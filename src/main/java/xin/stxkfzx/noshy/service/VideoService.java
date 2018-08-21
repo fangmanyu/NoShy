@@ -105,5 +105,13 @@ public interface VideoService {
      */
     VideoDTO addCategory(String categoryName, Long parentId) throws VideoServiceException;
 
-    VideoDTO removeCategory(String id) throws VideoServiceException;
+    /**
+     * 删除分类
+     *
+     * @param id 分类Id
+     * @return 返回状态标识
+     * @author fmy
+     * @date 2018-08-21 18:38
+     */
+    VideoDTO removeCategory(Long id) throws VideoServiceException;
 }
