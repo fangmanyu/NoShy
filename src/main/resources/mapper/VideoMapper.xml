@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xin.stxkfzx.noshy.mapper.VideoMapper">
+    <resultMap id="BaseResultMap" type="xin.stxkfzx.noshy.domain.Video">
+        <id column="video_id" jdbcType="CHAR" property="videoId"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="video_category" jdbcType="INTEGER" property="videoCategory"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="image_url" jdbcType="VARCHAR" property="imageUrl"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="last_edit_time" jdbcType="TIMESTAMP" property="lastEditTime"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <collection property="tags" javaType="java.util.List" ofType="xin.stxkfzx.noshy.domain.VideoTag">
+            <id column="tag_id" property="tagId"/>
+            <result column="tag_name" property="name"/>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ${alias}.video_id, ${alias}.title, ${alias}.name, ${alias}.video_category, ${alias}.description,
+        ${alias}.image_url, ${alias}.status, ${alias}.create_time, ${alias}.last_edit_time, ${alias}.user_id
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select tag_id, video_tag.name as tag_name,
+        <include refid="Base_Column_List">
+            <property name="alias" value="video"/>
+        </include>
+        from video, video_tag
+        where video.video_id = #{videoId} and video.video_id = video_tag.video_id
+    </select>
+
+    <select id="selectByVideoCondition" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List">
+            <property name="alias" value="video"/>
+        </include>
+        from video
+        <where>
+            <if test="videoCondition != null and videoCondition.title != null ">
+                and title like CONCAT('%', #{videoCondition.title}, '%')
+            </if>
+            <if test="videoCondition != null and videoCondition.videoCategory != null">
+                and video_category = #{videoCondition.videoCategory}
+            </if>
+            <if test="videoCondition != null and videoCondition.status != null">
+                and status = #{videoCondition.status}
+            </if>
+            <if test="videoCondition != null and videoCondition.userId != null">
+                and user_id = #{videoCondition.userId}
+            </if>
+        </where>
+        limit #{rowIndex}, #{pageSize}
+    </select>
+
+    <select id="countByVideoCondition" resultType="int">
+        select COUNT(distinct video.video_id)
+        from video
+        <where>
+            <if test="videoCondition != null and videoCondition.title != null ">
+                and title like CONCAT('%', #{videoCondition.title}, '%')
+            </if>
+            <if test="videoCondition != null and videoCondition.videoCategory != null">
+                and video_category = #{videoCondition.videoCategory}
+            </if>
+            <if test="videoCondition != null and videoCondition.status != null">
+                and status = #{videoCondition.status}
+            </if>
+            <if test="videoCondition != null and videoCondition.userId != null">
+                and user_id = #{videoCondition.userId}
+            </if>
+        </where>
+
+    </select>
+
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from video
+        where video_id = #{videoId,jdbcType=CHAR}
+    </delete>
+
+    <insert id="insert" parameterType="xin.stxkfzx.noshy.domain.Video">
+        insert into video (video_id, title, name,
+                           video_category, description, image_url,
+                           status, create_time, last_edit_time,
+                           user_id)
+        values (#{videoId,jdbcType=CHAR}, #{title,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+                #{videoCategory,jdbcType=INTEGER}, #{description,jdbcType=VARCHAR}, #{imageUrl,jdbcType=VARCHAR},
+                #{status,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{lastEditTime,jdbcType=TIMESTAMP},
+                #{userId,jdbcType=INTEGER})
+    </insert>
+
+    <insert id="insertSelective" parameterType="xin.stxkfzx.noshy.domain.Video">
+        insert into video
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="videoId != null">
+                video_id,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="videoCategory != null">
+                video_category,
+            </if>
+            <if test="description != null">
+                description,
+            </if>
+            <if test="imageUrl != null">
+                image_url,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="lastEditTime != null">
+                last_edit_time,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="videoId != null">
+                #{videoId,jdbcType=CHAR},
+            </if>
+            <if test="title != null">
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="videoCategory != null">
+                #{videoCategory,jdbcType=INTEGER},
+            </if>
+            <if test="description != null">
+                #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="imageUrl != null">
+                #{imageUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastEditTime != null">
+                #{lastEditTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.Video">
+        update video
+        <set>
+            <if test="title != null">
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="videoCategory != null">
+                video_category = #{videoCategory,jdbcType=INTEGER},
+            </if>
+            <if test="description != null">
+                description = #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="imageUrl != null">
+                image_url = #{imageUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastEditTime != null">
+                last_edit_time = #{lastEditTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=INTEGER},
+            </if>
+        </set>
+        where video_id = #{videoId,jdbcType=CHAR}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.Video">
+        update video
+        set title          = #{title,jdbcType=VARCHAR},
+            name           = #{name,jdbcType=VARCHAR},
+            video_category = #{videoCategory,jdbcType=INTEGER},
+            description    = #{description,jdbcType=VARCHAR},
+            image_url      = #{imageUrl,jdbcType=VARCHAR},
+            status         = #{status,jdbcType=VARCHAR},
+            create_time    = #{createTime,jdbcType=TIMESTAMP},
+            last_edit_time = #{lastEditTime,jdbcType=TIMESTAMP},
+            user_id        = #{userId,jdbcType=INTEGER}
+        where video_id = #{videoId,jdbcType=CHAR}
+    </update>
+    <update id="updateVideoStatus">
+        update video
+        set
+            status = #{status,jdbcType=VARCHAR}
+        where video_id = #{videoId}
+
+    </update>
+
+
+</mapper>
