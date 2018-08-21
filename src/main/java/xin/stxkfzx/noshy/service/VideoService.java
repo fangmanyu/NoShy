@@ -105,4 +105,5 @@ public interface VideoService {
      */
     VideoDTO addCategory(String categoryName, Long parentId) throws VideoServiceException;
 
+    VideoDTO removeCategory(String id) throws VideoServiceException;
 }
