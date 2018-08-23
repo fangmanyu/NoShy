@@ -49,7 +49,7 @@ public interface VideoTagMapper {
      * @author fmy
      * @date 2018-07-24 21:49
      */
-    int setVideoIdToNull(String videoId);
+    int updateVideoIdToNull(String videoId);
 
     /**
      * 删除指定视频的标签

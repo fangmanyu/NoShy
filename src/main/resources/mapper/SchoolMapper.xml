@@ -1,13 +1,96 @@
-<component name="libraryTable">
-  <library name="Maven: org.apache.logging.log4j:log4j-core:2.10.0">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-core/2.10.0/log4j-core-2.10.0.jar!/" />
-    </CLASSES>
-    <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-core/2.10.0/log4j-core-2.10.0-javadoc.jar!/" />
-    </JAVADOC>
-    <SOURCES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-core/2.10.0/log4j-core-2.10.0-sources.jar!/" />
-    </SOURCES>
-  </library>
-</component>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xin.stxkfzx.noshy.mapper.SchoolMapper">
+  <resultMap id="BaseResultMap" type="xin.stxkfzx.noshy.domain.School">
+    <id column="school_id" jdbcType="INTEGER" property="schoolId" />
+    <result column="school_name" jdbcType="VARCHAR" property="schoolName" />
+    <result column="school_desc" jdbcType="VARCHAR" property="schoolDesc" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="school_addr" jdbcType="VARCHAR" property="schoolAddr" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    school_id, school_name, school_desc, create_time, school_addr
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from school
+    where school_id = #{schoolId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from school
+    where school_id = #{schoolId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="xin.stxkfzx.noshy.domain.School">
+    <selectKey keyProperty="schoolId" order="BEFORE" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into school (school_id, school_name, school_desc, 
+      create_time, school_addr)
+    values (#{schoolId,jdbcType=INTEGER}, #{schoolName,jdbcType=VARCHAR}, #{schoolDesc,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{schoolAddr,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="xin.stxkfzx.noshy.domain.School">
+    <selectKey keyProperty="schoolId" order="BEFORE" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into school
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      school_id,
+      <if test="schoolName != null">
+        school_name,
+      </if>
+      <if test="schoolDesc != null">
+        school_desc,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="schoolAddr != null">
+        school_addr,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      #{schoolId,jdbcType=INTEGER},
+      <if test="schoolName != null">
+        #{schoolName,jdbcType=VARCHAR},
+      </if>
+      <if test="schoolDesc != null">
+        #{schoolDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="schoolAddr != null">
+        #{schoolAddr,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.School">
+    update school
+    <set>
+      <if test="schoolName != null">
+        school_name = #{schoolName,jdbcType=VARCHAR},
+      </if>
+      <if test="schoolDesc != null">
+        school_desc = #{schoolDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="schoolAddr != null">
+        school_addr = #{schoolAddr,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where school_id = #{schoolId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.School">
+    update school
+    set school_name = #{schoolName,jdbcType=VARCHAR},
+      school_desc = #{schoolDesc,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      school_addr = #{schoolAddr,jdbcType=VARCHAR}
+    where school_id = #{schoolId,jdbcType=INTEGER}
+  </update>
+
+</mapper>

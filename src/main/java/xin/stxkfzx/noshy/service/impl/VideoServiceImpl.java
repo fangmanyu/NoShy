@@ -321,7 +321,7 @@ public class VideoServiceImpl implements VideoService {
 
         // 删除数据库中的记录
         /// 先解除标签与视频的外键约束
-        int effectedNum = videoTagMapper.setVideoIdToNull(videoId);
+        int effectedNum = videoTagMapper.updateVideoIdToNull(videoId);
         if (effectedNum <= 0) {
             throw new VideoServiceException("数据库标签解除外键失败");
         }
@@ -421,6 +421,11 @@ public class VideoServiceImpl implements VideoService {
 
 
 
+        return null;
+    }
+
+    @Override
+    public VideoDTO removeCategory(Long id) throws VideoServiceException {
         return null;
     }
 

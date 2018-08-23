@@ -28,7 +28,7 @@
         where post_id = #{postId} and user.user_id = pi.user_id
         limit #{rowIndex}, #{pageSize}
     </select>
-    <select id="countByPostId" resultType="int" parameterType="_int">
+    <select id="countByPostId" resultType="int" parameterType="int">
         select COUNT(info_id)
         from post_information
         where post_id = ${postId}
