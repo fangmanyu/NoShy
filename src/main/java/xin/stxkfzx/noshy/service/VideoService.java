@@ -110,6 +110,7 @@ public interface VideoService {
      *
      * @param id 分类Id
      * @return 返回状态标识
+     * @throws VideoServiceException 视频服务异常
      * @author fmy
      * @date 2018-08-21 18:38
      */

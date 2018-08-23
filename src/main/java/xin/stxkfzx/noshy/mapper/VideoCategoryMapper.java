@@ -16,4 +16,14 @@ public interface VideoCategoryMapper {
     int updateByPrimaryKeySelective(VideoCategory record);
 
     int updateByPrimaryKey(VideoCategory record);
+
+    /**
+     * 通过阿里云分类Id删除视频分类
+     *
+     * @param id 阿里云分类Id
+     * @return
+     * @author fmy
+     * @date 2018-08-23 19:34
+     */
+    int deleteByAliyunId(Long id);
 }

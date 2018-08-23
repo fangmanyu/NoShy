@@ -20,8 +20,15 @@
     delete from video_category
     where category_id = #{categoryId,jdbcType=INTEGER}
   </delete>
+  <delete id="deleteByAliyunId">
+    delete from video_category
+    where aliyun_id = #{id}
+  </delete>
   <insert id="insert" parameterType="xin.stxkfzx.noshy.domain.VideoCategory">
-    insert into video_category (category_id, category_name, aliyun_id, 
+    <selectKey keyProperty="categoryId" order="BEFORE" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into video_category (category_id, category_name, aliyun_id,
       parent_id)
     values (#{categoryId,jdbcType=INTEGER}, #{categoryName,jdbcType=VARCHAR}, #{aliyunId,jdbcType=INTEGER}, 
       #{parentId,jdbcType=INTEGER})

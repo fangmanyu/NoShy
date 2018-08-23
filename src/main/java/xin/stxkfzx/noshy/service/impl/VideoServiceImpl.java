@@ -231,7 +231,7 @@ public class VideoServiceImpl implements VideoService {
 
     @Transactional(rollbackFor = VideoServiceException.class)
     @Override
-    public VideoDTO getVideoByVideoId(String videoId) throws VideoServiceException{
+    public VideoDTO getVideoByVideoId(String videoId) throws VideoServiceException {
         if (StringUtils.isEmpty(videoId)) {
             return new VideoDTO(false, "videoId 为空");
         }
@@ -309,7 +309,7 @@ public class VideoServiceImpl implements VideoService {
 
     @Transactional(rollbackFor = VideoServiceException.class)
     @Override
-    public VideoDTO deleteVideoByVideoId(String videoId) throws VideoServiceException{
+    public VideoDTO deleteVideoByVideoId(String videoId) throws VideoServiceException {
         if (StringUtils.isEmpty(videoId)) {
             return new VideoDTO(false, "videoId 为空");
         }
@@ -410,23 +410,55 @@ public class VideoServiceImpl implements VideoService {
 
     @Transactional(rollbackFor = VideoServiceException.class)
     @Override
-    public VideoDTO addCategory(String categoryName, Long parentId)throws VideoServiceException {
+    public VideoDTO addCategory(String categoryName, Long parentId) throws VideoServiceException {
         AddCategoryResponse response = new AddCategoryResponse();
 
+        Long cateId = null;
         try {
             response = addCategoryDetail(categoryName, parentId);
+            cateId = response.getCategory().getCateId();
         } catch (Exception e) {
             throw new VideoServiceException("阿里云创建分类失败: " + e.getMessage());
         }
 
+        VideoCategory category = new VideoCategory();
+        category.setAliyunId(cateId);
+        category.setCategoryName(categoryName);
+        if (parentId == -1) {
+            category.setParentId(null);
+        } else {
+            category.setParentId(parentId);
+        }
+        try {
+            videoCategoryMapper.insert(category);
+        } catch (Exception e) {
+            throw new VideoServiceException("数据库创建分类失败: " + e.getMessage());
+        }
 
 
-        return null;
+        return new VideoDTO(true, "创建成功");
     }
 
+    @Transactional(rollbackFor = VideoServiceException.class)
     @Override
     public VideoDTO removeCategory(Long id) throws VideoServiceException {
-        return null;
+        DeleteCategoryRequest request = new DeleteCategoryRequest();
+        request.setCateId(id);
+
+        try {
+            initVodClient().getAcsResponse(request);
+        } catch (ClientException e) {
+            throw new VideoServiceException("阿里云删除分类失败: " + e.getMessage());
+        }
+
+        try {
+            videoCategoryMapper.deleteByAliyunId(id);
+        } catch (Exception e) {
+            throw new VideoServiceException("数据库删除分类失败: " + e.getMessage());
+        }
+
+        return new VideoDTO(true, "删除成功");
+
     }
 
     private AddCategoryResponse addCategoryDetail(String categoryName, Long parentId) throws Exception {

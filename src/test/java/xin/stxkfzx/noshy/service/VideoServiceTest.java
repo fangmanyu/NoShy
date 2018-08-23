@@ -9,6 +9,7 @@ import xin.stxkfzx.noshy.BaseTest;
 import xin.stxkfzx.noshy.domain.Video;
 import xin.stxkfzx.noshy.domain.VideoTag;
 import xin.stxkfzx.noshy.dto.VideoDTO;
+import xin.stxkfzx.noshy.exception.VideoServiceException;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -90,11 +91,33 @@ public class VideoServiceTest extends BaseTest {
         assertTrue(videoDTO.getSuccess());
     }
 
+    @Transactional
+    @Rollback(value = false)
+    @Test
+    public void addCategory() {
+        try {
+            videoService.addCategory("测试分类", -1L);
+        } catch (VideoServiceException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Test
     public void getVideoCategoryByAliId() {
         VideoDTO videoDTO = videoService.getVideoCategoryByAliId("878006187");
         assertTrue(videoDTO.getSuccess());
         System.out.println(videoDTO.getVideoCategory());
 
+    }
+
+    @Transactional
+    @Rollback(value = false)
+    @Test
+    public void removeCategory() {
+        try {
+            videoService.removeCategory(44695809L);
+        } catch (VideoServiceException e) {
+            e.printStackTrace();
+        }
     }
 }
