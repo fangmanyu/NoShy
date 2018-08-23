@@ -1,13 +1,105 @@
-<component name="libraryTable">
-  <library name="Maven: org.apache.logging.log4j:log4j-slf4j-impl:2.10.0">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-slf4j-impl/2.10.0/log4j-slf4j-impl-2.10.0.jar!/" />
-    </CLASSES>
-    <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-slf4j-impl/2.10.0/log4j-slf4j-impl-2.10.0-javadoc.jar!/" />
-    </JAVADOC>
-    <SOURCES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-slf4j-impl/2.10.0/log4j-slf4j-impl-2.10.0-sources.jar!/" />
-    </SOURCES>
-  </library>
-</component>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xin.stxkfzx.noshy.mapper.VideoTagMapper">
+    <resultMap id="BaseResultMap" type="xin.stxkfzx.noshy.domain.VideoTag">
+        <id column="tag_id" jdbcType="INTEGER" property="tagId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="video_id" jdbcType="CHAR" property="videoId"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    tag_id, name, video_id
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from video_tag
+        where tag_id = #{tagId,jdbcType=INTEGER}
+    </select>
+    <select id="queryByVideoId" resultType="xin.stxkfzx.noshy.domain.VideoTag">
+        select
+        <include refid="Base_Column_List"/>
+        from video_tag
+        where video_id = #{videoId}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from video_tag
+    where tag_id = #{tagId,jdbcType=INTEGER}
+  </delete>
+    <delete id="deleteByVideoId" parameterType="string">
+        delete from video_tag
+        <where>
+        <if test="videoId == null">
+            video_id is null
+        </if>
+        <if test="videoId != null">
+            video_id = #{videoId}
+        </if>
+        </where>
+    </delete>
+    <insert id="insert" parameterType="xin.stxkfzx.noshy.domain.VideoTag">
+        <selectKey keyProperty="tagId" order="BEFORE" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into video_tag (tag_id, name, video_id
+        )
+        values (#{tagId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{videoId,jdbcType=CHAR}
+        )
+    </insert>
+    <insert id="insertSelective" parameterType="xin.stxkfzx.noshy.domain.VideoTag">
+        <selectKey keyProperty="tagId" order="BEFORE" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into video_tag
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            tag_id,
+            <if test="name != null">
+                name,
+            </if>
+            <if test="videoId != null">
+                video_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{tagId,jdbcType=INTEGER},
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="videoId != null">
+                #{videoId,jdbcType=CHAR},
+            </if>
+        </trim>
+    </insert>
+    <insert id="batchInsertVideoTag" useGeneratedKeys="true" keyColumn="tag_id" keyProperty="tagId"
+            parameterType="list">
+        insert into video_tag (name, video_id)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.name,jdbcType=VARCHAR}, #{item.videoId,jdbcType=CHAR})
+        </foreach>
+
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.VideoTag">
+        update video_tag
+        <set>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="videoId != null">
+                video_id = #{videoId,jdbcType=CHAR},
+            </if>
+        </set>
+        where tag_id = #{tagId,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.VideoTag">
+    update video_tag
+    set name = #{name,jdbcType=VARCHAR},
+      video_id = #{videoId,jdbcType=CHAR}
+    where tag_id = #{tagId,jdbcType=INTEGER}
+  </update>
+
+    <update id="updateVideoIdToNull">
+    update video_tag
+    set  video_id = null
+    where video_id = #{videoId}
+  </update>
+</mapper>

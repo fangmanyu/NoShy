@@ -27,12 +27,12 @@ public class VideoTagMapperTest extends BaseTest {
 
     @Test
     public void batchInsertVideoTag() {
-        List<VideoTag> videoTagList = new ArrayList<>(3);
-        VideoTag videoTag = new VideoTag();
-        videoTag.setVideoId("2df62c712f4e45239e4c42fa0b9d3080");
+        List<VideoTag> videoTagList = new ArrayList<>(1000);
+        VideoTag videoTag;
 
         for (int i = 0; i < 1000; i++) {
-
+            videoTag = new VideoTag();
+            videoTag.setVideoId("1a4d701f2d2545cf8749b2bd4f59e5b7");
             videoTag.setName("测试" + i);
             videoTagList.add(videoTag);
         }
@@ -43,7 +43,7 @@ public class VideoTagMapperTest extends BaseTest {
 
     @Test
     public void testSetVideoIdToNull() {
-        int i = videoTagMapper.setVideoIdToNull("2df62c712f4e45239e4c42fa0b9d3080");
+        int i = videoTagMapper.updateVideoIdToNull("962dbcf0eb424cbe93d62f8da5ffec80");
         assertEquals(2, i);
     }
 
@@ -53,6 +53,6 @@ public class VideoTagMapperTest extends BaseTest {
         assertEquals(0, i);
 
         i = videoTagMapper.deleteByVideoId("962dbcf0eb424cbe93d62f8da5ffec80");
-        assertEquals(3, i);
+        assertEquals(2, i);
     }
 }
