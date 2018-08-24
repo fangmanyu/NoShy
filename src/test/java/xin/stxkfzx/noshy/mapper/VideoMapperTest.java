@@ -70,6 +70,12 @@ public class VideoMapperTest extends BaseTest {
     }
 
     @Test
+    public void selectByCategoryId() {
+        List<Video> videos = videoMapper.selectByCategoryId(810963431L);
+        System.out.println(videos);
+    }
+
+    @Test
     public void updateByPrimaryKeySelective() {
         Video video = new Video();
         video.setVideoId("962dbcf0eb424cbe93d62f8da5ffec80");

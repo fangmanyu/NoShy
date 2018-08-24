@@ -110,6 +110,19 @@ public class VideoServiceTest extends BaseTest {
 
     }
 
+    @Test
+    public void listVideoByCategory() {
+        VideoDTO videoDTO = null;
+        try {
+            videoDTO = videoService.listVideoByCategory(810963431L);
+            assertTrue(videoDTO.getSuccess());
+            List<Video> videoList = videoDTO.getVideoList();
+            System.out.println(videoList.size());
+        } catch (VideoServiceException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Transactional
     @Rollback(value = false)
     @Test

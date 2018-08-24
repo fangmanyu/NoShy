@@ -74,6 +74,12 @@
         </where>
 
     </select>
+    <select id="selectByCategoryId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"><property name="alias" value="video"/></include>
+        from video
+        where video_category = #{cateId}
+    </select>
 
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.String">

@@ -25,6 +25,7 @@ import xin.stxkfzx.noshy.service.VideoService;
 import xin.stxkfzx.noshy.util.PageCalculator;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author fmy
@@ -166,7 +167,7 @@ public class VideoServiceImpl implements VideoService {
         }
 
         DefaultAcsClient client = VideoServiceImpl.initVodClient();
-        GetPlayInfoResponse response = new GetPlayInfoResponse();
+        GetPlayInfoResponse response;
         try {
             response = getPlayInfo(client, videoId);
             List<GetPlayInfoResponse.PlayInfo> playInfoList = response.getPlayInfoList();
@@ -236,7 +237,7 @@ public class VideoServiceImpl implements VideoService {
             return new VideoDTO(false, "videoId 为空");
         }
 
-        // TODO 从阿里云获取视频状态，并更新到数据库中。这是获取视频状态的一个权宜之计(你用我才更新),以后需要改进
+        // TODO 从阿里云获取视频状态，并更新到数据库中。这是获取视频状态的一个权宜之计(策略:你用我才更新),以后需要改进
         try {
             GetVideoInfoResponse response = getVideoInfo(videoId);
             String status = response.getVideo().getStatus();
@@ -408,12 +409,31 @@ public class VideoServiceImpl implements VideoService {
         return videoDTO;
     }
 
+    @Override
+    public VideoDTO listVideoByCategory(Long id) throws VideoServiceException{
+        VideoCategory videoCategory = videoCategoryMapper.selectByAliyunId(id);
+
+        Long aliyunId = Optional.ofNullable(videoCategory).map(VideoCategory::getAliyunId)
+                .orElseThrow(() -> new VideoServiceException("无该分类"));
+        List<Video> videoList = videoMapper.selectByCategoryId(aliyunId);
+
+        VideoDTO dto = new VideoDTO(true, "查询成功");
+        dto.setVideoList(videoList);
+
+        return dto;
+    }
+
+    @Override
+    public VideoDTO listCategory() {
+        return null;
+    }
+
     @Transactional(rollbackFor = VideoServiceException.class)
     @Override
     public VideoDTO addCategory(String categoryName, Long parentId) throws VideoServiceException {
-        AddCategoryResponse response = new AddCategoryResponse();
+        AddCategoryResponse response;
 
-        Long cateId = null;
+        Long cateId;
         try {
             response = addCategoryDetail(categoryName, parentId);
             cateId = response.getCategory().getCateId();
@@ -442,6 +462,8 @@ public class VideoServiceImpl implements VideoService {
     @Transactional(rollbackFor = VideoServiceException.class)
     @Override
     public VideoDTO removeCategory(Long id) throws VideoServiceException {
+        // TODO 将该分类下的视频移到父分类上.如果该分类是一级分类,则直接删除该分类下的视频
+
         DeleteCategoryRequest request = new DeleteCategoryRequest();
         request.setCateId(id);
 

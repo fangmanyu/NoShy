@@ -16,6 +16,12 @@
     from video_category
     where category_id = #{categoryId,jdbcType=INTEGER}
   </select>
+  <select id="selectByAliyunId" resultType="xin.stxkfzx.noshy.domain.VideoCategory">
+    select
+    <include refid="Base_Column_List"/>
+    from video_category
+    where aliyun_id = #{id}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from video_category
     where category_id = #{categoryId,jdbcType=INTEGER}

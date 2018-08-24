@@ -26,4 +26,14 @@ public interface VideoCategoryMapper {
      * @date 2018-08-23 19:34
      */
     int deleteByAliyunId(Long id);
+
+    /**
+     * 通过阿里云id查询分类
+     *
+     * @param id
+     * @return
+     * @author fmy
+     * @date 2018-08-24 10:20
+     */
+    VideoCategory selectByAliyunId(Long id);
 }

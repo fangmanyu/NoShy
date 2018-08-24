@@ -28,4 +28,7 @@ public interface VideoMapper {
 
 
     int updateVideoStatus(@Param("videoId") String videoId, @Param("status") String status);
+
+    List<Video> selectByCategoryId(@Param("cateId") Long cateId);
+
 }

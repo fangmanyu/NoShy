@@ -115,4 +115,25 @@ public interface VideoService {
      * @date 2018-08-21 18:38
      */
     VideoDTO removeCategory(Long id) throws VideoServiceException;
+
+    /**
+     * 通过分类获取视频
+     *
+     * @param id
+     * @return
+     * @throws VideoServiceException
+     * @author fmy
+     * @date 2018-08-24 10:16
+     */
+    VideoDTO listVideoByCategory(Long id) throws VideoServiceException;
+
+    /**
+     * 查询全部分类列表
+     *
+     * @param
+     * @return
+     * @author fmy
+     * @date 2018-08-24 10:17
+     */
+    VideoDTO listCategory();
 }
