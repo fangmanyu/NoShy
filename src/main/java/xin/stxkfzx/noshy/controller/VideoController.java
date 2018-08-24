@@ -61,6 +61,21 @@ public class VideoController {
     }
 
     /**
+     * 获取全部视频分类列表
+     *
+     * @param
+     * @return
+     * @author fmy
+     * @date 2018-08-24 17:08
+     */
+    @ApiOperation(value = "获取全部视频分类列表")
+    @GetMapping("/listVideoCategory")
+    public JSONResponse listVideoCategory() {
+        VideoDTO videoDTO = videoService.listCategory();
+        return new JSONResponse(videoDTO.getSuccess(), videoDTO.getMessage(), videoDTO.getVideoCategoryList());
+    }
+
+    /**
      * 获取指定视频播放路径
      *
      * @param videoId
