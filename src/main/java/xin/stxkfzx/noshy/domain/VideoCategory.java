@@ -1,5 +1,7 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.util.List;
+
 public class VideoCategory {
     private Long categoryId;
 
@@ -11,6 +13,11 @@ public class VideoCategory {
      * -1 表示一级分类
      */
     private Long parentId;
+
+    /**
+     * 直接子类分类列表
+     */
+    private List<VideoCategory> childrenCategory;
 
     public Long getCategoryId() {
         return categoryId;
@@ -44,6 +51,14 @@ public class VideoCategory {
         this.parentId = parentId;
     }
 
+    public List<VideoCategory> getChildrenCategory() {
+        return childrenCategory;
+    }
+
+    public void setChildrenCategory(List<VideoCategory> childrenCategory) {
+        this.childrenCategory = childrenCategory;
+    }
+
     @Override
     public String toString() {
         return "VideoCategory{" +
@@ -51,6 +66,7 @@ public class VideoCategory {
                 ", categoryName='" + categoryName + '\'' +
                 ", aliyunId=" + aliyunId +
                 ", parentId=" + parentId +
+                ", childrenCategory=" + childrenCategory +
                 '}';
     }
 }

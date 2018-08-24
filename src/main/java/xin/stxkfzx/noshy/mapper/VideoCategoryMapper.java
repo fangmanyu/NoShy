@@ -1,7 +1,10 @@
 package xin.stxkfzx.noshy.mapper;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import xin.stxkfzx.noshy.domain.VideoCategory;
+
+import java.util.List;
 
 @Repository
 public interface VideoCategoryMapper {
@@ -36,4 +39,15 @@ public interface VideoCategoryMapper {
      * @date 2018-08-24 10:20
      */
     VideoCategory selectByAliyunId(Long id);
+
+    /**
+     * 查询子分类列表
+     *
+     * @param parentId	父类Id.若查询一级分类,则parentId为null
+     * @return
+     * @author fmy
+     * @date 2018-08-24 11:51
+     */
+    List<VideoCategory> selectChildrenCategory(@Param("parentId") Long parentId);
+
 }

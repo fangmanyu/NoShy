@@ -1,5 +1,7 @@
 package xin.stxkfzx.noshy.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import xin.stxkfzx.noshy.BaseTest;
 import xin.stxkfzx.noshy.domain.Video;
+import xin.stxkfzx.noshy.domain.VideoCategory;
 import xin.stxkfzx.noshy.domain.VideoTag;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
@@ -96,7 +99,7 @@ public class VideoServiceTest extends BaseTest {
     @Test
     public void addCategory() {
         try {
-            videoService.addCategory("测试分类", -1L);
+            videoService.addCategory("客户端编程", 967943064L);
         } catch (VideoServiceException e) {
             e.printStackTrace();
         }
@@ -108,6 +111,18 @@ public class VideoServiceTest extends BaseTest {
         assertTrue(videoDTO.getSuccess());
         System.out.println(videoDTO.getVideoCategory());
 
+    }
+
+    @Test
+    public void listCategory() {
+        VideoDTO videoDTO = videoService.listCategory();
+        List<VideoCategory> videoCategoryList = videoDTO.getVideoCategoryList();
+        try {
+            String s = new ObjectMapper().writeValueAsString(videoCategoryList);
+            System.out.println(s);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

@@ -425,7 +425,14 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public VideoDTO listCategory() {
-        return null;
+        List<VideoCategory> videoCategoryList = videoCategoryMapper.selectChildrenCategory(null);
+        generateChildCategory(videoCategoryList);
+
+        log.debug("全部分类: {}", videoCategoryList);
+
+        VideoDTO dto = new VideoDTO(true, "查询成功");
+        dto.setVideoCategoryList(videoCategoryList);
+        return dto;
     }
 
     @Transactional(rollbackFor = VideoServiceException.class)
@@ -496,5 +503,19 @@ public class VideoServiceImpl implements VideoService {
         GetCategoriesRequest request = new GetCategoriesRequest();
         request.setCateId(cateId);
         return initVodClient().getAcsResponse(request);
+    }
+
+    private void generateChildCategory(List<VideoCategory> categoryList) {
+        if (categoryList == null) {
+            return;
+        }
+
+        for (VideoCategory category :
+                categoryList) {
+            List<VideoCategory> videoCategories = videoCategoryMapper.selectChildrenCategory(category.getAliyunId());
+            generateChildCategory(videoCategories);
+            category.setChildrenCategory(videoCategories);
+        }
+
     }
 }

@@ -19,6 +19,8 @@ public class VideoDTO {
     private List<Video> videoList;
     private String playUrl;
     private VideoCategory videoCategory;
+    private List<VideoCategory> videoCategoryList;
+
 
     public VideoDTO(Boolean success, String message) {
         this.success = success;
@@ -47,7 +49,16 @@ public class VideoDTO {
                 ", videoList=" + videoList +
                 ", playUrl='" + playUrl + '\'' +
                 ", videoCategory=" + videoCategory +
+                ", videoCategoryList=" + videoCategoryList +
                 '}';
+    }
+
+    public List<VideoCategory> getVideoCategoryList() {
+        return videoCategoryList;
+    }
+
+    public void setVideoCategoryList(List<VideoCategory> videoCategoryList) {
+        this.videoCategoryList = videoCategoryList;
     }
 
     public VideoCategory getVideoCategory() {
