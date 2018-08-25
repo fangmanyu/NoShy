@@ -345,6 +345,7 @@ public class VideoController {
         return tagsList;
     }
 
+
     // FIXME: 2018/7/26 0026 回调不可用
     // @PostMapping("/callback")
     @ApiIgnore(value = "getCallbackInfo")
