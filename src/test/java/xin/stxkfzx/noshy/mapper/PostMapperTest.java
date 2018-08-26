@@ -19,6 +19,12 @@ public class PostMapperTest extends BaseTest {
     private PostMapper postMapper;
 
     @Test
+    public void selectByPrimaryKey() {
+        Post post = postMapper.selectByPrimaryKey(4);
+        System.out.println(post);
+    }
+
+    @Test
     public void getPostStatus() {
         Integer postStatus = postMapper.queryPostStatus(6);
         // assertEquals(1, postStatus);

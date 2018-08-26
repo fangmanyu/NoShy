@@ -92,7 +92,6 @@ public class Post {
     @ApiModelProperty(value = "帖子描述")
     private String description;
 
-
     @Override
     public String toString() {
         return "Post{" +
