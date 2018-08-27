@@ -92,6 +92,9 @@ public class Post {
     @ApiModelProperty(value = "帖子描述")
     private String description;
 
+    @JsonIgnore
+    private Integer browseId;
+
     @Override
     public String toString() {
         return "Post{" +
@@ -108,7 +111,16 @@ public class Post {
                 ", postInformationList=" + postInformationList +
                 ", postInformation=" + postInformation +
                 ", description='" + description + '\'' +
+                ", browseId=" + browseId +
                 '}';
+    }
+
+    public Integer getBrowseId() {
+        return browseId;
+    }
+
+    public void setBrowseId(Integer browseId) {
+        this.browseId = browseId;
     }
 
     public String getDescription() {

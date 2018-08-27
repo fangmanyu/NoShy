@@ -37,15 +37,18 @@ public class PostMapperTest extends BaseTest {
 
         List<Post> postList = postMapper.queryByPostCondition(null, 0, 10);
         int i = postMapper.countByPostCondition(null);
-        assertEquals(i, postList.size());
+        assertEquals(10, postList.size());
+        System.out.println(i);
 
         postList = postMapper.queryByPostCondition(postCondition, 0, 10);
         i = postMapper.countByPostCondition(postCondition);
-        assertEquals(i, postList.size());
+        assertEquals(10, postList.size());
+        System.out.println(i);
 
         postCondition.setTitle("2");
         postList = postMapper.queryByPostCondition(postCondition, 0, 10);
         i = postMapper.countByPostCondition(postCondition);
-        assertEquals(i, postList.size());
+        assertEquals(2, postList.size());
+        System.out.println(i);
     }
 }

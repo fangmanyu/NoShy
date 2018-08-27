@@ -12,15 +12,12 @@
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="last_edit_time" jdbcType="TIMESTAMP" property="lastEditTime"/>
         <result column="user_id" jdbcType="INTEGER" property="userId"/>
-        <collection property="tags" javaType="java.util.List" ofType="xin.stxkfzx.noshy.domain.VideoTag">
-            <id column="tag_id" property="tagId"/>
-            <result column="tag_name" property="name"/>
-        </collection>
+        <result column="browse_id" property="browseId" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         ${alias}.video_id, ${alias}.title, ${alias}.name, ${alias}.video_category, ${alias}.description,
-        ${alias}.image_url, ${alias}.status, ${alias}.create_time, ${alias}.last_edit_time, ${alias}.user_id
+        ${alias}.image_url, ${alias}.status, ${alias}.create_time, ${alias}.last_edit_time, ${alias}.user_id, ${alias}.browse_id
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
@@ -91,11 +88,11 @@
         insert into video (video_id, title, name,
                            video_category, description, image_url,
                            status, create_time, last_edit_time,
-                           user_id)
+                           user_id, browse_id)
         values (#{videoId,jdbcType=CHAR}, #{title,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
                 #{videoCategory,jdbcType=INTEGER}, #{description,jdbcType=VARCHAR}, #{imageUrl,jdbcType=VARCHAR},
                 #{status,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{lastEditTime,jdbcType=TIMESTAMP},
-                #{userId,jdbcType=INTEGER})
+                #{userId,jdbcType=INTEGER}, #{browseId})
     </insert>
 
     <insert id="insertSelective" parameterType="xin.stxkfzx.noshy.domain.Video">
@@ -131,6 +128,9 @@
             <if test="userId != null">
                 user_id,
             </if>
+            <if test="browseId != null">
+                browse_id,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="videoId != null">
@@ -162,6 +162,9 @@
             </if>
             <if test="userId != null">
                 #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="browseId != null">
+                #{browse_id,jdbcType=INTEGER},
             </if>
         </trim>
     </insert>
@@ -196,6 +199,9 @@
             <if test="userId != null">
                 user_id = #{userId,jdbcType=INTEGER},
             </if>
+            <if test="browseId != null">
+                browse_id = #{browseId,jdbcType=INTEGER},
+            </if>
         </set>
         where video_id = #{videoId,jdbcType=CHAR}
     </update>
@@ -210,7 +216,8 @@
             status         = #{status,jdbcType=VARCHAR},
             create_time    = #{createTime,jdbcType=TIMESTAMP},
             last_edit_time = #{lastEditTime,jdbcType=TIMESTAMP},
-            user_id        = #{userId,jdbcType=INTEGER}
+            user_id        = #{userId,jdbcType=INTEGER},
+            browse_id       = #{browseId,jdbcType=INTEGER}
         where video_id = #{videoId,jdbcType=CHAR}
     </update>
     <update id="updateVideoStatus">

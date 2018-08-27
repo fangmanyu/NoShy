@@ -60,6 +60,8 @@ public class Video {
     private Long userId;
     @ApiModelProperty(hidden = true)
     private String playUrl;
+    @JsonIgnore
+    private Integer browseId;
 
     public static final String UPLOADING = "Uploading";
     public static final String UPLOADSUCC = "UploadSucc";
@@ -89,6 +91,14 @@ public class Video {
         this.title = title;
         this.name = videoFile.getName();
         this.videoInputStream = videoInputStream;
+    }
+
+    public Integer getBrowseId() {
+        return browseId;
+    }
+
+    public void setBrowseId(Integer browseId) {
+        this.browseId = browseId;
     }
 
     public String getPlayUrl() {
@@ -212,6 +222,7 @@ public class Video {
                 ", lastEditTime=" + lastEditTime +
                 ", userId=" + userId +
                 ", playUrl='" + playUrl + '\'' +
+                ", browseId=" + browseId +
                 '}';
     }
 }
