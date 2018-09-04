@@ -35,7 +35,7 @@ public class VideoServiceTest extends BaseTest {
     public void setUp() throws Exception {
         video = new Video("测试上传功能", new File("F:\\视频资料\\基于Spring Boot技术栈的博客系统企业级实战\\第1章 Spring Boot 简介\\1-2 -Spring Boot 是什么.mp4"));
         video.setVideoCategory(810963431L);
-        video.setDescription("测试用例");
+        video.setDescription("测试添加浏览信息");
         video.setVideoId("887111f293834bcb91b3acfa63b825ee");
 
         List<VideoTag> videoTagList = new ArrayList<>(5);

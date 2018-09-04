@@ -49,7 +49,7 @@ public class UserMapperTest extends BaseTest{
 
     @Test
     public void testQueryUserByPhoneAndPassword() {
-        User user = userMapper1.queryUserByPhoneAndPassword("15383644376", "123");
+        User user = userMapper1.queryUserByPhoneAndPassword("15383644375", "123456");
         System.out.println(user);
     }
 }

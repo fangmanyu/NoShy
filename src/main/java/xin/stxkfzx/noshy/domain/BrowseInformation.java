@@ -4,6 +4,10 @@ package xin.stxkfzx.noshy.domain;
  * @author fmy
  */
 public class BrowseInformation {
+    public static final int NONE = 0;
+    public static final int VIDEO = 1;
+    public static final int POST = 2;
+
     private Integer browseId;
 
     /** 浏览量*/

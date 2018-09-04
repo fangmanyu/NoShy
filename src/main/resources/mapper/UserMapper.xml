@@ -19,7 +19,7 @@
     from user
     where user_id = #{userId,jdbcType=INTEGER}
   </select>
-  <select id="queryUserByPhoneAndPassword" resultType="xin.stxkfzx.noshy.domain.User">
+  <select id="queryUserByPhoneAndPassword" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from user
@@ -35,24 +35,18 @@
     delete from user
     where user_id = #{userId,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="xin.stxkfzx.noshy.domain.User">
-    <selectKey keyProperty="userId" order="BEFORE" resultType="java.lang.Integer">
-      SELECT LAST_INSERT_ID()
-    </selectKey>
-    insert into user (user_id, user_name, user_password, 
+  <insert id="insert" parameterType="xin.stxkfzx.noshy.domain.User" useGeneratedKeys="true" keyColumn="user_id" keyProperty="userId">
+
+    insert into user (user_name, user_password,
       user_phone, user_status, create_time, 
       school_id)
-    values (#{userId,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, #{userPassword,jdbcType=VARCHAR}, 
+    values (#{userName,jdbcType=VARCHAR}, #{userPassword,jdbcType=VARCHAR},
       #{userPhone,jdbcType=CHAR}, #{userStatus,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
       #{schoolId,jdbcType=INTEGER})
   </insert>
-  <insert id="insertSelective" parameterType="xin.stxkfzx.noshy.domain.User">
-    <selectKey keyProperty="userId" order="BEFORE" resultType="java.lang.Integer">
-      SELECT LAST_INSERT_ID()
-    </selectKey>
+  <insert id="insertSelective" parameterType="xin.stxkfzx.noshy.domain.User"  useGeneratedKeys="true" keyColumn="user_id" keyProperty="userId">
     insert into user
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      user_id,
       <if test="userName != null">
         user_name,
       </if>
@@ -73,7 +67,6 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      #{userId,jdbcType=INTEGER},
       <if test="userName != null">
         #{userName,jdbcType=VARCHAR},
       </if>

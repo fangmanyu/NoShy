@@ -15,7 +15,7 @@ public interface VideoService {
     String ACCESS_KEY_SECRET = "nVFZyVGzpNzLkhJATLVtMRhOiugBvy";
 
     /**
-     * 将视频上传到阿里云点播库，并将保存的视频信息保存保存到数据库中
+     * 将视频上传到阿里云点播库，并将保存的视频信息保存保存到数据库中,并创建浏览信息
      *
      * @param video 需要上传的视频。其中视频标题，名称(含后缀名)，文件流是必须的
      * @return 返回状态标识
@@ -81,8 +81,6 @@ public interface VideoService {
      */
     VideoDTO listVideo(Video videoCondition, int pageIndex, int pageSize);
 
-
-    // TODO 创建，修改，删除视频分类
     /**
      * 获取视频分类
      *

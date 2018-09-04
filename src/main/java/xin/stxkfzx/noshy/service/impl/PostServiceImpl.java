@@ -1,5 +1,7 @@
 package xin.stxkfzx.noshy.service.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import java.util.Optional;
 public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final PostInformationMapper postInformationMapper;
+    private static final Logger log = LogManager.getLogger(PostServiceImpl.class);
 
     @Autowired
     public PostServiceImpl(PostMapper postMapper, PostInformationMapper postInformationMapper) {
@@ -157,6 +160,7 @@ public class PostServiceImpl implements PostService {
 
         int total = postInformationMapper.countByPostId(postId);
 
+        log.debug("剩余的加载数目: {}", total - loadSize);
         List<PostInformation> postInformationList =
                 postInformationMapper.selectPostInformationList(postId, loadSize, total - loadSize);
 

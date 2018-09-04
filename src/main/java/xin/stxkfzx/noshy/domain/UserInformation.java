@@ -3,13 +3,10 @@ package xin.stxkfzx.noshy.domain;
 public class UserInformation {
     private Long userId;
 
-    /** 头像地址*/
     private String headPortraitAddr;
 
-    /** 等级*/
     private Integer rank;
 
-    /** 经验值*/
     private Integer experience;
 
     private String introduction;

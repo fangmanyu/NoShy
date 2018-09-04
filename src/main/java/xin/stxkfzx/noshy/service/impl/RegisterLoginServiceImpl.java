@@ -1,10 +1,14 @@
 package xin.stxkfzx.noshy.service.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import xin.stxkfzx.noshy.domain.User;
+import xin.stxkfzx.noshy.domain.UserInformation;
 import xin.stxkfzx.noshy.exception.RegisterException;
+import xin.stxkfzx.noshy.mapper.UserInformationMapper;
 import xin.stxkfzx.noshy.mapper.UserMapper;
 import xin.stxkfzx.noshy.service.RegisterLoginService;
 
@@ -14,13 +18,17 @@ import xin.stxkfzx.noshy.service.RegisterLoginService;
  */
 @Service
 public class RegisterLoginServiceImpl implements RegisterLoginService {
+    private static final Logger log = LogManager.getLogger(RegisterLoginServiceImpl.class);
 
     private final UserMapper userMapper;
+    private final UserInformationMapper userInformationMapper;
 
 
     @Override
     public User login(String phone, String password) {
-        return userMapper.queryUserByPhoneAndPassword(phone, password);
+
+        User user = userMapper.queryUserByPhoneAndPassword(phone, password);
+        return user;
     }
 
     @Override
@@ -35,11 +43,20 @@ public class RegisterLoginServiceImpl implements RegisterLoginService {
         try {
             // TODO 用户密码加密
 
-            int effectedNum = userMapper.insert(user);
+            log.debug("注册用户信息: {}", user);
+            int effectedNum = userMapper.insertSelective(user);
 
             if (effectedNum <= 0) {
                 throw new RegisterException("注册失败, 服务器内部错误");
             }
+
+            // 创建用户信息
+            UserInformation information = new UserInformation();
+            information.setUserId(user.getUserId());
+            information.setExperience(0);
+            information.setRank(0);
+            userInformationMapper.insert(information);
+
         } catch (Exception e) {
             throw new RegisterException("RegisterLoginService error: " + e.getMessage());
         }
@@ -48,7 +65,8 @@ public class RegisterLoginServiceImpl implements RegisterLoginService {
 
 
     @Autowired
-    public RegisterLoginServiceImpl(UserMapper userMapper) {
+    public RegisterLoginServiceImpl(UserMapper userMapper, UserInformationMapper userInformationMapper) {
         this.userMapper = userMapper;
+        this.userInformationMapper = userInformationMapper;
     }
 }

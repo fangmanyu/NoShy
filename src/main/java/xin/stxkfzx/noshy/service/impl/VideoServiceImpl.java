@@ -13,17 +13,20 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import xin.stxkfzx.noshy.domain.BrowseInformation;
 import xin.stxkfzx.noshy.domain.Video;
 import xin.stxkfzx.noshy.domain.VideoCategory;
 import xin.stxkfzx.noshy.domain.VideoTag;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
+import xin.stxkfzx.noshy.mapper.BrowseInformationMapper;
 import xin.stxkfzx.noshy.mapper.VideoCategoryMapper;
 import xin.stxkfzx.noshy.mapper.VideoMapper;
 import xin.stxkfzx.noshy.mapper.VideoTagMapper;
 import xin.stxkfzx.noshy.service.VideoService;
 import xin.stxkfzx.noshy.util.PageCalculator;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +42,7 @@ public class VideoServiceImpl implements VideoService {
     private final VideoMapper videoMapper;
     private final VideoTagMapper videoTagMapper;
     private final VideoCategoryMapper videoCategoryMapper;
+    private final BrowseInformationMapper browseInformationMapper;
 
     /**
      * 高清度模板
@@ -48,115 +52,11 @@ public class VideoServiceImpl implements VideoService {
     private static final String TEMPLATE_GROUP_ID = "a1e88a9d519118917522af2aca247bd8";
 
     @Autowired
-    public VideoServiceImpl(VideoTagMapper videoTagMapper, VideoMapper videoMapper, VideoCategoryMapper videoCategoryMapper) {
+    public VideoServiceImpl(VideoTagMapper videoTagMapper, VideoMapper videoMapper, VideoCategoryMapper videoCategoryMapper, BrowseInformationMapper browseInformationMapper) {
         this.videoTagMapper = videoTagMapper;
         this.videoMapper = videoMapper;
         this.videoCategoryMapper = videoCategoryMapper;
-    }
-
-    private static DefaultAcsClient initVodClient() {
-        //点播服务所在的Region，国内请填cn-shanghai，不要填写别的区域
-        String regionId = "cn-shanghai";
-        DefaultProfile profile = DefaultProfile.getProfile(regionId, ACCESS_KEY_ID, ACCESS_KEY_SECRET);
-        DefaultAcsClient client = new DefaultAcsClient(profile);
-        return client;
-    }
-
-
-    /**
-     * 获取播放地址函数
-     */
-    private GetPlayInfoResponse getPlayInfo(DefaultAcsClient client, String videoId) throws Exception {
-        GetPlayInfoRequest request = new GetPlayInfoRequest();
-        request.setVideoId(videoId);
-        return client.getAcsResponse(request);
-    }
-
-
-    /*修改视频信息函数*/
-    private UpdateVideoInfoResponse updateVideoInfo(Video video) throws Exception {
-        DefaultAcsClient client = initVodClient();
-        UpdateVideoInfoRequest request = new UpdateVideoInfoRequest();
-        request.setVideoId(video.getVideoId());
-
-        String title = video.getTitle();
-        if (StringUtils.isNotEmpty(title)) {
-            System.out.println("更新标题： " + title);
-            request.setTitle(title);
-        }
-
-        String description = video.getDescription();
-        if (StringUtils.isNotEmpty(description)) {
-
-            System.out.println("更新描述： " + description);
-            request.setDescription(description);
-        }
-
-        Long videoCategory = video.getVideoCategory();
-        if (videoCategory != null) {
-            System.out.println("更新分类： " + videoCategory);
-            request.setCateId(videoCategory);
-        }
-
-        String imageUrl = video.getImageUrl();
-        if (StringUtils.isNotEmpty(imageUrl)) {
-
-            System.out.println("更新封面地址： " + imageUrl);
-            request.setCoverURL(imageUrl);
-        }
-
-        String tagString = getTagString(video);
-        System.out.println("更新标签： " + tagString);
-        request.setTags(tagString);
-
-        return client.getAcsResponse(request);
-    }
-
-    private String uploadStream(Video video) throws VideoServiceException {
-        UploadStreamRequest request = new UploadStreamRequest(ACCESS_KEY_ID, ACCESS_KEY_SECRET, video.getTitle(),
-                video.getName(), video.getVideoInputStream());
-        /* 是否使用默认水印(可选)，指定模板组ID时，根据模板组配置确定是否使用默认水印*/
-        ///request.setShowWaterMark(true);
-        // TODO 使用VOD上传到点播回调出现问题导致无法将上传的视频信息存储到数据库中，所以暂时取消事件回调。以后可以使用OOS进行上传
-        /* 设置上传完成后的回调URL(可选)，建议通过点播控制台配置消息监听事件，参见文档 https://help.aliyun.com/document_detail/57029.html */
-        // request.setCallback(VIDEO_CALLBACK_URL);
-        /* 视频分类ID(可选) */
-        request.setCateId(video.getVideoCategory());
-        /* 视频标签,多个用逗号分隔(可选) */
-        request.setTags(getTagString(video));
-        /* 视频描述(可选) */
-        request.setDescription(video.getDescription());
-        /* 封面图片(可选) */
-        request.setCoverURL(video.getImageUrl());
-        /* 模板组ID(可选) */
-        request.setTemplateGroupId(TEMPLATE_GROUP_ID);
-        /* 存储区域(可选) */
-        ///request.setStorageLocation("in-201703232118266-5sejdln9o.oss-cn-shanghai.aliyuncs.com");
-        UploadVideoImpl uploader = new UploadVideoImpl();
-        UploadStreamResponse response = uploader.uploadStream(request);
-
-        // 上传不成功
-        if (!response.isSuccess()) {
-            throw new VideoServiceException("视频上传失败--" + response.getMessage());
-        }
-
-        return response.getVideoId();
-    }
-
-
-    private String getTagString(Video video) {
-        List<VideoTag> tags = video.getTags();
-
-        StringBuilder sb = new StringBuilder();
-        if (tags != null && tags.size() > 0) {
-            for (int i = 0; i < tags.size(); i++) {
-                sb.append(tags.get(i).getName());
-                if (i < tags.size() - 1) {
-                    sb.append(",");
-                }
-            }
-        }
-        return "".equals(sb.toString()) ? null : sb.toString();
+        this.browseInformationMapper = browseInformationMapper;
     }
 
     @Override
@@ -196,17 +96,26 @@ public class VideoServiceImpl implements VideoService {
         }
 
         // 上传至阿里云点播
-        System.out.println("视频开始上传------------------");
+        log.info("开始上传视频");
         String videoId = uploadStream(video);
 
         if (StringUtils.isEmpty(videoId)) {
             throw new VideoServiceException("video 上传失败");
         }
 
-        // 设置状态为上传中
+        // 构建浏览信息
+        BrowseInformation browseInformation = new BrowseInformation();
+        browseInformation.setBrowseType(BrowseInformation.VIDEO);
+        browseInformationMapper.insertSelective(browseInformation);
+        log.debug("构建视频浏览信息Id: {}", browseInformation.getBrowseId());
+
+        // 设置视频状态
         video.setStatus(Video.UPLOADING);
         video.setVideoId(videoId);
-        System.out.println("上传的video信息---------" + video);
+        video.setBrowseId(browseInformation.getBrowseId());
+        video.setCreateTime(new Date());
+        video.setLastEditTime(new Date());
+        log.debug("上传的video信息: {}", video);
 
         int i = videoMapper.insert(video);
         if (i <= 0) {
@@ -226,6 +135,8 @@ public class VideoServiceImpl implements VideoService {
                 throw new VideoServiceException("保存videoTag失败： ");
             }
         }
+
+        log.info("上传视频结束");
 
         return new VideoDTO(true, "上传视频成功");
     }
@@ -251,13 +162,6 @@ public class VideoServiceImpl implements VideoService {
         log.debug("从数据库中查询的video信息: {}", video);
 
         return new VideoDTO(true, "查询成功", video);
-    }
-
-    private GetVideoInfoResponse getVideoInfo(String videoId) throws Exception {
-        DefaultAcsClient client = initVodClient();
-        GetVideoInfoRequest request = new GetVideoInfoRequest();
-        request.setVideoId(videoId);
-        return client.getAcsResponse(request);
     }
 
 
@@ -410,7 +314,7 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public VideoDTO listVideoByCategory(Long id) throws VideoServiceException{
+    public VideoDTO listVideoByCategory(Long id) throws VideoServiceException {
         VideoCategory videoCategory = videoCategoryMapper.selectByAliyunId(id);
 
         Long aliyunId = Optional.ofNullable(videoCategory).map(VideoCategory::getAliyunId)
@@ -490,15 +394,6 @@ public class VideoServiceImpl implements VideoService {
 
     }
 
-    private AddCategoryResponse addCategoryDetail(String categoryName, Long parentId) throws Exception {
-        AddCategoryRequest request = new AddCategoryRequest();
-        // 父分类ID，若不填，则默认生成一级分类，根节点分类ID为-1
-        request.setParentId(parentId);
-        // 分类名称，不能超过64个字节，UTF8编码
-        request.setCateName(categoryName);
-        return initVodClient().getAcsResponse(request);
-    }
-
     private GetCategoriesResponse getCategories(Long cateId) throws Exception {
         GetCategoriesRequest request = new GetCategoriesRequest();
         request.setCateId(cateId);
@@ -517,5 +412,121 @@ public class VideoServiceImpl implements VideoService {
             category.setChildrenCategory(videoCategories);
         }
 
+    }
+
+    /**
+     * 获取播放地址函数
+     */
+    private GetPlayInfoResponse getPlayInfo(DefaultAcsClient client, String videoId) throws Exception {
+        GetPlayInfoRequest request = new GetPlayInfoRequest();
+        request.setVideoId(videoId);
+        return client.getAcsResponse(request);
+    }
+
+    private String uploadStream(Video video) throws VideoServiceException {
+        UploadStreamRequest request = new UploadStreamRequest(ACCESS_KEY_ID, ACCESS_KEY_SECRET, video.getTitle(),
+                video.getName(), video.getVideoInputStream());
+        /* 是否使用默认水印(可选)，指定模板组ID时，根据模板组配置确定是否使用默认水印*/
+        ///request.setShowWaterMark(true);
+        // TODO 使用VOD上传到点播回调出现问题导致无法将上传的视频信息存储到数据库中，所以暂时取消事件回调。以后可以使用OOS进行上传
+        /* 设置上传完成后的回调URL(可选)，建议通过点播控制台配置消息监听事件，参见文档 https://help.aliyun.com/document_detail/57029.html */
+        // request.setCallback(VIDEO_CALLBACK_URL);
+        /* 视频分类ID(可选) */
+        request.setCateId(video.getVideoCategory());
+        /* 视频标签,多个用逗号分隔(可选) */
+        request.setTags(getTagString(video));
+        /* 视频描述(可选) */
+        request.setDescription(video.getDescription());
+        /* 封面图片(可选) */
+        request.setCoverURL(video.getImageUrl());
+        /* 模板组ID(可选) */
+        request.setTemplateGroupId(TEMPLATE_GROUP_ID);
+        /* 存储区域(可选) */
+        ///request.setStorageLocation("in-201703232118266-5sejdln9o.oss-cn-shanghai.aliyuncs.com");
+        UploadVideoImpl uploader = new UploadVideoImpl();
+        UploadStreamResponse response = uploader.uploadStream(request);
+
+        // 上传不成功
+        if (!response.isSuccess()) {
+            throw new VideoServiceException("视频上传失败--" + response.getMessage());
+        }
+
+        return response.getVideoId();
+    }
+
+    private AddCategoryResponse addCategoryDetail(String categoryName, Long parentId) throws Exception {
+        AddCategoryRequest request = new AddCategoryRequest();
+        // 父分类ID，若不填，则默认生成一级分类，根节点分类ID为-1
+        request.setParentId(parentId);
+        // 分类名称，不能超过64个字节，UTF8编码
+        request.setCateName(categoryName);
+        return initVodClient().getAcsResponse(request);
+    }
+
+    private String getTagString(Video video) {
+        List<VideoTag> tags = video.getTags();
+
+        StringBuilder sb = new StringBuilder();
+        if (tags != null && tags.size() > 0) {
+            for (int i = 0; i < tags.size(); i++) {
+                sb.append(tags.get(i).getName());
+                if (i < tags.size() - 1) {
+                    sb.append(",");
+                }
+            }
+        }
+        return "".equals(sb.toString()) ? null : sb.toString();
+    }
+
+    private static DefaultAcsClient initVodClient() {
+        //点播服务所在的Region，国内请填cn-shanghai，不要填写别的区域
+        String regionId = "cn-shanghai";
+        DefaultProfile profile = DefaultProfile.getProfile(regionId, ACCESS_KEY_ID, ACCESS_KEY_SECRET);
+        return new DefaultAcsClient(profile);
+    }
+
+    private UpdateVideoInfoResponse updateVideoInfo(Video video) throws Exception {
+        DefaultAcsClient client = initVodClient();
+        UpdateVideoInfoRequest request = new UpdateVideoInfoRequest();
+        request.setVideoId(video.getVideoId());
+
+        String title = video.getTitle();
+        if (StringUtils.isNotEmpty(title)) {
+            System.out.println("更新标题： " + title);
+            request.setTitle(title);
+        }
+
+        String description = video.getDescription();
+        if (StringUtils.isNotEmpty(description)) {
+
+            System.out.println("更新描述： " + description);
+            request.setDescription(description);
+        }
+
+        Long videoCategory = video.getVideoCategory();
+        if (videoCategory != null) {
+            System.out.println("更新分类： " + videoCategory);
+            request.setCateId(videoCategory);
+        }
+
+        String imageUrl = video.getImageUrl();
+        if (StringUtils.isNotEmpty(imageUrl)) {
+
+            System.out.println("更新封面地址： " + imageUrl);
+            request.setCoverURL(imageUrl);
+        }
+
+        String tagString = getTagString(video);
+        System.out.println("更新标签： " + tagString);
+        request.setTags(tagString);
+
+        return client.getAcsResponse(request);
+    }
+
+    private GetVideoInfoResponse getVideoInfo(String videoId) throws Exception {
+        DefaultAcsClient client = initVodClient();
+        GetVideoInfoRequest request = new GetVideoInfoRequest();
+        request.setVideoId(videoId);
+        return client.getAcsResponse(request);
     }
 }

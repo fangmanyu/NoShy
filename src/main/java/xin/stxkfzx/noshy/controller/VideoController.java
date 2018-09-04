@@ -296,8 +296,6 @@ public class VideoController {
         video.setDescription(description);
         video.setUserId(currentUser.getUserId());
         video.setTags(strTagsToList(tags));
-        video.setCreateTime(new Date());
-        video.setLastEditTime(new Date());
         // TODO 设置视频封面地址
         try {
             video.setName(videoFile.getOriginalFilename());
