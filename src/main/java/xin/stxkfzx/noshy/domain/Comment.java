@@ -1,5 +1,7 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.util.List;
+
 public class Comment {
     private Integer commentId;
 
@@ -14,6 +16,18 @@ public class Comment {
 
     /** 评论点赞量*/
     private Integer commentLikes;
+
+    /** 子类评论列表*/
+    private List<Comment> childrenCommentList;
+
+
+    public List<Comment> getChildrenCommentList() {
+        return childrenCommentList;
+    }
+
+    public void setChildrenCommentList(List<Comment> childrenCommentList) {
+        this.childrenCommentList = childrenCommentList;
+    }
 
     public Integer getCommentId() {
         return commentId;
@@ -65,17 +79,14 @@ public class Comment {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", commentId=").append(commentId);
-        sb.append(", browseId=").append(browseId);
-        sb.append(", parentId=").append(parentId);
-        sb.append(", commentContent=").append(commentContent);
-        sb.append(", userId=").append(userId);
-        sb.append(", commentLikes=").append(commentLikes);
-        sb.append("]");
-        return sb.toString();
+        return "Comment{" +
+                "commentId=" + commentId +
+                ", browseId=" + browseId +
+                ", parentId=" + parentId +
+                ", commentContent='" + commentContent + '\'' +
+                ", userId=" + userId +
+                ", commentLikes=" + commentLikes +
+                ", childrenCommentList=" + childrenCommentList +
+                '}';
     }
 }
