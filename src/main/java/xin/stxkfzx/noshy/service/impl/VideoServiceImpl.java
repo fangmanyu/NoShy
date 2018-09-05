@@ -106,6 +106,9 @@ public class VideoServiceImpl implements VideoService {
         // 构建浏览信息
         BrowseInformation browseInformation = new BrowseInformation();
         browseInformation.setBrowseType(BrowseInformation.VIDEO);
+        browseInformation.setLikes(0);
+        browseInformation.setPageviews(0);
+        browseInformation.setShares(0);
         browseInformationMapper.insertSelective(browseInformation);
         log.debug("构建视频浏览信息Id: {}", browseInformation.getBrowseId());
 

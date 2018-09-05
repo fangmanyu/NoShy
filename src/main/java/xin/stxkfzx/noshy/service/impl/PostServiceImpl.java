@@ -5,10 +5,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import xin.stxkfzx.noshy.domain.BrowseInformation;
 import xin.stxkfzx.noshy.domain.Post;
 import xin.stxkfzx.noshy.domain.PostInformation;
 import xin.stxkfzx.noshy.dto.PostDTO;
 import xin.stxkfzx.noshy.exception.PostServiceException;
+import xin.stxkfzx.noshy.mapper.BrowseInformationMapper;
 import xin.stxkfzx.noshy.mapper.PostInformationMapper;
 import xin.stxkfzx.noshy.mapper.PostMapper;
 import xin.stxkfzx.noshy.service.PostService;
@@ -25,20 +27,35 @@ import java.util.Optional;
 public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final PostInformationMapper postInformationMapper;
+    private final BrowseInformationMapper browseInformationMapper;
     private static final Logger log = LogManager.getLogger(PostServiceImpl.class);
 
     @Autowired
-    public PostServiceImpl(PostMapper postMapper, PostInformationMapper postInformationMapper) {
+    public PostServiceImpl(PostMapper postMapper, PostInformationMapper postInformationMapper, BrowseInformationMapper browseInformationMapper) {
         this.postMapper = postMapper;
         this.postInformationMapper = postInformationMapper;
+        this.browseInformationMapper = browseInformationMapper;
     }
 
 
     @Transactional(rollbackFor = PostServiceException.class)
     @Override
     public PostDTO createPost(Post post) throws PostServiceException {
+        // 构建浏览信息
+        BrowseInformation browseInformation = new BrowseInformation();
+        browseInformation.setBrowseType(BrowseInformation.POST);
+        browseInformation.setLikes(0);
+        browseInformation.setPageviews(0);
+        browseInformation.setShares(0);
+        try {
+            browseInformationMapper.insertSelective(browseInformation);
+        } catch (Exception e) {
+            throw new PostServiceException("创建浏览信息失败: " + e.getMessage());
+        }
+        log.debug("构建帖子浏览信息Id: {}", browseInformation.getBrowseId());
 
         try {
+            post.setBrowseId(browseInformation.getBrowseId());
             postMapper.insert(post);
         } catch (Exception e) {
             throw new PostServiceException("创建帖子失败: " + e.getMessage());
@@ -50,6 +67,7 @@ public class PostServiceImpl implements PostService {
         } catch (Exception e) {
             throw new PostServiceException("构建帖子信息失败: " + e.getMessage());
         }
+
 
         return new PostDTO(true, "创建帖子成功");
     }
@@ -87,7 +105,7 @@ public class PostServiceImpl implements PostService {
         try {
             postMapper.updateByPrimaryKeySelective(post);
         } catch (Exception e) {
-            throw new  PostServiceException("浏览量更新失败");
+            throw new PostServiceException("浏览量更新失败");
         }
 
         return new PostDTO(true, "操作成功");

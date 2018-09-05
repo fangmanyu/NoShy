@@ -14,9 +14,9 @@ import xin.stxkfzx.noshy.exception.PostServiceException;
 public interface PostService {
 
     /**
-     * 创建帖子
+     * 创建帖子,并构建浏览信息
      *
-     * @param post 帖子信息，包括
+     * @param post 帖子信息
      * @return 返回结果标识
      * @throws PostServiceException 论坛服务异常信息
      * @author fmy
