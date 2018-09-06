@@ -58,4 +58,11 @@ public class CommentServiceTest extends BaseTest {
         String json = new ObjectMapper().writeValueAsString(commentList);
         System.out.println(json);
     }
+
+    @Test
+    public void getComment() {
+        CommentDTO dto = commentService.getComment(1);
+        Comment comment = dto.getComment();
+        System.out.println(comment);
+    }
 }

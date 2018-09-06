@@ -17,7 +17,7 @@ public interface CommentService {
      *
      * @param comment
      * @return
-     * @throws
+     * @throws CommentServiceException
      * @author fmy
      * @date 2018-09-05 13:50
      */
@@ -28,6 +28,7 @@ public interface CommentService {
      *
      * @param commentId
      * @return
+     * @throws CommentServiceException
      * @author fmy
      * @date 2018-09-05 13:52
      */
@@ -42,4 +43,14 @@ public interface CommentService {
      * @date 2018-09-05 13:53
      */
     CommentDTO listCommentByBrowseId(int browseId);
+
+    /**
+     * 获取评论
+     *
+     * @param commentId
+     * @return
+     * @author fmy
+     * @date 2018-09-05 16:35
+     */
+    CommentDTO getComment(int commentId);
 }

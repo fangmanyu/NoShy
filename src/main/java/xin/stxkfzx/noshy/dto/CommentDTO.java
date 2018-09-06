@@ -15,10 +15,17 @@ public class CommentDTO {
     private Boolean success;
     private String message;
     private List<Comment> commentList;
+    private Comment comment;
 
     public CommentDTO(Boolean success, String message) {
         this.success = success;
         this.message = message;
+    }
+
+    public CommentDTO(Boolean success, String message, Comment comment) {
+        this.success = success;
+        this.message = message;
+        this.comment = comment;
     }
 
     public CommentDTO(Boolean success, String message, List<Comment> commentList) {
@@ -28,12 +35,21 @@ public class CommentDTO {
         this.commentList = commentList;
     }
 
+    public Comment getComment() {
+        return comment;
+    }
+
+    public void setComment(Comment comment) {
+        this.comment = comment;
+    }
+
     @Override
     public String toString() {
         return "CommentDTO{" +
                 "success=" + success +
                 ", message='" + message + '\'' +
                 ", commentList=" + commentList +
+                ", comment=" + comment +
                 '}';
     }
 

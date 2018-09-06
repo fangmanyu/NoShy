@@ -13,6 +13,10 @@ import xin.stxkfzx.noshy.vo.JSONResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
 import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+
+import static java.util.regex.Pattern.compile;
 
 /**
  * 全局异常处理
@@ -57,12 +61,19 @@ public class GlobalExceptionHandler {
         log.error("error url: " + request.getRequestURI());
         log.error(e.getMessage());
 
+        String errField = null;
+        Matcher matcher = compile("(default\\smessage\\s\\[(\\w+)\\])").matcher(e.getMessage());
+        if (matcher.find()) {
+            errField = matcher.group(2);
+        }
+        log.error("errField: {}", errField);
+
         StringBuilder sb = new StringBuilder();
         MethodArgumentNotValidException bindException = (MethodArgumentNotValidException) e;
         List<ObjectError> allErrors = bindException.getBindingResult().getAllErrors();
         for (ObjectError error :
                 allErrors) {
-            sb.append(error.getDefaultMessage()).append(";");
+            sb.append(Optional.ofNullable(errField).orElse("")).append(error.getDefaultMessage()).append(";");
         }
 
         return new JSONResponse(false, sb.toString());

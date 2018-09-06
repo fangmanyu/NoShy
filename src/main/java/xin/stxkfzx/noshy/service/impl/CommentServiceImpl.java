@@ -24,7 +24,7 @@ import java.util.List;
 public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private static final Logger log = LogManager.getLogger(CommentServiceImpl.class);
-    private User currentUser;
+
 
     @Autowired
     public CommentServiceImpl(CommentMapper commentMapper) {
@@ -37,13 +37,6 @@ public class CommentServiceImpl implements CommentService {
         if (comment == null) {
             return new CommentDTO(false, "添加评论为空");
         }
-
-        // FIXME: 2018/9/5 0005 解除注释
-        // if (currentUser == null || currentUser.getUserId() == null) {
-        //     return new CommentDTO(false, "当前用户未登录");
-        // }
-
-        // comment.setUserId(currentUser.getUserId());
         comment.setCommentLikes(0);
 
         try {
@@ -63,11 +56,6 @@ public class CommentServiceImpl implements CommentService {
         if (comment == null) {
             return new CommentDTO(false, "删除评论错误: 无该评论");
         }
-
-        // FIXME: 2018/9/5 0005 解除注释
-        // if (currentUser == null || currentUser.getUserId() == null) {
-        //     return new CommentDTO(false, "当前用户未登录");
-        // }
 
         // 删除子类评论
         List<Comment> childrenCommentList = commentMapper.findByParentId(commentId);
@@ -99,11 +87,17 @@ public class CommentServiceImpl implements CommentService {
         return new CommentDTO(true, "查询成功", commentList);
     }
 
-    @ModelAttribute
-    public void getCurrentUser(HttpSession session) {
-        this.currentUser = (User) session.getAttribute("currentUser");
-        log.debug("当前登录用户信息: {}", currentUser);
+    @Override
+    public CommentDTO getComment(int commentId) {
+        Comment comment = commentMapper.selectByPrimaryKey(commentId);
+        List<Comment> commentList = commentMapper.findByParentId(commentId);
+        recursionGetChildrenCommentList(commentList);
+        comment.setChildrenCommentList(commentList);
+
+        return new CommentDTO(true, "查询成功", comment);
     }
+
+
 
     private void recursionGetChildrenCommentList(List<Comment> commentList) {
         if (commentList == null) {
