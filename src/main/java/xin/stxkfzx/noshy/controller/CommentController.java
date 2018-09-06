@@ -70,8 +70,8 @@ public class CommentController {
 
     @ApiOperation(value = "获取全部评论信息")
     @ApiImplicitParam(name = "browseId", value = "浏览信息Id")
-    @GetMapping("/{browseId}")
-    public JSONResponse listCommentByBrowseId(@PathVariable @Min(0) int browseId) {
+    @GetMapping()
+    public JSONResponse listCommentByBrowseId(@RequestParam @Min(0) int browseId) {
         CommentDTO commentDTO = commentService.listCommentByBrowseId(browseId);
         return new JSONResponse(commentDTO.getSuccess(), commentDTO.getMessage(), commentDTO.getCommentList());
     }
@@ -97,17 +97,10 @@ public class CommentController {
 
     @ApiOperation(value = "获取指定评论,包括子类评论")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "browseId", value = "浏览信息Id"),
             @ApiImplicitParam(name = "commentId", value = "评论Id")
     })
-    @GetMapping("/{browseId}/{commentId}")
-    public JSONResponse getComment(@PathVariable @Min(0) int browseId,
-                                   @PathVariable @Min(0) int commentId) {
-        List<Comment> commentList = commentService.listCommentByBrowseId(browseId).getCommentList();
-        if (commentList == null || commentList.size() == 0) {
-            return new JSONResponse(false, "浏览信息Id错误");
-        }
-
+    @GetMapping("/{commentId}")
+    public JSONResponse getComment(@PathVariable @Min(0) int commentId) {
         CommentDTO comment = commentService.getComment(commentId);
         return new JSONResponse(comment.getSuccess(), comment.getMessage(), comment.getComment());
     }
