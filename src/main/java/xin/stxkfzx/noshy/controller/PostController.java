@@ -150,21 +150,6 @@ public class PostController {
         return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage(), modelMap);
     }
 
-    @ApiOperation(value = "发送帖子消息")
-    @PostMapping(value = "/addPostInfo", consumes = "application/json")
-    public JSONResponse addPostInfo(@RequestBody @Validated @ApiParam(value = "帖子消息") PostInformation postInformation) {
-        if (currentUser == null) {
-            return new JSONResponse(false, "当前用户尚未登录");
-        }
-
-        log.debug("获取的帖子消息: " + postInformation);
-        postInformation.setCreateTime(new Date());
-        postInformation.setUserId(currentUser.getUserId().intValue());
-
-        PostDTO postDTO = postService.addPostInformation(postInformation);
-
-        return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage());
-    }
 
     @Autowired
     public PostController(PostService postService) {

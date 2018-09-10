@@ -16,6 +16,7 @@ import xin.stxkfzx.noshy.mapper.PostMapper;
 import xin.stxkfzx.noshy.service.PostService;
 import xin.stxkfzx.noshy.util.PageCalculator;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +24,6 @@ import java.util.Optional;
  * @author fmy
  * @date 2018-07-28 20:34
  */
-@Service
 public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final PostInformationMapper postInformationMapper;
@@ -114,6 +114,7 @@ public class PostServiceImpl implements PostService {
     @Transactional(rollbackFor = PostServiceException.class)
     @Override
     public PostDTO addPostInformation(PostInformation postInformation) throws PostServiceException {
+        postInformation.setCreateTime(new Date());
         try {
             postInformationMapper.insert(postInformation);
         } catch (Exception e) {
