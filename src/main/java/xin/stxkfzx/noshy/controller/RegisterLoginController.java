@@ -42,16 +42,17 @@ public class RegisterLoginController {
         }
 
         if (!CheckUtils.checkPhone(loginInfo.getPhone()) || StringUtils.isEmpty(loginInfo.getPassword())) {
-            return new JSONResponse(false, "手机或密码错误");
+            return new JSONResponse(false, "手机或密码格式错误");
         }
 
         User user = registerLoginService.login(loginInfo.getPhone(), loginInfo.getPassword());
         if (user != null) {
             session.setAttribute("currentUser", user);
+        System.out.println("session id"+session.getId());
             return new JSONResponse(true, "登陆成功");
         }
 
-        return new JSONResponse(false, "登陆失败，服务器内部错误");
+        return new JSONResponse(false, "登陆失败，手机或密码错误");
 
     }
 
