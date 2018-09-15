@@ -2,20 +2,18 @@ package xin.stxkfzx.noshy.interceptor;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 import xin.stxkfzx.noshy.domain.User;
 
 import javax.servlet.http.HttpSession;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.Optional;
+
+import static java.util.regex.Pattern.*;
 
 /**
  * 论坛聊天拦截器
@@ -28,7 +26,7 @@ public class PostSocketInterceptor extends HttpSessionHandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, Map<String, Object> map) throws Exception {
-        super.beforeHandshake(serverHttpRequest, serverHttpResponse,webSocketHandler,map);
+        // super.beforeHandshake(serverHttpRequest, serverHttpResponse,webSocketHandler,map);
 
         log.info("进入webSocket 拦截器");
         if (serverHttpRequest instanceof ServletServerHttpRequest) {
@@ -43,25 +41,7 @@ public class PostSocketInterceptor extends HttpSessionHandshakeInterceptor {
             map.put("currentUser", Optional.ofNullable(currentUser).orElse(new User()));
             map.put("isLogin", currentUser != null);
             map.put("postId", postId);
-
-            String id = request.getServletRequest().getSession().getId();
-            System.out.println("session id = " + id);
         }
-
-        HttpSession session = getSession(serverHttpRequest);
-        if (session != null) {
-            User currentUser = (User) session.getAttribute("currentUser");
-            log.debug("getSession ---> " + currentUser);
-
-            Enumeration<String> attributeNames = session.getAttributeNames();
-            while (attributeNames.hasMoreElements()) {
-                String s = attributeNames.nextElement();
-                System.out.println(s);
-            }
-        } else {
-            log.debug("session is null");
-        }
-
 
         return true;
     }

@@ -32,8 +32,6 @@ public class PostInformation {
     @ApiModelProperty(value = "所属帖子Id", required = true)
     private Integer postId;
 
-    private User creator;
-
     @Override
     public String toString() {
         return "PostInformation{" +
@@ -43,16 +41,7 @@ public class PostInformation {
                 ", createTime=" + createTime +
                 ", imageUrl='" + imageUrl + '\'' +
                 ", postId=" + postId +
-                ", creator=" + creator +
                 '}';
-    }
-
-    public User getCreator() {
-        return creator;
-    }
-
-    public void setCreator(User creator) {
-        this.creator = creator;
     }
 
     public Integer getInfoId() {

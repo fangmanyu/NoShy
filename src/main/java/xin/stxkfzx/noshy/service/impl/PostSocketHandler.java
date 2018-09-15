@@ -1,7 +1,7 @@
 package xin.stxkfzx.noshy.service.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +18,10 @@ import xin.stxkfzx.noshy.mapper.PostInformationMapper;
 import xin.stxkfzx.noshy.mapper.PostMapper;
 import xin.stxkfzx.noshy.mapper.UserInformationMapper;
 import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.RequestSocketMessage;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * @author fmy
@@ -73,8 +71,11 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
         // 读取消息
         Object payload = webSocketMessage.getPayload();
         log.debug("handleMessage  " + payload);
-        JsonNode node = mapper.readTree((String) payload);
-        String message = node.get("message").textValue();
+        RequestSocketMessage socketMessage = mapper.readValue(payload.toString(), RequestSocketMessage.class);
+        String message = socketMessage.getMessage();
+        if (StringUtils.isEmpty(message)) {
+            return;
+        }
 
         // 判断当前用户是否登录,没有登录返回错误
         JSONResponse jsonResponse = new JSONResponse();
@@ -179,7 +180,8 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
         TextMessage webSocketMessage = new TextMessage(msg);
 
         for (PostSocketUserInfo item : postUserList) {
-            if (item.getUserId().equals(sendUserId)) {
+            if (Objects.equals(item.getUserId(), sendUserId)) {
+                log.debug("item.getUserId() = {}, sendUserId = {}",item.getUserId(), sendUserId);
                 continue;
             }
 

@@ -14,6 +14,7 @@ import xin.stxkfzx.noshy.domain.PostInformation;
 import xin.stxkfzx.noshy.domain.User;
 import xin.stxkfzx.noshy.dto.PostDTO;
 import xin.stxkfzx.noshy.service.PostService;
+import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 import xin.stxkfzx.noshy.vo.PostInformationVO;
 import xin.stxkfzx.noshy.vo.UserVO;
@@ -35,6 +36,7 @@ import java.util.*;
 public class PostController {
     private static final Logger log = LogManager.getLogger(PostController.class);
     private final PostService postService;
+    private final UserService userService;
     private User currentUser;
 
     @ModelAttribute
@@ -59,20 +61,6 @@ public class PostController {
         }
     }
 
-    @ApiOperation(value = "获取剩余帖子内容")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "postId", value = "指定帖子Id", required = true, dataType = "int"),
-            @ApiImplicitParam(name = "loadSize", value = "加载数目", required = true, dataType = "int")
-    })
-    @GetMapping("/getAfterInfo")
-    public JSONResponse getAfterInfo(@RequestParam("postId") @Min(1) int postId,
-                                     @RequestParam("loadSize") @Min(0) int loadSize) {
-        PostDTO afterPostInfo = postService.getAfterPostInfo(postId, loadSize);
-        List<PostInformationVO> postInformationVOList = getPostInformationVOS(afterPostInfo);
-
-        return new JSONResponse(afterPostInfo.getSuccess(), afterPostInfo.getMessage(), postInformationVOList);
-    }
-
     private List<PostInformationVO> getPostInformationVOS(PostDTO afterPostInfo) {
         // DO -> VO
         List<PostInformationVO> postInformationVOList = new ArrayList<>(10);
@@ -80,8 +68,7 @@ public class PostController {
         UserVO userVO = new UserVO();
         for (PostInformation temp :
                 afterPostInfo.getPostInformationList()) {
-
-            BeanUtils.copyProperties(temp.getCreator(), userVO);
+            Optional.ofNullable(userService.getUser(Long.valueOf(temp.getUserId()))).ifPresent(user -> BeanUtils.copyProperties(user, userVO));
             BeanUtils.copyProperties(temp, vo);
             vo.setUser(userVO);
 
@@ -150,9 +137,28 @@ public class PostController {
         return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage(), modelMap);
     }
 
+    @ApiOperation(value = "获取之前帖子信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "postId", value = "帖子id", required = true),
+            @ApiImplicitParam(name = "pageIndex", value = "分页位置", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "分页大小", required = true),
+            @ApiImplicitParam(name = "infoId", value = "信息位置,获取的是这个id之前的消息"),
+    })
+    @GetMapping("/{postId}/beforeInformation")
+    public JSONResponse listBeforeInformation(@PathVariable @Min(0) int postId,
+                                              @RequestParam Integer pageIndex,
+                                              @RequestParam @Min(0) int pageSize,
+                                              @RequestParam(required = false) Integer infoId) {
+
+        PostDTO postDTO = postService.listBeforeInformation(postId, pageIndex, pageSize, infoId);
+
+        return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage(), postDTO.getPostInformationList());
+    }
+
 
     @Autowired
-    public PostController(PostService postService) {
+    public PostController(PostService postService, UserService userService) {
         this.postService = postService;
+        this.userService = userService;
     }
 }

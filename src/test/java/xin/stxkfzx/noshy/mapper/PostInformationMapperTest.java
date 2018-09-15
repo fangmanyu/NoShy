@@ -36,5 +36,9 @@ public class PostInformationMapperTest extends BaseTest {
         System.out.println(postInformations);
     }
 
-
+    @Test
+    public void selectPostInformationListDESCCreateTime() {
+        List<PostInformation> postInformationList = postInformationMapper.selectPostInformationListDESCCreateTime(2, 1, 4, 30);
+        postInformationList.forEach(item -> System.out.println(item.getInfoContent()));
+    }
 }

@@ -48,4 +48,6 @@ public interface PostInformationMapper {
      * @date 2018-07-29 21:32
      */
     int countByPostId(@Param("postId") int postId);
+
+    List<PostInformation> selectPostInformationListDESCCreateTime(@Param("postId") int postId, @Param("rowIndex") Integer rowIndex, @Param("pageSize") int pageSize, @Param("infoId")Integer infoId);
 }

@@ -111,6 +111,24 @@ public class PostServiceImpl implements PostService {
         return new PostDTO(true, "操作成功");
     }
 
+    @Override
+    public PostDTO listBeforeInformation(int postId, Integer pageIndex, int pageSize, Integer infoId) {
+        Post post = postMapper.selectByPrimaryKey(postId);
+        if (post == null) {
+            return new PostDTO(false, "无该论坛");
+        }
+
+        Integer rowIndex = Optional.ofNullable(pageIndex)
+                .map(integer -> PageCalculator.calculateRowIndex(integer, pageSize)).orElse(null);
+
+        log.debug("查询参数: rowIndex={}", rowIndex);
+        List<PostInformation> postInformationList = postInformationMapper.selectPostInformationListDESCCreateTime(postId, rowIndex, pageSize, infoId);
+
+        PostDTO postDTO = new PostDTO(true, "查询成功");
+        postDTO.setPostInformationList(postInformationList);
+        return postDTO;
+    }
+
     @Transactional(rollbackFor = PostServiceException.class)
     @Override
     public PostDTO addPostInformation(PostInformation postInformation) throws PostServiceException {
@@ -164,27 +182,6 @@ public class PostServiceImpl implements PostService {
         postDTO.setCount(count);
         postDTO.setPost(post);
 
-        return postDTO;
-    }
-
-    @Override
-    public PostDTO getAfterPostInfo(int postId, int loadSize) {
-        // 不可被展示的帖子不能被获取到
-        Integer postStatus = postMapper.queryPostStatus(postId);
-        if (postStatus == null) {
-            return new PostDTO(false, "获得帖子失败： 该帖子不存在");
-        } else if (postStatus == Post.UN_DISPLAY) {
-            return new PostDTO(false, "获得帖子失败： 该帖子状态不可见");
-        }
-
-        int total = postInformationMapper.countByPostId(postId);
-
-        log.debug("剩余的加载数目: {}", total - loadSize);
-        List<PostInformation> postInformationList =
-                postInformationMapper.selectPostInformationList(postId, loadSize, total - loadSize);
-
-        PostDTO postDTO = new PostDTO(true, "查询成功");
-        postDTO.setPostInformationList(postInformationList);
         return postDTO;
     }
 

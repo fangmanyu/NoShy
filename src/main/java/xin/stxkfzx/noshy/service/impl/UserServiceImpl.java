@@ -10,15 +10,15 @@ import xin.stxkfzx.noshy.domain.UserInformation;
 import xin.stxkfzx.noshy.exception.RegisterException;
 import xin.stxkfzx.noshy.mapper.UserInformationMapper;
 import xin.stxkfzx.noshy.mapper.UserMapper;
-import xin.stxkfzx.noshy.service.RegisterLoginService;
+import xin.stxkfzx.noshy.service.UserService;
 
 /**
  * @author fmy
  * @date 2018-07-21 22:15
  */
 @Service
-public class RegisterLoginServiceImpl implements RegisterLoginService {
-    private static final Logger log = LogManager.getLogger(RegisterLoginServiceImpl.class);
+public class UserServiceImpl implements UserService {
+    private static final Logger log = LogManager.getLogger(UserServiceImpl.class);
 
     private final UserMapper userMapper;
     private final UserInformationMapper userInformationMapper;
@@ -58,14 +58,19 @@ public class RegisterLoginServiceImpl implements RegisterLoginService {
             userInformationMapper.insert(information);
 
         } catch (Exception e) {
-            throw new RegisterException("RegisterLoginService error: " + e.getMessage());
+            throw new RegisterException("UserService error: " + e.getMessage());
         }
 
     }
 
+    @Override
+    public User getUser(Long userId) {
+        return userMapper.selectByPrimaryKey(userId.intValue());
+    }
+
 
     @Autowired
-    public RegisterLoginServiceImpl(UserMapper userMapper, UserInformationMapper userInformationMapper) {
+    public UserServiceImpl(UserMapper userMapper, UserInformationMapper userInformationMapper) {
         this.userMapper = userMapper;
         this.userInformationMapper = userInformationMapper;
     }

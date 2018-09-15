@@ -71,18 +71,6 @@ public interface PostService {
     PostDTO getPost(int postId, int pageIndex, int pageSize);
 
     /**
-     * 获取剩余帖子内容信息
-     *
-     * @param postId   帖子Id
-     * @param loadSize 已加载的帖子内容数目
-     * @return 返回结果标识
-     * @author fmy
-     * @date 2018-08-04 22:28
-     */
-    PostDTO getAfterPostInfo(int postId, int loadSize);
-
-
-    /**
      * 获取全部帖子信息(不能获取到具体内容信息)
      *
      * @param postCondition 查询条件.如果要查询全部列表,则postCondition为null.
@@ -105,5 +93,16 @@ public interface PostService {
      */
     PostDTO addPageViewNum(int postId) throws PostServiceException;
 
-
+    /**
+     * 通过postId获取之前消息
+     *
+     * @param postId
+     * @param pageIndex pageIndex可以为空
+     * @param pageSize
+     * @param infoId
+     * @return
+     * @author fmy
+     * @date 2018-09-14 17:13
+     */
+    PostDTO listBeforeInformation(int postId, Integer pageIndex, int pageSize, Integer infoId);
 }

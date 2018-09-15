@@ -1,9 +1,11 @@
 package xin.stxkfzx.noshy.bo;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -44,7 +46,7 @@ public class PostSocketInfoBO {
             Iterator<PostSocketUserInfo> iterator = postUserList.iterator();
             while (iterator.hasNext()) {
                 Integer id = iterator.next().getUserId();
-                if (id.equals(userId)) {
+                if (Objects.equals(id, userId)) {
                     iterator.remove();
                 }
             }

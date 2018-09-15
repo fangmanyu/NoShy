@@ -1,16 +1,14 @@
 package xin.stxkfzx.noshy.controller;
 
-import com.google.code.kaptcha.Constants;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import xin.stxkfzx.noshy.domain.User;
 import xin.stxkfzx.noshy.exception.RegisterException;
-import xin.stxkfzx.noshy.service.RegisterLoginService;
+import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.util.CheckUtils;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 import xin.stxkfzx.noshy.vo.LoginInfoVO;
@@ -28,7 +26,7 @@ import java.util.Date;
 @RestController
 public class RegisterLoginController {
 
-    private final RegisterLoginService registerLoginService;
+    private final UserService userService;
     private static final Logger log = LogManager.getLogger(RegisterLoginController.class);
 
     @ApiOperation(value = "用户登录", notes = "根据用户的电话号码和密码进行登录")
@@ -45,7 +43,7 @@ public class RegisterLoginController {
             return new JSONResponse(false, "手机或密码格式错误");
         }
 
-        User user = registerLoginService.login(loginInfo.getPhone(), loginInfo.getPassword());
+        User user = userService.login(loginInfo.getPhone(), loginInfo.getPassword());
         if (user != null) {
             session.setAttribute("currentUser", user);
         System.out.println("session id"+session.getId());
@@ -74,7 +72,7 @@ public class RegisterLoginController {
         user.setUserStatus(1);
 
         try {
-            registerLoginService.register(user);
+            userService.register(user);
             return new JSONResponse(true, "注册成功");
         } catch (RegisterException e) {
             return new JSONResponse(false, e.getMessage());
@@ -83,7 +81,7 @@ public class RegisterLoginController {
 
 
     @Autowired
-    public RegisterLoginController(RegisterLoginService registerLoginService) {
-        this.registerLoginService = registerLoginService;
+    public RegisterLoginController(UserService userService) {
+        this.userService = userService;
     }
 }

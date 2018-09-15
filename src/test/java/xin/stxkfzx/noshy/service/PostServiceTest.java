@@ -8,7 +8,6 @@ import xin.stxkfzx.noshy.domain.PostInformation;
 import xin.stxkfzx.noshy.dto.PostDTO;
 
 import java.util.Date;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -92,5 +91,16 @@ public class PostServiceTest extends BaseTest {
     public void addPageViewNum() {
         PostDTO postDTO = postService.addPageViewNum(-2);
         assertTrue(postDTO.getSuccess());
+    }
+
+    @Test
+    public void listPostInformationByPostIdDESC() {
+        PostDTO postDTO = postService.listBeforeInformation(2, null, 5, null);
+        assertTrue(postDTO.getSuccess());
+        postDTO.getPostInformationList().forEach(item -> System.out.println(item.getInfoContent()));
+
+        postDTO = postService.listBeforeInformation(2, 3, 5, null);
+        assertTrue(postDTO.getSuccess());
+        postDTO.getPostInformationList().forEach(item -> System.out.println(item.getInfoContent()));
     }
 }
