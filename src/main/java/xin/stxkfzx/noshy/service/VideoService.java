@@ -72,7 +72,7 @@ public interface VideoService {
     /**
      * 根据查询条件分页获取视频列表
      *
-     * @param videoCondition 查询条件。可选条件：标题名(模糊)，视频分类，视频状态，用户Id
+     * @param videoCondition 查询条件。可选条件：标题名(模糊)，视频分类，视频状态，用户Id, 描述(模糊)
      * @param pageIndex 起始位置
      * @param pageSize 每页大小
      * @return 返回状态标识

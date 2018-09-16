@@ -39,6 +39,9 @@
             <if test="videoCondition != null and videoCondition.title != null ">
                 and title like CONCAT('%', #{videoCondition.title}, '%')
             </if>
+            <if test="videoCondition != null and videoCondition.description != null ">
+                and description like CONCAT('%', #{videoCondition.description}, '%')
+            </if>
             <if test="videoCondition != null and videoCondition.videoCategory != null">
                 and video_category = #{videoCondition.videoCategory}
             </if>

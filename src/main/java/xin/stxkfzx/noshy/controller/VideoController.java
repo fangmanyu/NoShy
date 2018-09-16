@@ -1,9 +1,6 @@
 package xin.stxkfzx.noshy.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import io.swagger.annotations.*;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +12,6 @@ import springfox.documentation.annotations.ApiIgnore;
 import xin.stxkfzx.noshy.domain.User;
 import xin.stxkfzx.noshy.domain.Video;
 import xin.stxkfzx.noshy.domain.VideoTag;
-import xin.stxkfzx.noshy.dto.VideoCallBackDTO;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
 import xin.stxkfzx.noshy.service.VideoService;
@@ -195,8 +191,7 @@ public class VideoController {
      */
     @ApiOperation(value = "获取视频列表", notes = "根据查询条件返回视频列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "videoStr", value = "查询条件。Video对象JSON格式字符串。如果查询全部视频列表，" +
-                    "将查询条件为空，否则可能出现json解析错误"),
+            @ApiImplicitParam(name = "videoStr", value = "查询条件.可以通过标题和内容进行查询.查询全部列表则忽略"),
             @ApiImplicitParam(name = "pageIndex", value = "分页起始位置"),
             @ApiImplicitParam(name = "pageSize", value = "每页大小")
     })
@@ -208,14 +203,10 @@ public class VideoController {
         if (StringUtils.isEmpty(videoStr) || StringUtils.isBlank(videoStr)) {
             videoDTO = videoService.listVideo(null, pageIndex, pageSize);
         } else {
-            ObjectMapper mapper = new ObjectMapper();
-            Video videoCondition;
-            try {
-                videoCondition = mapper.readValue(videoStr, Video.class);
-            } catch (IOException e) {
-                return new JSONResponse(false, "解析videoStr失败： " + e.getMessage());
-            }
-            videoDTO = videoService.listVideo(videoCondition, pageIndex, pageSize);
+            Video video = new Video();
+            video.setTitle(videoStr);
+            video.setDescription(videoStr);
+            videoDTO = videoService.listVideo(video, pageIndex, pageSize);
         }
 
 
@@ -254,10 +245,10 @@ public class VideoController {
      */
     @ApiOperation(value = "上传视频", produces = "multipart/form-data")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "title", value = "视频标题", required = true, example = "视频标题"),
-            @ApiImplicitParam(name = "videoCategory", value = "视频分类", required = true, example = "810963431"),
-            @ApiImplicitParam(name = "description", value = "视频描述", example = "这是一个视频的描述"),
-            @ApiImplicitParam(name = "tags", value = "视频标签。最多16个标签，每个标签不能超过5个字，标签之间以英文状态下的逗号(,)隔开", example = "视频,好看")
+            @ApiImplicitParam(name = "title", value = "视频标题", required = true),
+            @ApiImplicitParam(name = "videoCategory", value = "视频分类", required = true),
+            @ApiImplicitParam(name = "description", value = "视频描述"),
+            @ApiImplicitParam(name = "tags", value = "视频标签。最多16个标签，每个标签不能超过5个字，标签之间以英文状态下的逗号(,)隔开")
     })
     @PostMapping
     public JSONResponse uploadVideo(@RequestParam("title") String title,
