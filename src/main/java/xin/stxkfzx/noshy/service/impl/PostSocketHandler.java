@@ -19,6 +19,7 @@ import xin.stxkfzx.noshy.mapper.PostMapper;
 import xin.stxkfzx.noshy.mapper.UserInformationMapper;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 import xin.stxkfzx.noshy.vo.RequestSocketMessage;
+import xin.stxkfzx.noshy.vo.ResponseSocketMessage;
 
 import java.io.IOException;
 import java.util.*;
@@ -94,10 +95,11 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
         information.setInfoContent(message);
         information.setPostId(Integer.valueOf(postId));
 
-        Map<String, Object> data = new HashMap<>(4);
+        ResponseSocketMessage responseSocketMessage = new ResponseSocketMessage();
         try {
             log.debug("信息存到数据库中");
             PostDTO postDTO = super.addPostInformation(information);
+            responseSocketMessage.setInfoId(postDTO.getInfoId());
         } catch (PostServiceException e) {
             log.error(e.getMessage());
             jsonResponse.setMessage("系统内部错误");
@@ -107,13 +109,13 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
         }
 
         String imgAddr = userInformationMapper.findOneHeadPortraitAddrByUserId(Long.valueOf(userId));
-        data.put("userId", userId);
-        data.put("postId", postId);
-        data.put("message", message);
-        data.put("imgAddr", imgAddr);
+        responseSocketMessage.setImageAddr(imgAddr);
+        responseSocketMessage.setMessage(message);
+        responseSocketMessage.setPostId(Integer.valueOf(postId));
+        responseSocketMessage.setUserId(userId);
         jsonResponse.setSuccess(true);
         jsonResponse.setMessage("成功");
-        jsonResponse.setData(data);
+        jsonResponse.setData(responseSocketMessage);
 
         // 给房间其他人广播消息
         String json = mapper.writeValueAsString(jsonResponse);
@@ -121,7 +123,7 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
         sendToPostRoom(postId, json, userId);
 
         //给自己广播
-        data.put("myMessage", true);
+        responseSocketMessage.setMyMessage(true);
         json = mapper.writeValueAsString(jsonResponse);
         webSocketSession.sendMessage(new TextMessage(json));
         log.debug("给自己发送的消息: {}", json);
@@ -181,7 +183,7 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
 
         for (PostSocketUserInfo item : postUserList) {
             if (Objects.equals(item.getUserId(), sendUserId)) {
-                log.debug("item.getUserId() = {}, sendUserId = {}",item.getUserId(), sendUserId);
+                log.debug("item.getUserId() = {}, sendUserId = {}", item.getUserId(), sendUserId);
                 continue;
             }
 

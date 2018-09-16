@@ -138,8 +138,10 @@ public class PostServiceImpl implements PostService {
         } catch (Exception e) {
             throw new PostServiceException("创建帖子内容失败: " + e.getMessage());
         }
-
-        return new PostDTO(true, "帖子添加消息成功");
+        log.debug("插入消息Id: {}", postInformation.getInfoId());
+        PostDTO postDTO = new PostDTO(true, "帖子添加消息成功");
+        postDTO.setInfoId(postInformation.getInfoId());
+        return postDTO;
     }
 
     @Transactional(rollbackFor = PostServiceException.class)

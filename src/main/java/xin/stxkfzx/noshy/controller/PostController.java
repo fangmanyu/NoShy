@@ -2,6 +2,7 @@ package xin.stxkfzx.noshy.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +18,7 @@ import xin.stxkfzx.noshy.service.PostService;
 import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 import xin.stxkfzx.noshy.vo.PostInformationVO;
+import xin.stxkfzx.noshy.vo.ResponseSocketMessage;
 import xin.stxkfzx.noshy.vo.UserVO;
 
 import javax.servlet.http.HttpSession;
@@ -50,7 +52,7 @@ public class PostController {
 
     @ApiOperation(value = "更新帖子点击量")
     @ApiImplicitParam(name = "postId", value = "指定帖子Id", required = true, dataType = "int")
-    @GetMapping("/addPageView/{postId}")
+    @GetMapping("/{postId}/addPageView")
     public JSONResponse addPageView(@PathVariable @Min(1) int postId) {
         PostDTO postDTO = null;
         try {
@@ -151,8 +153,21 @@ public class PostController {
                                               @RequestParam(required = false) Integer infoId) {
 
         PostDTO postDTO = postService.listBeforeInformation(postId, pageIndex, pageSize, infoId);
+        List<PostInformation> postInformationList = postDTO.getPostInformationList();
+        List<ResponseSocketMessage> messageList = new ArrayList<>(postInformationList.size());
+        ResponseSocketMessage message;
+        for (PostInformation info :
+                postInformationList) {
+            message = new ResponseSocketMessage();
+            BeanUtils.copyProperties(info, message);
+            message.setImageAddr(info.getImageUrl());
+            message.setMessage(info.getInfoContent());
+            Boolean myMessage = Optional.ofNullable(currentUser).map(user -> user.getUserId().equals(Long.valueOf(info.getUserId()))).orElse(null);
+            message.setMyMessage(myMessage);
+            messageList.add(message);
 
-        return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage(), postDTO.getPostInformationList());
+        }
+        return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage(), messageList);
     }
 
 

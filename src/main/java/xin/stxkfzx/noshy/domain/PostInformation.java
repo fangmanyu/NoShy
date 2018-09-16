@@ -11,7 +11,6 @@ import java.util.Date;
 @ApiModel(description = "帖子消息")
 public class PostInformation {
     @ApiModelProperty(hidden = true)
-    @JsonIgnore
     private Integer infoId;
 
     @ApiModelProperty(value = "信息内容", required = true)

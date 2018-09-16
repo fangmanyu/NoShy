@@ -26,7 +26,6 @@ public class PostSocketInterceptor extends HttpSessionHandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, Map<String, Object> map) throws Exception {
-        // super.beforeHandshake(serverHttpRequest, serverHttpResponse,webSocketHandler,map);
 
         log.info("进入webSocket 拦截器");
         if (serverHttpRequest instanceof ServletServerHttpRequest) {
@@ -44,16 +43,6 @@ public class PostSocketInterceptor extends HttpSessionHandshakeInterceptor {
         }
 
         return true;
-    }
-
-
-    private HttpSession getSession(ServerHttpRequest request) {
-        if (request instanceof ServletServerHttpRequest) {
-            ServletServerHttpRequest serverRequest = (ServletServerHttpRequest)request;
-            return serverRequest.getServletRequest().getSession(this.isCreateSession());
-        } else {
-            return null;
-        }
     }
 
 }
