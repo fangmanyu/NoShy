@@ -16,7 +16,7 @@
     from video_category
     where category_id = #{categoryId,jdbcType=INTEGER}
   </select>
-  <select id="selectByAliyunId" resultType="xin.stxkfzx.noshy.domain.VideoCategory">
+  <select id="selectByAliyunId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List"/>
     from video_category

@@ -13,6 +13,14 @@ import java.util.List;
 
 @ApiModel
 public class Video {
+    public static final String UPLOADING = "Uploading";
+    public static final String UPLOADSUCC = "UploadSucc";
+    public static final String TRANSCODING = "Transcoding";
+    public static final String TRANSCODEFAIL = "TranscodeFail";
+    public static final String CHECKING = "Checking";
+    public static final String BLOCKED = "Blocked";
+    public static final String Normal = "Normal";
+
     @ApiModelProperty(hidden = true)
     private String videoId;
 
@@ -25,13 +33,13 @@ public class Video {
 
     @JsonIgnore
     @ApiModelProperty(value = "视频上传流", hidden = true)
-    private InputStream videoInputStream;
+    private transient InputStream videoInputStream;
 
     @ApiModelProperty(value = "视频分类")
     private Long videoCategory;
 
     @ApiModelProperty(value = "视频标签", notes = "单个标签不超过32字节,最多16个标签")
-    private List<VideoTag> tags;
+    private transient List<VideoTag> tags;
     @ApiModelProperty(value = "视频描述")
     private String description;
     @ApiModelProperty(value = "视频封面图片地址")
@@ -59,17 +67,10 @@ public class Video {
     @ApiModelProperty(hidden = true)
     private Long userId;
     @ApiModelProperty(hidden = true)
-    private String playUrl;
+    private transient String playUrl;
     @JsonIgnore
     private Integer browseId;
 
-    public static final String UPLOADING = "Uploading";
-    public static final String UPLOADSUCC = "UploadSucc";
-    public static final String TRANSCODING = "Transcoding";
-    public static final String TRANSCODEFAIL = "TranscodeFail";
-    public static final String CHECKING = "Checking";
-    public static final String BLOCKED = "Blocked";
-    public static final String Normal = "Normal";
 
     public Video() {}
 

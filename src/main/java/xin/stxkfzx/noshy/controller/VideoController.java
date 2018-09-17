@@ -15,6 +15,7 @@ import xin.stxkfzx.noshy.domain.VideoTag;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
 import xin.stxkfzx.noshy.service.VideoService;
+import xin.stxkfzx.noshy.vo.ImageHolder;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 
 import javax.servlet.ServletInputStream;
@@ -47,13 +48,23 @@ public class VideoController {
     private final VideoService videoService;
     private User currentUser;
 
-    @ModelAttribute
-    public void initUser(HttpSession session) {
-        Object currentUser = session.getAttribute("currentUser");
-        if (currentUser instanceof User) {
-            log.debug("获取当前登录用户: " + currentUser);
-            this.currentUser = (User) currentUser;
+    @ApiOperation(value = "获取自己发布的视频列表")
+    @GetMapping("/myVideo")
+    public JSONResponse listMyVideo() {
+        if (currentUser == null || currentUser.getUserId() == null) {
+            return new JSONResponse(false, "用户未登录");
         }
+
+        VideoDTO videoDTO = videoService.listMyVideo(currentUser.getUserId().intValue());
+        return new JSONResponse(true, "查询成功", videoDTO.getVideoList());
+    }
+
+    @ApiOperation(value = "通过分类获取视频列表")
+    @ApiImplicitParam(name = "categoryId", value = "分类Id")
+    @GetMapping("/category/{categoryId}")
+    public JSONResponse listVideoByCategory(@Min(0) @PathVariable Long categoryId) {
+        VideoDTO videoDTO = videoService.listVideoByCategory(categoryId);
+        return new JSONResponse(videoDTO.getSuccess(), videoDTO.getMessage(), videoDTO.getVideoList());
     }
 
     /**
@@ -139,12 +150,8 @@ public class VideoController {
             return new JSONResponse(false, "video 为空");
         }
 
-        // 设置不允许更新字段和更新时间
+
         video.setVideoId(videoId);
-        video.setStatus(null);
-        video.setUserId(null);
-        video.setCreateTime(null);
-        video.setLastEditTime(new Date());
         VideoDTO videoDTO = videoService.updateVideoByVideoId(video);
 
         return new JSONResponse(videoDTO.getSuccess(), videoDTO.getMessage());
@@ -255,8 +262,8 @@ public class VideoController {
                                     @RequestParam("videoCategory") Long videoCategory,
                                     @ApiParam(value = "视频文件流对象", required = true) @RequestParam("videoFile") MultipartFile videoFile,
                                     @RequestParam(value = "description", required = false) String description,
-                                    @RequestParam(value = "tags", required = false) String tags
-            /*@RequestParam(value = "videoImage", required = false) MultipartFile videoImage*/) {
+                                    @RequestParam(value = "tags", required = false) String tags,
+                                    @RequestParam(value = "videoImage", required = false) MultipartFile videoImage) {
 
         // 传参检查
         /// 获取当前登录用户
@@ -287,7 +294,14 @@ public class VideoController {
         video.setDescription(description);
         video.setUserId(currentUser.getUserId());
         video.setTags(strTagsToList(tags));
-        // TODO 设置视频封面地址
+        ImageHolder imageHolder;
+        try {
+             imageHolder = new ImageHolder(videoFile.getOriginalFilename(), videoImage.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new JSONResponse(false, "系统错误，获取图片流失败: " + e.getMessage());
+        }
+
         try {
             video.setName(videoFile.getOriginalFilename());
             video.setVideoInputStream(videoFile.getInputStream());
@@ -296,7 +310,7 @@ public class VideoController {
         }
 
         try {
-            VideoDTO videoDTO = videoService.uploadVideo(video);
+            VideoDTO videoDTO = videoService.uploadVideo(video, imageHolder);
 
             JSONResponse jsonResponse;
             if (videoDTO.getSuccess()) {
@@ -336,6 +350,7 @@ public class VideoController {
 
 
     // FIXME: 2018/7/26 0026 回调不可用
+
     // @PostMapping("/callback")
     @ApiIgnore(value = "getCallbackInfo")
     public void getCallbackInfo(HttpServletRequest request) {
@@ -377,6 +392,15 @@ public class VideoController {
 
             videoService.updateVideoByVideoId(videoCondition);
         }*/
+    }
+
+    @ModelAttribute
+    public void initUser(HttpSession session) {
+        Object currentUser = session.getAttribute("currentUser");
+        if (currentUser instanceof User) {
+            log.debug("获取当前登录用户: " + currentUser);
+            this.currentUser = (User) currentUser;
+        }
     }
 
     @Autowired

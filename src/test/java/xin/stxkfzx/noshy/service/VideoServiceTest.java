@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import xin.stxkfzx.noshy.BaseTest;
@@ -13,8 +14,11 @@ import xin.stxkfzx.noshy.domain.VideoCategory;
 import xin.stxkfzx.noshy.domain.VideoTag;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
+import xin.stxkfzx.noshy.vo.ImageHolder;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,12 +51,13 @@ public class VideoServiceTest extends BaseTest {
         video.setTags(videoTagList);
     }
 
-    @Transactional
-    @Rollback(value = false)
-    @Test
-    public void uploadVideo() {
 
-        VideoDTO videoDTO = videoService.uploadVideo(video);
+    @Commit
+    @Test
+    public void uploadVideo() throws FileNotFoundException {
+        File file = new File("D:\\图片\\动漫\\5c7413e1c674e1d88f94b99d2531aa43.jpg");
+        ImageHolder image = new ImageHolder(file.getName(), new FileInputStream(file));
+        VideoDTO videoDTO = videoService.uploadVideo(video, image);
         assertTrue(videoDTO.getSuccess());
     }
 

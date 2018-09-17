@@ -54,20 +54,17 @@ public class PostServiceImpl implements PostService {
         }
         log.debug("构建帖子浏览信息Id: {}", browseInformation.getBrowseId());
 
+        post.setStatus(Post.DISPLAY);
+        post.setLastEditTime(new Date());
+        post.setCreateTime(new Date());
+        post.setPageView(0);
+        post.setBrowseId(browseInformation.getBrowseId());
         try {
-            post.setBrowseId(browseInformation.getBrowseId());
-            postMapper.insert(post);
+            log.debug("添加帖子信息: {}", post);
+            postMapper.insertSelective(post);
         } catch (Exception e) {
             throw new PostServiceException("创建帖子失败: " + e.getMessage());
         }
-
-        PostInformation postInformation = post.getPostInformation();
-        try {
-            postInformationMapper.insert(postInformation);
-        } catch (Exception e) {
-            throw new PostServiceException("构建帖子信息失败: " + e.getMessage());
-        }
-
 
         return new PostDTO(true, "创建帖子成功");
     }

@@ -13,18 +13,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import xin.stxkfzx.noshy.domain.BrowseInformation;
-import xin.stxkfzx.noshy.domain.Video;
-import xin.stxkfzx.noshy.domain.VideoCategory;
-import xin.stxkfzx.noshy.domain.VideoTag;
+import xin.stxkfzx.noshy.domain.*;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
-import xin.stxkfzx.noshy.mapper.BrowseInformationMapper;
-import xin.stxkfzx.noshy.mapper.VideoCategoryMapper;
-import xin.stxkfzx.noshy.mapper.VideoMapper;
-import xin.stxkfzx.noshy.mapper.VideoTagMapper;
+import xin.stxkfzx.noshy.mapper.*;
 import xin.stxkfzx.noshy.service.VideoService;
+import xin.stxkfzx.noshy.util.ImageUtil;
 import xin.stxkfzx.noshy.util.PageCalculator;
+import xin.stxkfzx.noshy.util.PathUtil;
+import xin.stxkfzx.noshy.vo.ImageHolder;
 
 import java.util.Date;
 import java.util.List;
@@ -43,6 +40,7 @@ public class VideoServiceImpl implements VideoService {
     private final VideoTagMapper videoTagMapper;
     private final VideoCategoryMapper videoCategoryMapper;
     private final BrowseInformationMapper browseInformationMapper;
+    private final ImageMapper imageMapper;
 
     /**
      * 高清度模板
@@ -52,11 +50,12 @@ public class VideoServiceImpl implements VideoService {
     private static final String TEMPLATE_GROUP_ID = "a1e88a9d519118917522af2aca247bd8";
 
     @Autowired
-    public VideoServiceImpl(VideoTagMapper videoTagMapper, VideoMapper videoMapper, VideoCategoryMapper videoCategoryMapper, BrowseInformationMapper browseInformationMapper) {
+    public VideoServiceImpl(VideoTagMapper videoTagMapper, VideoMapper videoMapper, VideoCategoryMapper videoCategoryMapper, BrowseInformationMapper browseInformationMapper, ImageMapper imageMapper) {
         this.videoTagMapper = videoTagMapper;
         this.videoMapper = videoMapper;
         this.videoCategoryMapper = videoCategoryMapper;
         this.browseInformationMapper = browseInformationMapper;
+        this.imageMapper = imageMapper;
     }
 
     @Override
@@ -89,11 +88,12 @@ public class VideoServiceImpl implements VideoService {
 
     @Transactional(rollbackFor = VideoServiceException.class)
     @Override
-    public VideoDTO uploadVideo(Video video) throws VideoServiceException {
+    public VideoDTO uploadVideo(Video video, ImageHolder image) throws VideoServiceException {
         if (video == null || StringUtils.isAllEmpty(video.getTitle(), video.getName())
                 || video.getVideoInputStream() == null) {
             return new VideoDTO(false, "video 为空");
         }
+
 
         // 上传至阿里云点播
         log.info("开始上传视频");
@@ -103,9 +103,29 @@ public class VideoServiceImpl implements VideoService {
             throw new VideoServiceException("video 上传失败");
         }
 
+        int type = BrowseInformation.VIDEO;
+        String addr = null;
+        if (image != null) {
+            // 设置封面图片
+            try {
+                String path = PathUtil.getImageBasePath(videoId, type);
+                addr = ImageUtil.generateThumbnail(image, path);
+
+                Image image1 = new Image();
+                image1.setType(type);
+                image1.setBelongId(videoId);
+                image1.setCreateTime(new Date());
+                image1.setImageUrl(addr);
+                imageMapper.insert(image1);
+            } catch (Exception e) {
+                throw new VideoServiceException("视频封面保存失败" + e.getMessage());
+            }
+
+        }
+
         // 构建浏览信息
         BrowseInformation browseInformation = new BrowseInformation();
-        browseInformation.setBrowseType(BrowseInformation.VIDEO);
+        browseInformation.setBrowseType(type);
         browseInformation.setLikes(0);
         browseInformation.setPageviews(0);
         browseInformation.setShares(0);
@@ -118,6 +138,7 @@ public class VideoServiceImpl implements VideoService {
         video.setBrowseId(browseInformation.getBrowseId());
         video.setCreateTime(new Date());
         video.setLastEditTime(new Date());
+        video.setImageUrl(addr);
         log.debug("上传的video信息: {}", video);
 
         int i = videoMapper.insert(video);
@@ -180,6 +201,12 @@ public class VideoServiceImpl implements VideoService {
             return new VideoDTO(false, "更新的视频不存在");
         }
 
+        // 设置不允许更新字段和更新时间
+        videoCondition.setStatus(null);
+        videoCondition.setUserId(null);
+        videoCondition.setCreateTime(null);
+        videoCondition.setLastEditTime(new Date());
+
         // 更新数据库视频信息
         int effectedNum = videoMapper.updateByPrimaryKeySelective(videoCondition);
         if (effectedNum <= 0) {
@@ -238,6 +265,16 @@ public class VideoServiceImpl implements VideoService {
         if (effectedNum <= 0) {
             throw new VideoServiceException("数据库标签删除失败");
         }
+
+        // 删除视频封面图片
+        int type = BrowseInformation.VIDEO;
+        try {
+            imageMapper.deleteByTypeAndBelongId(type, videoId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new VideoServiceException("数据库图片删除失败");
+        }
+        ImageUtil.deleteFile(PathUtil.getImageBasePath(videoId, type));
 
         // 删除视频
         effectedNum = videoMapper.deleteByPrimaryKey(videoId);
@@ -320,14 +357,15 @@ public class VideoServiceImpl implements VideoService {
     public VideoDTO listVideoByCategory(Long id) throws VideoServiceException {
         VideoCategory videoCategory = videoCategoryMapper.selectByAliyunId(id);
 
-        Long aliyunId = Optional.ofNullable(videoCategory).map(VideoCategory::getAliyunId)
-                .orElseThrow(() -> new VideoServiceException("无该分类"));
-        List<Video> videoList = videoMapper.selectByCategoryId(aliyunId);
+        VideoDTO videoDTO = Optional.ofNullable(videoCategory).map(category -> {
+            Long categoryAliyunId = category.getAliyunId();
+            List<Video> videos = videoMapper.selectByCategoryId(categoryAliyunId);
+            VideoDTO dto = new VideoDTO(true, "查询成功");
+            dto.setVideoList(videos);
+            return dto;
+        }).orElse(new VideoDTO(false, "无该分类"));
 
-        VideoDTO dto = new VideoDTO(true, "查询成功");
-        dto.setVideoList(videoList);
-
-        return dto;
+        return videoDTO;
     }
 
     @Override
@@ -340,6 +378,12 @@ public class VideoServiceImpl implements VideoService {
         VideoDTO dto = new VideoDTO(true, "查询成功");
         dto.setVideoCategoryList(videoCategoryList);
         return dto;
+    }
+
+    @Override
+    public VideoDTO listMyVideo(int userId) {
+        List<Video> videoList = videoMapper.findByUserId((long) userId);
+        return new VideoDTO(true, "查询成功", videoList);
     }
 
     @Transactional(rollbackFor = VideoServiceException.class)

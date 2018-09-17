@@ -1,8 +1,10 @@
 package xin.stxkfzx.noshy.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import xin.stxkfzx.noshy.domain.Video;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
+import xin.stxkfzx.noshy.vo.ImageHolder;
 
 /**
  * 阿里视频点播服务
@@ -18,12 +20,13 @@ public interface VideoService {
      * 将视频上传到阿里云点播库，并将保存的视频信息保存保存到数据库中,并创建浏览信息
      *
      * @param video 需要上传的视频。其中视频标题，名称(含后缀名)，文件流是必须的
+     * @param image 封面图片
      * @return 返回状态标识
      * @throws VideoServiceException 视频服务异常
      * @author fmy
      * @date 2018-07-24 15:00
      */
-    VideoDTO uploadVideo(Video video) throws VideoServiceException;
+    VideoDTO uploadVideo(Video video, ImageHolder image) throws VideoServiceException;
 
     /**
      * 获取指定视频在阿里云的播放地址
@@ -134,4 +137,14 @@ public interface VideoService {
      * @date 2018-08-24 10:17
      */
     VideoDTO listCategory();
+
+    /**
+     * 获取自己的视频列表
+     *
+     * @param userId
+     * @return
+     * @author fmy
+     * @date 2018-09-16 23:45
+     */
+    VideoDTO listMyVideo(int userId);
 }

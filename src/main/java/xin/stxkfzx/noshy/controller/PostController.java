@@ -14,12 +14,15 @@ import xin.stxkfzx.noshy.domain.Post;
 import xin.stxkfzx.noshy.domain.PostInformation;
 import xin.stxkfzx.noshy.domain.User;
 import xin.stxkfzx.noshy.dto.PostDTO;
+import xin.stxkfzx.noshy.exception.PostServiceException;
 import xin.stxkfzx.noshy.service.PostService;
 import xin.stxkfzx.noshy.service.UserService;
+import xin.stxkfzx.noshy.util.CheckUtils;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 import xin.stxkfzx.noshy.vo.PostInformationVO;
 import xin.stxkfzx.noshy.vo.ResponseSocketMessage;
 import xin.stxkfzx.noshy.vo.UserVO;
+import xin.stxkfzx.noshy.vo.post.AddPostVO;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
@@ -168,6 +171,25 @@ public class PostController {
 
         }
         return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage(), messageList);
+    }
+
+    @ApiOperation(value = "添加帖子")
+    @PostMapping
+    public JSONResponse addPost(@RequestBody @ApiParam AddPostVO postInfo) {
+        if (currentUser == null || currentUser.getUserId() == null) {
+            return new JSONResponse(false, "用户未登录");
+        }
+
+        Post post = new Post();
+        BeanUtils.copyProperties(postInfo, post);
+        post.setUserId(currentUser.getUserId().intValue());
+        try {
+            PostDTO dto = postService.createPost(post);
+            return new JSONResponse(dto.getSuccess(), dto.getMessage());
+        } catch (PostServiceException e) {
+            e.printStackTrace();
+            return new JSONResponse(false, e.getMessage());
+        }
     }
 
 

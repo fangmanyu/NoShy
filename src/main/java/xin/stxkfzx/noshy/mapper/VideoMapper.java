@@ -31,4 +31,5 @@ public interface VideoMapper {
 
     List<Video> selectByCategoryId(@Param("cateId") Long cateId);
 
+    List<Video> findByUserId(@Param("userId")Long userId);
 }
