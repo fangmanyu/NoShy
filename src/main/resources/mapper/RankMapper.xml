@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xin.stxkfzx.noshy.mapper.RankMapper">
+  <resultMap id="BaseResultMap" type="xin.stxkfzx.noshy.domain.Rank">
+    <id column="rank_id" jdbcType="INTEGER" property="rankId" />
+    <result column="grade" jdbcType="INTEGER" property="grade" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="likes" jdbcType="INTEGER" property="likes" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="last_edit_time" jdbcType="TIMESTAMP" property="lastEditTime" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="challenge_id" jdbcType="INTEGER" property="challengeId" />
+      <result column="video_id" property="videoId" jdbcType="VARCHAR"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    rank_id, grade, type, status, likes, create_time, last_edit_time, user_id, challenge_id,
+video_id
+</sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from rank
+    where rank_id = #{rankId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from rank
+    where rank_id = #{rankId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="rank_id" keyProperty="rankId" parameterType="xin.stxkfzx.noshy.domain.Rank" useGeneratedKeys="true">
+        INSERT INTO rank (
+            rank_id,
+            grade,
+            type,
+            status,
+            likes,
+            create_time,
+            last_edit_time,
+            user_id,
+            challenge_id,
+            video_id
+        ) VALUES (
+            #{rankId,jdbcType=INTEGER},
+            #{grade,jdbcType=INTEGER},
+            #{type,jdbcType=INTEGER},
+            #{status,jdbcType=INTEGER},
+            #{likes,jdbcType=INTEGER},
+            #{createTime,jdbcType=TIMESTAMP},
+            #{lastEditTime,jdbcType=TIMESTAMP},
+            #{userId,jdbcType=INTEGER},
+            #{challengeId,jdbcType=INTEGER},
+            #{videoId,jdbcType=VARCHAR}
+        )
+</insert>
+  <insert id="insertSelective" keyColumn="rank_id" keyProperty="rankId" parameterType="xin.stxkfzx.noshy.domain.Rank" useGeneratedKeys="true">
+        INSERT INTO rank
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="rankId!=null"> rank_id,</if>
+            <if test="grade!=null"> grade,</if>
+            <if test="type!=null"> type,</if>
+            <if test="status!=null"> status,</if>
+            <if test="likes!=null"> likes,</if>
+            <if test="createTime!=null"> create_time,</if>
+            <if test="lastEditTime!=null"> last_edit_time,</if>
+            <if test="userId!=null"> user_id,</if>
+            <if test="challengeId!=null"> challenge_id,</if>
+            <if test="videoId!=null"> video_id</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="rankId!=null"> #{rankId,jdbcType=INTEGER},</if>
+            <if test="grade!=null"> #{grade,jdbcType=INTEGER},</if>
+            <if test="type!=null"> #{type,jdbcType=INTEGER},</if>
+            <if test="status!=null"> #{status,jdbcType=INTEGER},</if>
+            <if test="likes!=null"> #{likes,jdbcType=INTEGER},</if>
+            <if test="createTime!=null"> #{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="lastEditTime!=null"> #{lastEditTime,jdbcType=TIMESTAMP},</if>
+            <if test="userId!=null"> #{userId,jdbcType=INTEGER},</if>
+            <if test="challengeId!=null"> #{challengeId,jdbcType=INTEGER},</if>
+            <if test="videoId!=null"> #{videoId,jdbcType=VARCHAR}</if>
+        </trim>
+</insert>
+  <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.Rank">
+        UPDATE rank
+        <set>
+                <if test="rankId != null"> rank_id = #{rankId,jdbcType=INTEGER},</if>
+                <if test="grade != null"> grade = #{grade,jdbcType=INTEGER},</if>
+                <if test="type != null"> type = #{type,jdbcType=INTEGER},</if>
+                <if test="status != null"> status = #{status,jdbcType=INTEGER},</if>
+                <if test="likes != null"> likes = #{likes,jdbcType=INTEGER},</if>
+                <if test="createTime != null"> create_time = #{createTime,jdbcType=TIMESTAMP},</if>
+                <if test="lastEditTime != null"> last_edit_time = #{lastEditTime,jdbcType=TIMESTAMP},</if>
+                <if test="userId != null"> user_id = #{userId,jdbcType=INTEGER},</if>
+                <if test="challengeId != null"> challenge_id = #{challengeId,jdbcType=INTEGER},</if>
+                <if test="videoId != null"> video_id = #{videoId,jdbcType=VARCHAR}</if>
+        </set>
+		where rank_id = #{rankId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.Rank">
+        UPDATE rank
+        set
+                rank_id = #{rankId,jdbcType=INTEGER},
+                grade = #{grade,jdbcType=INTEGER},
+                type = #{type,jdbcType=INTEGER},
+                status = #{status,jdbcType=INTEGER},
+                likes = #{likes,jdbcType=INTEGER},
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+                last_edit_time = #{lastEditTime,jdbcType=TIMESTAMP},
+                user_id = #{userId,jdbcType=INTEGER},
+                challenge_id = #{challengeId,jdbcType=INTEGER},
+                video_id = #{videoId,jdbcType=VARCHAR}
+		where rank_id = #{rankId,jdbcType=INTEGER}
+  </update>
+
+<!--auto generated by codehelper on 2018-09-18-->
+	<select id="findByChallengeIdAndType" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from rank
+        where challenge_id=#{challengeId,jdbcType=INTEGER} and type=#{type,jdbcType=INTEGER}
+    </select>
+
+<!--auto generated by codehelper on 2018-09-19-->
+	<select id="countByChallengeId" resultType="java.lang.Integer">
+        select count(*)
+        from rank
+        where challenge_id = #{challengeId,jdbcType=INTEGER}</select>
+</mapper>
