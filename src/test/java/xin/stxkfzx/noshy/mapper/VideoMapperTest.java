@@ -38,26 +38,26 @@ public class VideoMapperTest extends BaseTest {
     @Test
     public void countAndSelectByVideoCondition() {
         Video videoCondition = new Video();
-        List<Video> videoList = videoMapper.selectByVideoCondition(videoCondition, 0, 10);
-        int count = videoMapper.countByVideoCondition(videoCondition);
+        List<Video> videoList = videoMapper.selectByVideoCondition(videoCondition, 0, 10, 2, false);
+        int count = videoMapper.countByVideoCondition(videoCondition, 2, false);
         System.out.println(videoList.size());
         System.out.println(count);
 
-        videoMapper.selectByVideoCondition(null, 0, 10);
-        count = videoMapper.countByVideoCondition(null);
+        videoMapper.selectByVideoCondition(null, 0, 10, null, true);
+        count = videoMapper.countByVideoCondition(null, null, true);
         System.out.println(videoList.size());
         System.out.println(count);
 
         videoCondition.setTitle("视频");
-        videoList = videoMapper.selectByVideoCondition(videoCondition, 0, 2);
-        count = videoMapper.countByVideoCondition(videoCondition);
+        videoList = videoMapper.selectByVideoCondition(videoCondition, 0, 2, 1, true);
+        count = videoMapper.countByVideoCondition(videoCondition, 1, true);
         System.out.println(videoList);
         System.out.println(videoList.size());
         System.out.println(count);
 
         videoCondition.setVideoCategory(878006187L);
-        videoList = videoMapper.selectByVideoCondition(videoCondition, 0, 10);
-        count = videoMapper.countByVideoCondition(videoCondition);
+        videoList = videoMapper.selectByVideoCondition(videoCondition, 0, 10, 1, false);
+        count = videoMapper.countByVideoCondition(videoCondition, 1, false);
         System.out.println(videoList.size());
         System.out.println(count);
 

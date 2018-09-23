@@ -1,6 +1,7 @@
 package xin.stxkfzx.noshy.service;
 
 import xin.stxkfzx.noshy.domain.User;
+import xin.stxkfzx.noshy.domain.UserInformation;
 import xin.stxkfzx.noshy.exception.RegisterException;
 
 /**
@@ -43,4 +44,14 @@ public interface UserService {
      * @date 2018-09-15 15:58
      */
     User getUser(Long userId);
+
+    /**
+     * 获取指定用户细节
+     *
+     * @param userId
+     * @return
+     * @author fmy
+     * @date 2018-09-18 21:28
+     */
+    UserInformation getUserDetail(Long userId);
 }

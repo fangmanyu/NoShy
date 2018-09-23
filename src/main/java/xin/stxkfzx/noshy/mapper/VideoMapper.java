@@ -22,9 +22,9 @@ public interface VideoMapper {
 
     List<Video> selectByVideoCondition(@Param("videoCondition") Video videoCondition,
                                        @Param("rowIndex") int rowIndex,
-                                       @Param("pageSize") int pageSize);
+                                       @Param("pageSize") int pageSize, @Param("schoolId") Integer schoolId, @Param("isOurSchool")boolean isOurSchool);
 
-    int countByVideoCondition(@Param("videoCondition") Video videoCondition);
+    int countByVideoCondition(@Param("videoCondition") Video videoCondition, @Param("schoolId") Integer schoolId, @Param("isOurSchool")boolean isOurSchool);
 
 
     int updateVideoStatus(@Param("videoId") String videoId, @Param("status") String status);

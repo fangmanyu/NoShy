@@ -86,6 +86,7 @@ public class VideoServiceImpl implements VideoService {
         return new VideoDTO(false, "获取视频信息错误");
     }
 
+    // FIXME: 2018/9/19 0019 上传成功后调用回调获取videoId,之后创建数据库信息
     @Transactional(rollbackFor = VideoServiceException.class)
     @Override
     public VideoDTO uploadVideo(Video video, ImageHolder image) throws VideoServiceException {
@@ -94,10 +95,12 @@ public class VideoServiceImpl implements VideoService {
             return new VideoDTO(false, "video 为空");
         }
 
+        log.debug("创建视频信息: {}", video);
 
         // 上传至阿里云点播
         log.info("开始上传视频");
         String videoId = uploadStream(video);
+        log.debug("视频Id: {}", videoId);
 
         if (StringUtils.isEmpty(videoId)) {
             throw new VideoServiceException("video 上传失败");
@@ -110,13 +113,6 @@ public class VideoServiceImpl implements VideoService {
             try {
                 String path = PathUtil.getImageBasePath(videoId, type);
                 addr = ImageUtil.generateThumbnail(image, path);
-
-                Image image1 = new Image();
-                image1.setType(type);
-                image1.setBelongId(videoId);
-                image1.setCreateTime(new Date());
-                image1.setImageUrl(addr);
-                imageMapper.insert(image1);
             } catch (Exception e) {
                 throw new VideoServiceException("视频封面保存失败" + e.getMessage());
             }
@@ -302,7 +298,7 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public VideoDTO listVideo(Video videoCondition, int pageIndex, int pageSize) {
+    public VideoDTO listVideo(Video videoCondition, int pageIndex, int pageSize, Integer schoolId, boolean isOurSchool) {
         if (pageIndex < 0 || pageSize < 0) {
             return new VideoDTO(false, "pageIndex 或 pageSize 错误");
         }
@@ -311,12 +307,12 @@ public class VideoServiceImpl implements VideoService {
 
         // 根据查询条件返回视频对象(没有关联视频标签，原因：关联和视频的关系为一对多，关联是将属于同一个视频的标签封装的一个List中，
         // 加入limit实现分页将导致得到的记录行数不完整，封装获取到的List大小和预期不符)
-        List<Video> videoList = videoMapper.selectByVideoCondition(videoCondition, rowIndex, pageSize);
+        List<Video> videoList = videoMapper.selectByVideoCondition(videoCondition, rowIndex, pageSize, schoolId, isOurSchool);
         // 获取查询总数
-        int count = videoMapper.countByVideoCondition(videoCondition);
-        if (videoList == null || videoList.size() == 0) {
-            return new VideoDTO(false, "查询失败");
-        }
+        int count = videoMapper.countByVideoCondition(videoCondition, schoolId, isOurSchool);
+        // if (videoList == null || videoList.size() == 0) {
+        //     return new VideoDTO(false, "查询失败");
+        // }
 
         // 将标签列表放入视频中
         for (Video video : videoList) {
@@ -324,7 +320,6 @@ public class VideoServiceImpl implements VideoService {
             video.setTags(videoTagList);
         }
 
-        System.out.println("videoList---------" + videoList);
         VideoDTO videoDTO = new VideoDTO(true, "查询成功", videoList);
         videoDTO.setCount(count);
 

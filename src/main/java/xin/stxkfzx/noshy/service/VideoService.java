@@ -1,6 +1,5 @@
 package xin.stxkfzx.noshy.service;
 
-import org.springframework.web.multipart.MultipartFile;
 import xin.stxkfzx.noshy.domain.Video;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
@@ -78,11 +77,13 @@ public interface VideoService {
      * @param videoCondition 查询条件。可选条件：标题名(模糊)，视频分类，视频状态，用户Id, 描述(模糊)
      * @param pageIndex 起始位置
      * @param pageSize 每页大小
+     * @param schoolId
+     * @param isOurSchool 查询条件:是否同校
      * @return 返回状态标识
      * @author fmy
      * @date 2018-07-25 8:41
      */
-    VideoDTO listVideo(Video videoCondition, int pageIndex, int pageSize);
+    VideoDTO listVideo(Video videoCondition, int pageIndex, int pageSize, Integer schoolId, boolean isOurSchool);
 
     /**
      * 获取视频分类

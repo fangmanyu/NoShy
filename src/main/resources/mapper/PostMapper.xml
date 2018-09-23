@@ -40,10 +40,10 @@ browse_id
                 and status > 0
             </if>
             <if test="postCondition != null and postCondition.title != null ">
-                or title like CONCAT('%', #{postCondition.title}, '%')
+                or title likes CONCAT('%', #{postCondition.title}, '%')
             </if>
             <if test="postCondition != null and postCondition.description != null ">
-                or description like CONCAT('%', #{postCondition.description}, '%')
+                or description likes CONCAT('%', #{postCondition.description}, '%')
             </if>
             <if test="postCondition != null and postCondition.authority != null">
                 and authority = #{postCondition.authority}
@@ -72,10 +72,10 @@ browse_id
                 and status > 0
             </if>
             <if test="postCondition != null and postCondition.title != null ">
-                or title like CONCAT('%', #{postCondition.title}, '%')
+                or title likes CONCAT('%', #{postCondition.title}, '%')
             </if>
             <if test="postCondition != null and postCondition.description != null ">
-                or description like CONCAT('%', #{postCondition.description}, '%')
+                or description likes CONCAT('%', #{postCondition.description}, '%')
             </if>
             <if test="postCondition != null and postCondition.authority != null">
                 and authority = #{postCondition.authority}

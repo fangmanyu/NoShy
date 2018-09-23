@@ -16,10 +16,6 @@ public class ImageHolder {
         this.image = image;
     }
 
-    public ImageHolder(File imageFile) {
-        this.imageFile = imageFile;
-    }
-
     public File getImageFile() {
         return imageFile;
     }

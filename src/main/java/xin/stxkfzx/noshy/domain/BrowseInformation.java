@@ -7,6 +7,7 @@ public class BrowseInformation {
     public static final int NONE = 0;
     public static final int VIDEO = 1;
     public static final int POST = 2;
+    public static final int CHALLENGE = 3;
 
     private Integer browseId;
 

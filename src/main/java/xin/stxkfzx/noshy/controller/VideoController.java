@@ -22,6 +22,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -205,16 +206,18 @@ public class VideoController {
     @GetMapping
     public JSONResponse listVideos(@RequestParam(value = "videoStr", required = false) String videoStr,
                                    @RequestParam("pageIndex") @Min(0) int pageIndex,
-                                   @RequestParam("pageSize") @Min(0) int pageSize) {
-        VideoDTO videoDTO;
-        if (StringUtils.isEmpty(videoStr) || StringUtils.isBlank(videoStr)) {
-            videoDTO = videoService.listVideo(null, pageIndex, pageSize);
-        } else {
-            Video video = new Video();
+                                   @RequestParam("pageSize") @Min(0) int pageSize,
+                                   @RequestParam("isOurSchool") @NotNull Boolean isOurSchool) {
+
+        Video video = null;
+        Integer schoolId = Optional.ofNullable(currentUser).map(user ->
+                isOurSchool ? user.getSchoolId().intValue() : null).orElse(null);
+        if (StringUtils.isNotEmpty(videoStr) && StringUtils.isNotBlank(videoStr)) {
+            video = new Video();
             video.setTitle(videoStr);
             video.setDescription(videoStr);
-            videoDTO = videoService.listVideo(video, pageIndex, pageSize);
         }
+        VideoDTO videoDTO = videoService.listVideo(video, pageIndex, pageSize, schoolId, isOurSchool);
 
 
         if (videoDTO.getSuccess()) {
@@ -294,9 +297,9 @@ public class VideoController {
         video.setDescription(description);
         video.setUserId(currentUser.getUserId());
         video.setTags(strTagsToList(tags));
-        ImageHolder imageHolder;
+        ImageHolder imageHolder = null;
         try {
-             imageHolder = new ImageHolder(videoFile.getOriginalFilename(), videoImage.getInputStream());
+            imageHolder = new ImageHolder(videoFile.getOriginalFilename(), videoImage.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
             return new JSONResponse(false, "系统错误，获取图片流失败: " + e.getMessage());

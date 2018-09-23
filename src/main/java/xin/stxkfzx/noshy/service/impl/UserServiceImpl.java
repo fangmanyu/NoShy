@@ -68,6 +68,11 @@ public class UserServiceImpl implements UserService {
         return userMapper.selectByPrimaryKey(userId.intValue());
     }
 
+    @Override
+    public UserInformation getUserDetail(Long userId) {
+        return userInformationMapper.selectByPrimaryKey(userId);
+    }
+
 
     @Autowired
     public UserServiceImpl(UserMapper userMapper, UserInformationMapper userInformationMapper) {

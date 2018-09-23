@@ -16,9 +16,7 @@ import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +35,7 @@ public class VideoServiceTest extends BaseTest {
 
     @Before
     public void setUp() throws Exception {
-        video = new Video("测试上传功能", new File("F:\\视频资料\\基于Spring Boot技术栈的博客系统企业级实战\\第1章 Spring Boot 简介\\1-2 -Spring Boot 是什么.mp4"));
+        video = new Video("123", new File("F:\\视频资料\\基于Spring Boot技术栈的博客系统企业级实战\\第1章 Spring Boot 简介\\1-2 -Spring Boot 是什么.mp4"));
         video.setVideoCategory(810963431L);
         video.setDescription("测试添加浏览信息");
         video.setVideoId("887111f293834bcb91b3acfa63b825ee");
@@ -95,7 +93,7 @@ public class VideoServiceTest extends BaseTest {
     @Rollback(value = false)
     @Test
     public void deleteVideoByVideoId() {
-        VideoDTO videoDTO = videoService.deleteVideoByVideoId(video.getVideoId());
+        VideoDTO videoDTO = videoService.deleteVideoByVideoId("962dbcf0eb424cbe93d62f8da5ffec80");
         assertTrue(videoDTO.getSuccess());
     }
 
@@ -153,4 +151,48 @@ public class VideoServiceTest extends BaseTest {
             e.printStackTrace();
         }
     }
+
+    @Commit
+    @Test
+    public void name() throws IOException {
+        File file = new File("C:\\Users\\59261\\Desktop\\noshy");
+        File[] files = file.listFiles();
+        for (File item :
+                files) {
+            Video video = new Video();
+            video.setTitle(item.getName());
+            video.setUserId(27L);
+            video.setVideoCategory(810963431L);
+            ImageHolder image = null;
+            // System.out.println(item.getName());
+            File[] listFiles = item.listFiles();
+            for (File temp : listFiles) {
+                if (temp.toString().contains(".txt")) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(temp), "gbk"));
+                    String buff = null;
+                    StringBuilder sb = new StringBuilder();
+                    while ((buff = reader.readLine()) != null) {
+                        sb.append(buff);
+                    }
+                    video.setDescription(sb.toString());
+                    // System.out.println(sb.toString());
+                    reader.close();
+                } else if (temp.toString().contains(".mp4")) {
+                    video.setVideoInputStream(new FileInputStream(temp));
+                    video.setName(temp.getName());
+                } else {
+                    // video.setImageUrl(temp.getAbsolutePath());
+                    image = new ImageHolder(temp.getName(), new FileInputStream(temp));
+                }
+            }
+
+
+            VideoDTO videoDTO = videoService.uploadVideo(video, image);
+            System.out.println(videoDTO.getMessage());
+            // System.out.println(video);
+            System.out.println("********************");
+        }
+    }
+
+
 }

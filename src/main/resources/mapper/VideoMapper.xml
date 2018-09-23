@@ -34,12 +34,12 @@
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
-        select tag_id, video_tag.name as tag_name,
+        select
         <include refid="Base_Column_List_Alias">
             <property name="alias" value="video"/>
         </include>
-        from video, video_tag
-        where video.video_id = #{videoId} and video.video_id = video_tag.video_id
+        from video
+        where video.video_id = #{videoId}
     </select>
 
     <select id="selectByVideoCondition" resultMap="BaseResultMap">
@@ -64,6 +64,12 @@
             <if test="videoCondition != null and videoCondition.userId != null">
                 and user_id = #{videoCondition.userId}
             </if>
+            <if test="schoolId != null and isOurSchool == true">
+                and (select school_id from user where video.user_id = user.user_id) = #{schoolId}
+            </if>
+            <if test="schoolId != null and isOurSchool == false">
+                and (select school_id from user where video.user_id = user.user_id) != #{schoolId}
+            </if>
         </where>
         limit #{rowIndex}, #{pageSize}
     </select>
@@ -83,6 +89,12 @@
             </if>
             <if test="videoCondition != null and videoCondition.userId != null">
                 and user_id = #{videoCondition.userId}
+            </if>
+            <if test="schoolId != null and isOurSchool == true">
+                and (select school_id from user where video.user_id = user.user_id) = #{schoolId}
+            </if>
+            <if test="schoolId != null and isOurSchool == false">
+                and (select school_id from user where video.user_id = user.user_id) != #{schoolId}
             </if>
         </where>
 
