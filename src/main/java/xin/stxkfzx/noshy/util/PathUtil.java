@@ -1,7 +1,7 @@
 package xin.stxkfzx.noshy.util;
 
 public class PathUtil {
-    private static final String DEFAULT_PATH_WIN = "D:/doc/intellij/Noshy/images";
+    private static final String DEFAULT_PATH_WIN = "D:/doc/intellij/NoShy/images";
     private static final String DEFAULT_PATH_OTHER = "/home/fmy/image/";
     private static String separator = System.getProperty("file.separator");
 

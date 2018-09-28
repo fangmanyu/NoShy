@@ -43,7 +43,7 @@ public class ImageUtil {
         try {
             Thumbnails.of(thumbnail.getImage())
                     .size(200, 200)
-                    .outputQuality(0.8f)
+                    .outputQuality(1f)
                     .toFile(dest);
         } catch (IOException e) {
             throw new RuntimeException("创建缩略图失败 " + e.getMessage());
@@ -158,7 +158,7 @@ public class ImageUtil {
                 count++;
 
                 try {
-                    Thumbnails.of(productImg.getImage()).size(600, 300).outputQuality(0.5f).toFile(dest);
+                    Thumbnails.of(productImg.getImage()).size(600, 300).outputQuality(1f).toFile(dest);
                 } catch (IOException e) {
                     throw new RuntimeException("创建" + typeName + "失败： " + e.getMessage());
                 }

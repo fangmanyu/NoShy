@@ -67,7 +67,7 @@ public class Video {
     @ApiModelProperty(hidden = true)
     private Long userId;
     @ApiModelProperty(hidden = true)
-    private transient String playUrl;
+    private  String playUrl;
     @JsonIgnore
     private Integer browseId;
 

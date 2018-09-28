@@ -12,8 +12,9 @@
         create_time,
         last_edit_time,
         user_id,
-        browse_id
-    </sql>
+        browse_id,
+play_url
+</sql>
     <resultMap id="BaseResultMap" type="xin.stxkfzx.noshy.domain.Video">
         <id column="video_id" jdbcType="CHAR" property="videoId"/>
         <result column="title" jdbcType="VARCHAR" property="title"/>
@@ -26,12 +27,14 @@
         <result column="last_edit_time" jdbcType="TIMESTAMP" property="lastEditTime"/>
         <result column="user_id" jdbcType="INTEGER" property="userId"/>
         <result column="browse_id" property="browseId" jdbcType="INTEGER"/>
+        <result column="play_url" property="playUrl" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List_Alias">
         ${alias}.video_id, ${alias}.title, ${alias}.name, ${alias}.video_category, ${alias}.description,
-        ${alias}.image_url, ${alias}.status, ${alias}.create_time, ${alias}.last_edit_time, ${alias}.user_id, ${alias}.browse_id
-    </sql>
+        ${alias}.image_url, ${alias}.status, ${alias}.create_time, ${alias}.last_edit_time, ${alias}.user_id, ${alias}.browse_id,
+play_url
+</sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
@@ -115,140 +118,103 @@
     </delete>
 
     <insert id="insert" parameterType="xin.stxkfzx.noshy.domain.Video">
-        insert into video (video_id, title, name,
-                           video_category, description, image_url,
-                           status, create_time, last_edit_time,
-                           user_id, browse_id)
-        values (#{videoId,jdbcType=CHAR}, #{title,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
-            #{videoCategory,jdbcType=INTEGER}, #{description,jdbcType=VARCHAR}, #{imageUrl,jdbcType=VARCHAR},
-            #{status,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{lastEditTime,jdbcType=TIMESTAMP},
-            #{userId,jdbcType=INTEGER}, #{browseId})
-    </insert>
+        INSERT INTO video (
+            video_id,
+            title,
+            name,
+            video_category,
+            description,
+            image_url,
+            status,
+            create_time,
+            last_edit_time,
+            user_id,
+            browse_id,
+            play_url
+        ) VALUES (
+            #{videoId,jdbcType=CHAR},
+            #{title,jdbcType=VARCHAR},
+            #{name,jdbcType=VARCHAR},
+            #{videoCategory,jdbcType=INTEGER},
+            #{description,jdbcType=VARCHAR},
+            #{imageUrl,jdbcType=VARCHAR},
+            #{status,jdbcType=VARCHAR},
+            #{createTime,jdbcType=TIMESTAMP},
+            #{lastEditTime,jdbcType=TIMESTAMP},
+            #{userId,jdbcType=INTEGER},
+            #{browseId,jdbcType=INTEGER},
+            #{playUrl,jdbcType=VARCHAR}
+        )
+</insert>
 
     <insert id="insertSelective" parameterType="xin.stxkfzx.noshy.domain.Video">
-        insert into video
+        INSERT INTO video
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="videoId != null">
-                video_id,
-            </if>
-            <if test="title != null">
-                title,
-            </if>
-            <if test="name != null">
-                name,
-            </if>
-            <if test="videoCategory != null">
-                video_category,
-            </if>
-            <if test="description != null">
-                description,
-            </if>
-            <if test="imageUrl != null">
-                image_url,
-            </if>
-            <if test="status != null">
-                status,
-            </if>
-            <if test="createTime != null">
-                create_time,
-            </if>
-            <if test="lastEditTime != null">
-                last_edit_time,
-            </if>
-            <if test="userId != null">
-                user_id,
-            </if>
-            <if test="browseId != null">
-                browse_id,
-            </if>
+            <if test="videoId!=null"> video_id,</if>
+            <if test="title!=null"> title,</if>
+            <if test="name!=null"> name,</if>
+            <if test="videoCategory!=null"> video_category,</if>
+            <if test="description!=null"> description,</if>
+            <if test="imageUrl!=null"> image_url,</if>
+            <if test="status!=null"> status,</if>
+            <if test="createTime!=null"> create_time,</if>
+            <if test="lastEditTime!=null"> last_edit_time,</if>
+            <if test="userId!=null"> user_id,</if>
+            <if test="browseId!=null"> browse_id,</if>
+            <if test="playUrl!=null"> play_url</if>
         </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="videoId != null">
-                #{videoId,jdbcType=CHAR},
-            </if>
-            <if test="title != null">
-                #{title,jdbcType=VARCHAR},
-            </if>
-            <if test="name != null">
-                #{name,jdbcType=VARCHAR},
-            </if>
-            <if test="videoCategory != null">
-                #{videoCategory,jdbcType=INTEGER},
-            </if>
-            <if test="description != null">
-                #{description,jdbcType=VARCHAR},
-            </if>
-            <if test="imageUrl != null">
-                #{imageUrl,jdbcType=VARCHAR},
-            </if>
-            <if test="status != null">
-                #{status,jdbcType=VARCHAR},
-            </if>
-            <if test="createTime != null">
-                #{createTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="lastEditTime != null">
-                #{lastEditTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="userId != null">
-                #{userId,jdbcType=INTEGER},
-            </if>
-            <if test="browseId != null">
-                #{browse_id,jdbcType=INTEGER},
-            </if>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="videoId!=null"> #{videoId,jdbcType=CHAR},</if>
+            <if test="title!=null"> #{title,jdbcType=VARCHAR},</if>
+            <if test="name!=null"> #{name,jdbcType=VARCHAR},</if>
+            <if test="videoCategory!=null"> #{videoCategory,jdbcType=INTEGER},</if>
+            <if test="description!=null"> #{description,jdbcType=VARCHAR},</if>
+            <if test="imageUrl!=null"> #{imageUrl,jdbcType=VARCHAR},</if>
+            <if test="status!=null"> #{status,jdbcType=VARCHAR},</if>
+            <if test="createTime!=null"> #{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="lastEditTime!=null"> #{lastEditTime,jdbcType=TIMESTAMP},</if>
+            <if test="userId!=null"> #{userId,jdbcType=INTEGER},</if>
+            <if test="browseId!=null"> #{browseId,jdbcType=INTEGER},</if>
+            <if test="playUrl!=null"> #{playUrl,jdbcType=VARCHAR}</if>
         </trim>
-    </insert>
+</insert>
 
     <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.Video">
-        update video
+        UPDATE video
         <set>
-            <if test="title != null">
-                title = #{title,jdbcType=VARCHAR},
-            </if>
-            <if test="name != null">
-                name = #{name,jdbcType=VARCHAR},
-            </if>
-            <if test="videoCategory != null">
-                video_category = #{videoCategory,jdbcType=INTEGER},
-            </if>
-            <if test="description != null">
-                description = #{description,jdbcType=VARCHAR},
-            </if>
-            <if test="imageUrl != null">
-                image_url = #{imageUrl,jdbcType=VARCHAR},
-            </if>
-            <if test="status != null">
-                status = #{status,jdbcType=VARCHAR},
-            </if>
-            <if test="createTime != null">
-                create_time = #{createTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="lastEditTime != null">
-                last_edit_time = #{lastEditTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="userId != null">
-                user_id = #{userId,jdbcType=INTEGER},
-            </if>
-            <if test="browseId != null">
-                browse_id = #{browseId,jdbcType=INTEGER},
-            </if>
+                <if test="videoId != null"> video_id = #{videoId,jdbcType=CHAR},</if>
+                <if test="title != null"> title = #{title,jdbcType=VARCHAR},</if>
+                <if test="name != null"> name = #{name,jdbcType=VARCHAR},</if>
+                <if test="videoCategory != null"> video_category = #{videoCategory,jdbcType=INTEGER},</if>
+                <if test="description != null"> description = #{description,jdbcType=VARCHAR},</if>
+                <if test="imageUrl != null"> image_url = #{imageUrl,jdbcType=VARCHAR},</if>
+                <if test="status != null"> status = #{status,jdbcType=VARCHAR},</if>
+                <if test="createTime != null"> create_time = #{createTime,jdbcType=TIMESTAMP},</if>
+                <if test="lastEditTime != null"> last_edit_time = #{lastEditTime,jdbcType=TIMESTAMP},</if>
+                <if test="userId != null"> user_id = #{userId,jdbcType=INTEGER},</if>
+                <if test="browseId != null"> browse_id = #{browseId,jdbcType=INTEGER},</if>
+                <if test="playUrl != null"> play_url = #{playUrl,jdbcType=VARCHAR}</if>
         </set>
-        where video_id = #{videoId,jdbcType=CHAR}
+		where video_id = #{videoId,jdbcType=CHAR}
     </update>
 
     <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.Video">
-        update video
-        set title          = #{title,jdbcType=VARCHAR},
-            name           = #{name,jdbcType=VARCHAR},
-            video_category = #{videoCategory,jdbcType=INTEGER},
-            description    = #{description,jdbcType=VARCHAR},
-            image_url      = #{imageUrl,jdbcType=VARCHAR},
-            status         = #{status,jdbcType=VARCHAR},
-            create_time    = #{createTime,jdbcType=TIMESTAMP},
-            last_edit_time = #{lastEditTime,jdbcType=TIMESTAMP},
-            user_id        = #{userId,jdbcType=INTEGER},
-            browse_id      = #{browseId,jdbcType=INTEGER}
-        where video_id = #{videoId,jdbcType=CHAR}
+        UPDATE video
+        set
+                video_id = #{videoId,jdbcType=CHAR},
+                title = #{title,jdbcType=VARCHAR},
+                name = #{name,jdbcType=VARCHAR},
+                video_category = #{videoCategory,jdbcType=INTEGER},
+                description = #{description,jdbcType=VARCHAR},
+                image_url = #{imageUrl,jdbcType=VARCHAR},
+                status = #{status,jdbcType=VARCHAR},
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+                last_edit_time = #{lastEditTime,jdbcType=TIMESTAMP},
+                user_id = #{userId,jdbcType=INTEGER},
+                browse_id = #{browseId,jdbcType=INTEGER},
+                play_url = #{playUrl,jdbcType=VARCHAR}
+		where video_id = #{videoId,jdbcType=CHAR}
     </update>
     <update id="updateVideoStatus">
         update video

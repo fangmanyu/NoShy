@@ -65,6 +65,14 @@ public class VideoServiceImpl implements VideoService {
             return new VideoDTO(false, "videoId 不能为空");
         }
 
+        Video video = videoMapper.selectByPrimaryKey(videoId);
+        if (video.getPlayUrl() != null) {
+            VideoDTO videoDTO = new VideoDTO(true, "获取播放地址成功");
+            videoDTO.setPlayUrl(video.getPlayUrl());
+
+            return videoDTO;
+        }
+
         DefaultAcsClient client = VideoServiceImpl.initVodClient();
         GetPlayInfoResponse response;
         try {
@@ -72,8 +80,15 @@ public class VideoServiceImpl implements VideoService {
             List<GetPlayInfoResponse.PlayInfo> playInfoList = response.getPlayInfoList();
             //播放地址
             for (GetPlayInfoResponse.PlayInfo playInfo : playInfoList) {
+                String playURL = playInfo.getPlayURL();
+
+                Video videoRecord = new Video();
+                videoRecord.setVideoId(videoId);
+                videoRecord.setPlayUrl(playURL);
+                videoMapper.updateByPrimaryKeySelective(videoRecord);
+
                 VideoDTO videoDTO = new VideoDTO(true, "获取播放地址成功");
-                videoDTO.setPlayUrl(playInfo.getPlayURL());
+                videoDTO.setPlayUrl(playURL);
 
                 return videoDTO;
 

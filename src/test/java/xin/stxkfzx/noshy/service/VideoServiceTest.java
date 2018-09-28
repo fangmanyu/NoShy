@@ -97,13 +97,12 @@ public class VideoServiceTest extends BaseTest {
         assertTrue(videoDTO.getSuccess());
     }
 
-    @Transactional
-    @Rollback(value = false)
+    @Commit
     @Test
     public void addCategory() {
         try {
-            videoService.addCategory("客户端编程", 967943064L);
-        } catch (VideoServiceException e) {
+            videoService.addCategory("悄悄关注", -1L);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -1,5 +1,6 @@
 package xin.stxkfzx.noshy.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -17,6 +18,7 @@ import xin.stxkfzx.noshy.exception.VideoServiceException;
 import xin.stxkfzx.noshy.service.VideoService;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.video.ListVideosVO;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -190,7 +192,7 @@ public class VideoController {
     /**
      * 获取视频列表
      *
-     * @param videoStr
+     * @param videoCondition
      * @param pageIndex
      * @param pageSize
      * @return
@@ -199,12 +201,12 @@ public class VideoController {
      */
     @ApiOperation(value = "获取视频列表", notes = "根据查询条件返回视频列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "videoStr", value = "查询条件.可以通过标题和内容进行查询.查询全部列表则忽略"),
+            @ApiImplicitParam(name = "videoCondition", value = "查询条件.可以通过标题和内容进行查询.查询全部列表则忽略"),
             @ApiImplicitParam(name = "pageIndex", value = "分页起始位置"),
             @ApiImplicitParam(name = "pageSize", value = "每页大小")
     })
     @GetMapping
-    public JSONResponse listVideos(@RequestParam(value = "videoStr", required = false) String videoStr,
+    public JSONResponse listVideos(@RequestParam(value = "videoCondition", required = false) String videoCondition,
                                    @RequestParam("pageIndex") @Min(0) int pageIndex,
                                    @RequestParam("pageSize") @Min(0) int pageSize,
                                    @RequestParam("isOurSchool") @NotNull Boolean isOurSchool) {
@@ -212,10 +214,21 @@ public class VideoController {
         Video video = null;
         Integer schoolId = Optional.ofNullable(currentUser).map(user ->
                 isOurSchool ? user.getSchoolId().intValue() : null).orElse(null);
-        if (StringUtils.isNotEmpty(videoStr) && StringUtils.isNotBlank(videoStr)) {
+
+        if (StringUtils.isNotEmpty(videoCondition) && StringUtils.isNotBlank(videoCondition)) {
+            log.debug("视频列表条件参数: {}", videoCondition);
+            ListVideosVO vo;
+            try {
+                 vo = new ObjectMapper().readValue(videoCondition, ListVideosVO.class);
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                return new JSONResponse(false, "videoCondition 解析错误");
+            }
             video = new Video();
-            video.setTitle(videoStr);
-            video.setDescription(videoStr);
+            video.setTitle(vo.getSearch());
+            video.setDescription(vo.getSearch());
+            Long categoryId = Optional.ofNullable(vo.getVideoCategory()).map(Long::valueOf).orElse(null);
+            video.setVideoCategory(categoryId);
         }
         VideoDTO videoDTO = videoService.listVideo(video, pageIndex, pageSize, schoolId, isOurSchool);
 
@@ -223,11 +236,14 @@ public class VideoController {
         if (videoDTO.getSuccess()) {
             for (Video temp :
                     videoDTO.getVideoList()) {
-                String videoId = temp.getVideoId();
-                VideoDTO playUrl = videoService.getPlayUrl(videoId);
+                if (temp.getPlayUrl() == null) {
 
-                if (playUrl.getSuccess()) {
-                    temp.setPlayUrl(playUrl.getPlayUrl());
+                    String videoId = temp.getVideoId();
+                    VideoDTO playUrl = videoService.getPlayUrl(videoId);
+
+                    if (playUrl.getSuccess()) {
+                        temp.setPlayUrl(playUrl.getPlayUrl());
+                    }
                 }
             }
 

@@ -23,6 +23,7 @@ import xin.stxkfzx.noshy.vo.PostInformationVO;
 import xin.stxkfzx.noshy.vo.ResponseSocketMessage;
 import xin.stxkfzx.noshy.vo.UserVO;
 import xin.stxkfzx.noshy.vo.post.AddPostVO;
+import xin.stxkfzx.noshy.vo.post.PostConditionVO;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
@@ -122,10 +123,13 @@ public class PostController {
         if (StringUtils.isEmpty(postConditionStr)) {
             postDTO = postService.listPost(null, pageIndex, pageSize);
         } else {
-            Post post = null;
+            Post post = new Post();
             try {
                 ObjectMapper mapper = new ObjectMapper();
-                post = mapper.readValue(postConditionStr, Post.class);
+                PostConditionVO vo = mapper.readValue(postConditionStr, PostConditionVO.class);
+                BeanUtils.copyProperties(vo, post);
+                post.setTitle(vo.getSearch());
+                post.setDescription(vo.getSearch());
                 log.debug("解析的Post json对象为 {}", post);
             } catch (Exception e) {
                 log.error("解析json错误: " + e.getMessage());
