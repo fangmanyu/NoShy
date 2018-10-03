@@ -16,4 +16,6 @@ public interface BrowseInformationMapper {
     int updateByPrimaryKeySelective(BrowseInformation record);
 
     int updateByPrimaryKey(BrowseInformation record);
+
+
 }

@@ -1,7 +1,10 @@
 package xin.stxkfzx.noshy.service.impl;
 
+import com.aliyun.vod.upload.impl.UploadImageImpl;
 import com.aliyun.vod.upload.impl.UploadVideoImpl;
+import com.aliyun.vod.upload.req.UploadImageRequest;
 import com.aliyun.vod.upload.req.UploadStreamRequest;
+import com.aliyun.vod.upload.resp.UploadImageResponse;
 import com.aliyun.vod.upload.resp.UploadStreamResponse;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
@@ -13,7 +16,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import xin.stxkfzx.noshy.domain.*;
+import xin.stxkfzx.noshy.domain.BrowseInformation;
+import xin.stxkfzx.noshy.domain.Video;
+import xin.stxkfzx.noshy.domain.VideoCategory;
+import xin.stxkfzx.noshy.domain.VideoTag;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
 import xin.stxkfzx.noshy.mapper.*;
@@ -23,8 +29,10 @@ import xin.stxkfzx.noshy.util.PageCalculator;
 import xin.stxkfzx.noshy.util.PathUtil;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -101,7 +109,6 @@ public class VideoServiceImpl implements VideoService {
         return new VideoDTO(false, "获取视频信息错误");
     }
 
-    // FIXME: 2018/9/19 0019 上传成功后调用回调获取videoId,之后创建数据库信息
     @Transactional(rollbackFor = VideoServiceException.class)
     @Override
     public VideoDTO uploadVideo(Video video, ImageHolder image) throws VideoServiceException {
@@ -133,15 +140,7 @@ public class VideoServiceImpl implements VideoService {
             }
 
         }
-
-        // 构建浏览信息
-        BrowseInformation browseInformation = new BrowseInformation();
-        browseInformation.setBrowseType(type);
-        browseInformation.setLikes(0);
-        browseInformation.setPageviews(0);
-        browseInformation.setShares(0);
-        browseInformationMapper.insertSelective(browseInformation);
-        log.debug("构建视频浏览信息Id: {}", browseInformation.getBrowseId());
+        BrowseInformation browseInformation = getBrowseInformation(type);
 
         // 设置视频状态
         video.setStatus(Video.UPLOADING);
@@ -152,12 +151,20 @@ public class VideoServiceImpl implements VideoService {
         video.setImageUrl(addr);
         log.debug("上传的video信息: {}", video);
 
-        int i = videoMapper.insert(video);
+        int i = videoMapper.insertSelective(video);
         if (i <= 0) {
             throw new VideoServiceException("保存video失败");
         }
 
-        // 不能先保存标签，因为标签依赖于视频
+        insertVideoTags(video, videoId);
+
+        log.info("上传视频结束");
+
+        return new VideoDTO(true, "上传视频成功");
+    }
+
+    private void insertVideoTags(Video video, String videoId) {
+        int i;// 不能先保存标签，因为标签依赖于视频
         List<VideoTag> tags = video.getTags();
         if (tags != null && tags.size() > 0) {
             for (VideoTag videoTag :
@@ -170,10 +177,18 @@ public class VideoServiceImpl implements VideoService {
                 throw new VideoServiceException("保存videoTag失败： ");
             }
         }
+    }
 
-        log.info("上传视频结束");
-
-        return new VideoDTO(true, "上传视频成功");
+    private BrowseInformation getBrowseInformation(int type) {
+        // 构建浏览信息
+        BrowseInformation browseInformation = new BrowseInformation();
+        browseInformation.setBrowseType(type);
+        browseInformation.setLikes(0);
+        browseInformation.setPageviews(0);
+        browseInformation.setShares(0);
+        browseInformationMapper.insertSelective(browseInformation);
+        log.debug("构建视频浏览信息Id: {}", browseInformation.getBrowseId());
+        return browseInformation;
     }
 
     @Transactional(rollbackFor = VideoServiceException.class)
@@ -287,10 +302,19 @@ public class VideoServiceImpl implements VideoService {
         }
         ImageUtil.deleteFile(PathUtil.getImageBasePath(videoId, type));
 
+
         // 删除视频
-        effectedNum = videoMapper.deleteByPrimaryKey(videoId);
-        if (effectedNum <= 0) {
+        try {
+            videoMapper.deleteByPrimaryKey(videoId);
+        } catch (Exception e) {
             throw new VideoServiceException("数据库视频删除失败");
+        }
+
+        // 删除浏览信息
+        try {
+            browseInformationMapper.deleteByPrimaryKey(video.getBrowseId());
+        } catch (Exception e) {
+            throw new VideoServiceException("数据库视频浏览信息删除失败");
         }
 
         // 从阿里云上删除视频
@@ -369,7 +393,7 @@ public class VideoServiceImpl implements VideoService {
 
         VideoDTO videoDTO = Optional.ofNullable(videoCategory).map(category -> {
             Long categoryAliyunId = category.getAliyunId();
-            List<Video> videos = videoMapper.selectByCategoryId(categoryAliyunId);
+            List<Video> videos = videoMapper.selectByCategoryIdAndStatus(categoryAliyunId, Video.NORMAL);
             VideoDTO dto = new VideoDTO(true, "查询成功");
             dto.setVideoList(videos);
             return dto;
@@ -585,5 +609,115 @@ public class VideoServiceImpl implements VideoService {
         GetVideoInfoRequest request = new GetVideoInfoRequest();
         request.setVideoId(videoId);
         return client.getAcsResponse(request);
+    }
+
+    @Transactional(rollbackFor = VideoServiceException.class)
+    @Override
+    public VideoDTO createUploadVideo(Video video, ImageHolder image) throws VideoServiceException {
+        Optional.ofNullable(image).ifPresent(imageHolder -> {
+            String coverUrl = uploadImageStream(image.getImageName(), image.getImage());
+            video.setImageUrl(coverUrl);
+            log.debug("视频封面地址: {}", coverUrl);
+        });
+
+        CreateUploadVideoResponse response = null;
+        try {
+            response = getCreateUploadVideoResponse(video);
+        } catch (ClientException e) {
+            throw new VideoServiceException("获取凭证错误: " + e.getMessage());
+        }
+        String videoId = Objects.requireNonNull(response).getVideoId();
+        String uploadAddress = response.getUploadAddress();
+        String uploadAuth = response.getUploadAuth();
+
+        int type = BrowseInformation.VIDEO;
+        BrowseInformation browseInformation = getBrowseInformation(type);
+
+        // 设置视频状态
+        video.setStatus(Video.UPLOADING);
+        video.setVideoId(videoId);
+        video.setBrowseId(browseInformation.getBrowseId());
+        video.setCreateTime(new Date());
+        video.setLastEditTime(new Date());
+        log.debug("上传的video信息: {}", video);
+
+        int i = videoMapper.insertSelective(video);
+        if (i <= 0) {
+            throw new VideoServiceException("保存video失败");
+        }
+
+        insertVideoTags(video, videoId);
+
+        VideoDTO dto = new VideoDTO(true, "操作成功");
+        dto.setVideoId(videoId);
+        dto.setUploadAddress(uploadAddress);
+        dto.setUploadAuth(uploadAuth);
+        return dto;
+    }
+
+    private CreateUploadVideoResponse getCreateUploadVideoResponse(Video video) throws ClientException {
+        CreateUploadVideoRequest request = new CreateUploadVideoRequest();
+        request.setTitle(video.getTitle());
+        request.setDescription(video.getDescription());
+        request.setFileName(video.getName());
+        request.setCateId(video.getVideoCategory());
+        request.setTemplateGroupId(TEMPLATE_GROUP_ID);
+        request.setCoverURL(video.getImageUrl());
+
+        Optional.ofNullable(video.getTags()).ifPresent(videoTags -> {
+            StringBuilder sb = new StringBuilder();
+            videoTags.forEach(item -> sb.append(item.getName()).append(","));
+            sb.deleteCharAt(sb.lastIndexOf(","));
+            request.setTags(sb.toString());
+        });
+
+        CreateUploadVideoResponse response = initVodClient().getAcsResponse(request);
+
+        return response;
+    }
+
+
+    @Override
+    public VideoDTO refreshUploadVideo(String videoId) {
+        RefreshUploadVideoRequest request = new RefreshUploadVideoRequest();
+        request.setVideoId(videoId);
+        RefreshUploadVideoResponse response = null;
+        try {
+            response = initVodClient().getAcsResponse(request);
+        } catch (ClientException e) {
+            e.printStackTrace();
+        }
+
+        VideoDTO dto = new VideoDTO(true, "操作成功");
+        String uploadAddress = Objects.requireNonNull(response).getUploadAddress();
+        String uploadAuth = response.getUploadAuth();
+        dto.setVideoId(videoId);
+        dto.setUploadAddress(uploadAddress);
+        dto.setUploadAuth(uploadAuth);
+        return dto;
+    }
+
+    private String uploadImageStream(String fileName, InputStream inputStream) {
+        /* 图片类型（必选）取值范围：default（默认)，cover（封面），watermark（水印）*/
+        String imageType = "cover";
+        /* 图片文件扩展名（可选）取值范围：png，jpg，jpeg */
+        // String imageExt = "png";
+        /* 图片标题（可选）长度不超过128个字节，UTF8编码 */
+        // String title = "图片标题";
+        /* 图片标签（可选）单个标签不超过32字节，最多不超过16个标签，多个用逗号分隔，UTF8编码 */
+        // String tags = "标签1,标签2";
+        /* 存储区域（可选）*/
+        // String storageLocation = "out-4f3952f78c0211e8b3020013e7.oss-cn-shanghai.aliyuncs.com";
+        // 流式上传时，InputStream为必选，fileName为源文件名称，如:文件名称.png(可选)
+
+        log.debug("开始上传阿里云视频封面");
+        UploadImageRequest request = new UploadImageRequest(ACCESS_KEY_ID, ACCESS_KEY_SECRET, imageType);
+        request.setInputStream(inputStream);
+        request.setFileName(fileName);
+        UploadImageImpl uploadImage = new UploadImageImpl();
+        UploadImageResponse response = uploadImage.upload(request);
+
+        log.debug("上传阿里云视频封面结束");
+        return response.getImageURL();
     }
 }

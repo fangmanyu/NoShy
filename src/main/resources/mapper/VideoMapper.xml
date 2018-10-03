@@ -33,16 +33,16 @@ play_url
     <sql id="Base_Column_List_Alias">
         ${alias}.video_id, ${alias}.title, ${alias}.name, ${alias}.video_category, ${alias}.description,
         ${alias}.image_url, ${alias}.status, ${alias}.create_time, ${alias}.last_edit_time, ${alias}.user_id, ${alias}.browse_id,
-play_url
+${alias}.play_url
 </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List_Alias">
-            <property name="alias" value="video"/>
+            <property name="alias" value="v"/>
         </include>
-        from video
-        where video.video_id = #{videoId}
+        from video v
+        where v.video_id = #{videoId}
     </select>
 
     <select id="selectByVideoCondition" resultMap="BaseResultMap">
@@ -102,13 +102,13 @@ play_url
         </where>
 
     </select>
-    <select id="selectByCategoryId" resultMap="BaseResultMap">
+    <select id="selectByCategoryIdAndStatus" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List_Alias">
             <property name="alias" value="video"/>
         </include>
         from video
-        where video_category = #{cateId}
+        where video_category = #{cateId} and status = #{status}
     </select>
 
 

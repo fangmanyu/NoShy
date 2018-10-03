@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,13 +14,20 @@ import java.util.List;
 
 @ApiModel
 public class Video {
+    /** Uploading（上传中） */
     public static final String UPLOADING = "Uploading";
+    /** UploadSucc（上传完成） */
     public static final String UPLOADSUCC = "UploadSucc";
+    /** Transcoding（转码中） */
     public static final String TRANSCODING = "Transcoding";
+    /** TranscodeFail（转码失败） */
     public static final String TRANSCODEFAIL = "TranscodeFail";
+    /** Checking（审核中） */
     public static final String CHECKING = "Checking";
+    /** Blocked（屏蔽） */
     public static final String BLOCKED = "Blocked";
-    public static final String Normal = "Normal";
+    /** NORMAL（正常） */
+    public static final String NORMAL = "NORMAL";
 
     @ApiModelProperty(hidden = true)
     private String videoId;
@@ -45,19 +53,6 @@ public class Video {
     @ApiModelProperty(value = "视频封面图片地址")
     private String imageUrl;
 
-    /**
-     * 视频状态
-     *
-     * Uploading（上传中）
-     * UploadSucc（上传完成）
-     * Transcoding（转码中）
-     * TranscodeFail（转码失败）
-     * Checking（审核中）
-     * Blocked（屏蔽）
-     * Normal（正常）
-     *
-     * @date 2018-07-25 9:21
-     */
     @ApiModelProperty(hidden = true)
     private String status;
     @ApiModelProperty(hidden = true)

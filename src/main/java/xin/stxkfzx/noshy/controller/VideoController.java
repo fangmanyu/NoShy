@@ -5,6 +5,7 @@ import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +17,19 @@ import xin.stxkfzx.noshy.domain.VideoTag;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
 import xin.stxkfzx.noshy.service.VideoService;
+import xin.stxkfzx.noshy.util.CheckUtils;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.video.AuthVo;
+import xin.stxkfzx.noshy.vo.video.CallbackVO;
 import xin.stxkfzx.noshy.vo.video.ListVideosVO;
+import xin.stxkfzx.noshy.vo.video.UploadAuthVO;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -219,7 +225,7 @@ public class VideoController {
             log.debug("视频列表条件参数: {}", videoCondition);
             ListVideosVO vo;
             try {
-                 vo = new ObjectMapper().readValue(videoCondition, ListVideosVO.class);
+                vo = new ObjectMapper().readValue(videoCondition, ListVideosVO.class);
             } catch (IOException e) {
                 log.error(e.getMessage());
                 return new JSONResponse(false, "videoCondition 解析错误");
@@ -229,6 +235,7 @@ public class VideoController {
             video.setDescription(vo.getSearch());
             Long categoryId = Optional.ofNullable(vo.getVideoCategory()).map(Long::valueOf).orElse(null);
             video.setVideoCategory(categoryId);
+            video.setStatus(Video.NORMAL);
         }
         VideoDTO videoDTO = videoService.listVideo(video, pageIndex, pageSize, schoolId, isOurSchool);
 
@@ -286,12 +293,9 @@ public class VideoController {
 
         // 传参检查
         /// 获取当前登录用户
-        // TODO 解除下面注释。从session中获取登录用户的userId，这里方便测试，使用假数据
-        currentUser = new User();
-        currentUser.setUserId(26L);
-        // if (currentUser == null || currentUser.getUserId() < 0) {
-        //     return new JSONResponse(false, "userId 错误");
-        // }
+        if (!CheckUtils.checkCurrentUserExist(currentUser)) {
+            return new JSONResponse(false, "userId 错误");
+        }
         boolean flag = StringUtils.isEmpty(title) || videoCategory == null || videoCategory < 0;
         if (flag) {
             return new JSONResponse(false, "video 对象错误");
@@ -360,24 +364,68 @@ public class VideoController {
         ArrayList<VideoTag> tagsList = new ArrayList<>();
         VideoTag videoTag = new VideoTag();
 
-        for (int i = 0; i < split.length; i++) {
-            videoTag.setName(StringUtils.trim(split[i]));
+        for (String aSplit : split) {
+            videoTag.setName(StringUtils.trim(aSplit));
             tagsList.add(videoTag);
         }
         return tagsList;
     }
 
+    @ApiOperation(value = "获取上传视频凭证")
+    @PostMapping("/uploadAuth")
+    public JSONResponse createUploadVideo(@RequestParam String videoInfo,
+                                          @RequestParam MultipartFile videoImage) {
+        if (!CheckUtils.checkCurrentUserExist(currentUser)) {
+            return new JSONResponse(false, "用户尚未登录");
+        }
 
-    // FIXME: 2018/7/26 0026 回调不可用
+        UploadAuthVO uploadAuthVO;
+        try {
+            uploadAuthVO = new ObjectMapper().readValue(videoInfo, UploadAuthVO.class);
+            String errMsg = CheckUtils.checkBean(uploadAuthVO);
+            if (StringUtils.isNotEmpty(errMsg)) {
+                return new JSONResponse(false, errMsg);
+            }
 
-    // @PostMapping("/callback")
-    @ApiIgnore(value = "getCallbackInfo")
-    public void getCallbackInfo(HttpServletRequest request) {
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            return new JSONResponse(false, "参数解析错误");
+        }
+        Video video = new Video();
+        BeanUtils.copyProperties(uploadAuthVO, video);
+        video.setUserId(currentUser.getUserId());
+
+        ImageHolder imageHolder;
+        try {
+            imageHolder = new ImageHolder(videoImage.getOriginalFilename(), videoImage.getInputStream());
+        } catch (IOException e) {
+            return new JSONResponse(false, "系统内部错误");
+        }
+        VideoDTO dto = videoService.createUploadVideo(video, imageHolder);
+
+        AuthVo vo = new AuthVo();
+        BeanUtils.copyProperties(dto, vo);
+        return new JSONResponse(dto.getSuccess(), dto.getMessage(), vo);
+    }
+
+    @ApiOperation(value = "刷新视频凭证")
+    @PostMapping("/refreshAuth/{videoId}")
+    public JSONResponse refreshUploadVideo(@NotEmpty @PathVariable String videoId) {
+        VideoDTO videoDTO = videoService.refreshUploadVideo(videoId);
+        AuthVo vo = new AuthVo();
+        BeanUtils.copyProperties(videoDTO, vo);
+        return new JSONResponse(videoDTO.getSuccess(), videoDTO.getMessage(), vo);
+    }
+
+
+    @PostMapping("/callback")
+    @ApiIgnore()
+    public void getCallbackInfo(@RequestBody CallbackVO callbackVO, HttpServletRequest request) {
 
         BufferedReader br = null;
         try {
             br = new BufferedReader(new InputStreamReader((ServletInputStream) request.getInputStream(), "utf-8"));
-            StringBuffer sb = new StringBuffer("");
+            StringBuffer sb = new StringBuffer();
             String temp;
             while ((temp = br.readLine()) != null) {
                 sb.append(temp);
@@ -386,31 +434,31 @@ public class VideoController {
 
             System.out.println("视频处理回调----------------");
             System.out.println(sb.toString());
+            System.out.println("视频处理回调结束----------------");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        // System.out.println("回调 videoCallBackDTO---------" + videoCallBackDTO);
+        log.debug("视频上传回调信息: {}", callbackVO);
 
-        // if (StringUtils.isAnyEmpty(EventType, VideoId, Status)) {
-        //     return;
-        // }
-        /*if (videoCallBackDTO == null) {
-            return;
-        }
-
-        if ("success".equals(videoCallBackDTO.getStatus())) {
+        if ("success".equals(callbackVO.getStatus())) {
             Video videoCondition = new Video();
-            videoCondition.setVideoId(videoCallBackDTO.getVideoId());
+            videoCondition.setVideoId(callbackVO.getVideoId());
 
-            if ("FileUploadComplete".equals(videoCallBackDTO.getEventType())) {
+            if ("FileUploadComplete".equals(callbackVO.getEventType())) {
+                // 视频上传完成
                 videoCondition.setStatus(Video.TRANSCODING);
-            } else if ("StreamTranscodeComplete".equals(videoCallBackDTO.getEventType())) {
-                videoCondition.setStatus(Video.Normal);
+                log.debug("视频上传完成");
+            } else if ("StreamTranscodeComplete".equals(callbackVO.getEventType())) {
+                // 视频单个清晰度转码完成
+                videoCondition.setStatus(Video.NORMAL);
+                videoCondition.setPlayUrl(callbackVO.getFileUrl());
+                log.debug("视频单个清晰度转码完成");
             }
 
+            videoCondition.setLastEditTime(new Date());
             videoService.updateVideoByVideoId(videoCondition);
-        }*/
+        }
     }
 
     @ModelAttribute

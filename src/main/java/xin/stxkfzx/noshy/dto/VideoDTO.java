@@ -20,6 +20,9 @@ public class VideoDTO {
     private String playUrl;
     private VideoCategory videoCategory;
     private List<VideoCategory> videoCategoryList;
+    private String uploadAuth;
+    private String uploadAddress;
+    private String videoId;
 
 
     public VideoDTO(Boolean success, String message) {
@@ -50,6 +53,9 @@ public class VideoDTO {
                 ", playUrl='" + playUrl + '\'' +
                 ", videoCategory=" + videoCategory +
                 ", videoCategoryList=" + videoCategoryList +
+                ", uploadAuth='" + uploadAuth + '\'' +
+                ", uploadAddress='" + uploadAddress + '\'' +
+                ", videoId='" + videoId + '\'' +
                 '}';
     }
 
@@ -115,5 +121,29 @@ public class VideoDTO {
 
     public void setVideoList(List<Video> videoList) {
         this.videoList = videoList;
+    }
+
+    public void setUploadAuth(String uploadAuth) {
+        this.uploadAuth = uploadAuth;
+    }
+
+    public String getUploadAuth() {
+        return uploadAuth;
+    }
+
+    public void setUploadAddress(String uploadAddress) {
+        this.uploadAddress = uploadAddress;
+    }
+
+    public String getUploadAddress() {
+        return uploadAddress;
+    }
+
+    public void setVideoId(String videoId) {
+        this.videoId = videoId;
+    }
+
+    public String getVideoId() {
+        return videoId;
     }
 }

@@ -4,8 +4,13 @@ import com.google.code.kaptcha.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import xin.stxkfzx.noshy.domain.User;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -17,6 +22,21 @@ import java.util.regex.Pattern;
 public class CheckUtils {
     private static final Logger log = LogManager.getLogger(CheckUtils.class);
 
+    /**
+     * 检查当前用户是否存在
+     *
+     * @param currentUser
+     * @return
+     * @author fmy
+     * @date 2018-09-16 21:13
+     */
+    public static boolean checkCurrentUserExist(User currentUser) {
+        if (currentUser != null && currentUser.getUserId() != null) {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * 校验验证码
@@ -71,6 +91,27 @@ public class CheckUtils {
     public static boolean checkSmsCode(String code, HttpSession session) {
         String smsCode = (String) session.getAttribute("smsCode");
         return StringUtils.equals(code, smsCode);
+    }
+
+
+    /**
+     * 显式Bean校验
+     *
+     * @param bean
+     * @return
+     * @author fmy
+     * @date 2018-09-16 21:18
+     */
+    public static <T> String checkBean(T bean) {
+        // TODO: 2018/9/16 0016 抛出参数检查异常,由全局异常处理统一处理
+        StringBuilder sb = new StringBuilder();
+        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        Set<ConstraintViolation<T>> violations = validator.validate(bean);
+        for (ConstraintViolation<T> item :
+                violations) {
+            sb.append(item.getPropertyPath().toString()).append(item.getMessage()).append(";");
+        }
+        return sb.toString();
     }
 
     private CheckUtils() {

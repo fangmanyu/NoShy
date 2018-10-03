@@ -24,7 +24,7 @@ public class VideoMapperTest extends BaseTest {
     public void insert() {
         Video video = new Video("123", new File("E:\\download\\慕课网java仿抖音实战\\第1章 千呼万唤史出来，微信小程序的简要学习\\1.5.mp4"));
         video.setVideoId("111111");
-        video.setStatus(Video.Normal);
+        video.setStatus(Video.NORMAL);
         int i = videoMapper.insert(video);
         assertEquals(1, i);
     }
@@ -65,13 +65,13 @@ public class VideoMapperTest extends BaseTest {
 
     @Test
     public void updateVideoStatus() {
-        int i = videoMapper.updateVideoStatus("86e20e600a3647f8abf453d11360f114", Video.Normal);
+        int i = videoMapper.updateVideoStatus("86e20e600a3647f8abf453d11360f114", Video.NORMAL);
         assertEquals(0, i);
     }
 
     @Test
     public void selectByCategoryId() {
-        List<Video> videos = videoMapper.selectByCategoryId(810963431L);
+        List<Video> videos = videoMapper.selectByCategoryIdAndStatus(810963431L, Video.NORMAL);
         System.out.println(videos);
     }
 

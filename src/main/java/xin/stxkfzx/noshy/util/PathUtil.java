@@ -1,8 +1,11 @@
 package xin.stxkfzx.noshy.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class PathUtil {
     private static final String DEFAULT_PATH_WIN = "D:/doc/intellij/NoShy/images";
     private static final String DEFAULT_PATH_OTHER = "/home/fmy/image/";
+    public static final String DOMAIN = "119.23.208.165:8080";
     private static String separator = System.getProperty("file.separator");
 
     private PathUtil() {
@@ -13,7 +16,7 @@ public class PathUtil {
      *
      * @return
      */
-    public static String getImgBasePath() {
+    public static String getImageAbsolutePath() {
         // 获取系统名称
         String os = System.getProperty("os.name");
         String basePath;
@@ -39,6 +42,20 @@ public class PathUtil {
     public static String getImageBasePath(String  id, int type) {
         String imagePath = "/upload/" + type + "/" + id + "/";
         return imagePath.replace("/", separator);
+    }
+
+    /**
+     * 获取视频封面的URL
+     * @param videoId
+     * @return
+     */
+    public static String getImageUrl(String videoId) {
+        if (StringUtils.isEmpty(videoId)) {
+
+        return null;
+        }
+
+        return DOMAIN + getImageBasePath(videoId, 1);
     }
 
 }

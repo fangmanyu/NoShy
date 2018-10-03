@@ -17,7 +17,7 @@ public interface VideoService {
 
     /**
      * 将视频上传到阿里云点播库，并将保存的视频信息保存保存到数据库中,并创建浏览信息
-     *
+     * @deprecated 使用createUploadVideo()
      * @param video 需要上传的视频。其中视频标题，名称(含后缀名)，文件流是必须的
      * @param image 封面图片
      * @return 返回状态标识
@@ -25,6 +25,7 @@ public interface VideoService {
      * @author fmy
      * @date 2018-07-24 15:00
      */
+    @Deprecated
     VideoDTO uploadVideo(Video video, ImageHolder image) throws VideoServiceException;
 
     /**
@@ -148,4 +149,26 @@ public interface VideoService {
      * @date 2018-09-16 23:45
      */
     VideoDTO listMyVideo(int userId);
+
+    /**
+     * 获取上传地址和凭证函数
+     *
+     * @param video
+     * @param image
+     * @return
+     * @throws VideoServiceException
+     * @author fmy
+     * @date 2018-09-28 19:33
+     */
+    VideoDTO createUploadVideo(Video video, ImageHolder image) throws VideoServiceException;
+
+    /**
+     *刷新视频上传凭证函数
+     *
+     * @param videoId
+     * @return
+     * @author fmy
+     * @date 2018-09-29 11:03
+     */
+    VideoDTO refreshUploadVideo(String videoId);
 }

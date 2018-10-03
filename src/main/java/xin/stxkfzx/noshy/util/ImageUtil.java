@@ -38,7 +38,7 @@ public class ImageUtil {
         String extension = getFileExtension(thumbnail.getImageName());
         makeDirPath(targetAddr);
         String relativeAddr = targetAddr + realFileName + extension;
-        File dest = new File(PathUtil.getImgBasePath() + relativeAddr);
+        File dest = new File(PathUtil.getImageAbsolutePath() + relativeAddr);
 
         try {
             Thumbnails.of(thumbnail.getImage())
@@ -59,7 +59,7 @@ public class ImageUtil {
      */
     private static void makeDirPath(String targetAddr) {
         // 获取绝对路径
-        String realFilePath = PathUtil.getImgBasePath() + targetAddr;
+        String realFilePath = PathUtil.getImageAbsolutePath() + targetAddr;
         File dirPath = new File(realFilePath);
 
         if (!dirPath.exists()) {
@@ -100,8 +100,8 @@ public class ImageUtil {
             return;
         }
 
-        String path = deleteFilePath.contains(PathUtil.getImgBasePath()) ?
-                deleteFilePath : PathUtil.getImgBasePath() + deleteFilePath;
+        String path = deleteFilePath.contains(PathUtil.getImageAbsolutePath()) ?
+                deleteFilePath : PathUtil.getImageAbsolutePath() + deleteFilePath;
 
         File file = new File(path);
         deleteFile(file);
@@ -153,7 +153,7 @@ public class ImageUtil {
                 String fileExtension = getFileExtension(productImg.getImageName());
                 String relativeAddr = targetAddr + realFileName + count + fileExtension;
                 // 绝对路径
-                File dest = new File(PathUtil.getImgBasePath() + relativeAddr);
+                File dest = new File(PathUtil.getImageAbsolutePath() + relativeAddr);
 
                 count++;
 

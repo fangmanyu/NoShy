@@ -18,7 +18,7 @@ public class StaticResourceConfig extends WebMvcConfigurationSupport {
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
 
         registry.addResourceHandler("/upload/**")
-                .addResourceLocations("file:"+PathUtil.getImgBasePath() + "/upload/");
+                .addResourceLocations("file:"+PathUtil.getImageAbsolutePath() + "/upload/");
 
         registry.addResourceHandler("swagger-ui.html")
                 .addResourceLocations("classpath:/META-INF/resources/");

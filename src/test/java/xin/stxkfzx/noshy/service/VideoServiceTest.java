@@ -17,7 +17,11 @@ import xin.stxkfzx.noshy.exception.VideoServiceException;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -35,17 +39,17 @@ public class VideoServiceTest extends BaseTest {
 
     @Before
     public void setUp() throws Exception {
-        video = new Video("123", new File("F:\\视频资料\\基于Spring Boot技术栈的博客系统企业级实战\\第1章 Spring Boot 简介\\1-2 -Spring Boot 是什么.mp4"));
+        video = new Video("sdakjlsdh", new File("E:\\download\\12月20日-微服务系列 Spring Boot项目实战.mp4"));
         video.setVideoCategory(810963431L);
-        video.setDescription("测试添加浏览信息");
-        video.setVideoId("887111f293834bcb91b3acfa63b825ee");
+        video.setDescription("测试获取凭证");
+        // video.setVideoId("887111f293834bcb91b3acfa63b825ee");
 
         List<VideoTag> videoTagList = new ArrayList<>(5);
-        videoTagList.add(new VideoTag("不错"));
-        videoTagList.add(new VideoTag("甚好"));
-        videoTagList.add(new VideoTag("三定ad"));
-        videoTagList.add(new VideoTag("快儿科"));
-        videoTagList.add(new VideoTag("测试"));
+        videoTagList.add(new VideoTag("313不错"));
+        videoTagList.add(new VideoTag("甚3231好"));
+        videoTagList.add(new VideoTag("123"));
+        videoTagList.add(new VideoTag("11"));
+        videoTagList.add(new VideoTag("测1231试"));
         video.setTags(videoTagList);
     }
 
@@ -93,8 +97,14 @@ public class VideoServiceTest extends BaseTest {
     @Rollback(value = false)
     @Test
     public void deleteVideoByVideoId() {
-        VideoDTO videoDTO = videoService.deleteVideoByVideoId("962dbcf0eb424cbe93d62f8da5ffec80");
-        assertTrue(videoDTO.getSuccess());
+        VideoDTO videoDTO = null;
+        try {
+            videoDTO = videoService.deleteVideoByVideoId("c6a958b06fac43d0900cd5ed568d8507");
+            System.out.println(videoDTO.getMessage());
+            assertTrue(videoDTO.getSuccess());
+        } catch (VideoServiceException e) {
+            e.printStackTrace();
+        }
     }
 
     @Commit
@@ -151,16 +161,21 @@ public class VideoServiceTest extends BaseTest {
         }
     }
 
+    /**
+     * 从本地导入视频信息
+     *
+     * @throws IOException
+     */
     @Commit
     @Test
-    public void name() throws IOException {
+    public void localImport() throws IOException {
         File file = new File("C:\\Users\\59261\\Desktop\\noshy");
         File[] files = file.listFiles();
         for (File item :
                 files) {
             Video video = new Video();
             video.setTitle(item.getName());
-            video.setUserId(27L);
+            // video.setUserId(27L);
             video.setVideoCategory(810963431L);
             ImageHolder image = null;
             // System.out.println(item.getName());
@@ -193,5 +208,24 @@ public class VideoServiceTest extends BaseTest {
         }
     }
 
+    @Commit
+    @Test
+    public void createUploadVideo() throws FileNotFoundException {
+        File file = new File("D:\\图片\\动漫\\5c7413e1c674e1d88f94b99d2531aa43.jpg");
+        ImageHolder imageHolder = new ImageHolder(file.getName(), new FileInputStream(file));
+
+        VideoDTO dto = videoService.createUploadVideo(video, imageHolder);
+        System.out.println(dto.getVideoId());
+        System.out.println(dto.getUploadAuth());
+        System.out.println(dto.getUploadAddress());
+    }
+
+    @Test
+    public void refreshUploadVideo() {
+        String videoId = "5f38f41237874d7fa2a5bec86841d3ae";
+        VideoDTO dto = videoService.refreshUploadVideo(videoId);
+        System.out.println(dto.getUploadAuth());
+        System.out.println(dto.getUploadAddress());
+    }
 
 }
