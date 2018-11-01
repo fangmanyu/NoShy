@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>title</title>
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+		<link rel="shortcut icon" href="#">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/??sm.min.css,sm-extend.min.css">
+		<link rel="stylesheet" href="/upload/css/login/login.css">
+		<link rel="stylesheet" href="/upload/css/login/iconfont.css">
+
+	</head>
+
+	<body>
+		<!-- page集合的容器，里面放多个平行的.page，其他.page作为内联页面由路由控制展示 -->
+		<div class="page-group">
+			<!-- 单个page ,第一个.page默认被展示-->
+			<div class="page" id="login">
+				<div class="logo">
+					<div>
+						<img src="/upload/img/logo.png"/>
+					</div>
+				</div>
+				<div class="content">
+					<div class="list-block">
+						<ul>
+							<!-- Text inputs -->
+							<li>
+								<div class="item-content">
+									<div class="item-inner">
+										<div class="item-title label"><i class="iconfont icon-shouji"></i></div>
+										<div class="item-input">
+											<input type="text" id="phone" placeholder="请输入注册电话">
+										</div>
+									</div>
+								</div>
+							</li>
+
+							<li>
+								<div class="item-content">
+									<div class="item-inner">
+										<div class="item-title label"><i class="iconfont icon-mima"></i></div>
+										<div class="item-input">
+											<input type="password" placeholder="请输入密码" id="password">
+										</div>
+									</div>
+								</div>
+							</li>
+
+							<!--验证码-->
+							<li>
+								<div class="item-content">
+									<div class="item-inner">
+										<div class="item-title label"><i class="iconfont icon-yanzheng"></i></div>
+										<input type="text" id="j_captcha" placeholder="验证码">
+										<div class="item-input">
+											<img src="#" alt="点击更换" title="点击更换" id="captcha_img" onclick="changeVerifyCode(this)">
+										</div>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div class="content-block">
+						<div>
+							<button class="button button-big button-fill login" id="submit">登录</button>
+						</div>
+						<div class="row">
+							<div class="col-49 forget">
+								<a href="#">忘记密码</a>
+							</div>
+							<div class="col-2"><span>|</span></div>
+							<div class="col-49">
+								<a href="./registered.html" >注册账号</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/??sm.min.js,sm-extend.min.js' charset='utf-8'></script>
+		<script type="text/javascript" src="/upload/js/common.js" ></script>
+		<script type="text/javascript" src="/upload/js/login.js" ></script>
+	</body>
+
+</html>

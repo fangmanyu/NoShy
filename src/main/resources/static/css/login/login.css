@@ -1,0 +1,108 @@
+#login, #register{
+    background-image: url("../../img/login_bj.png");
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: 100% auto;
+    background-color: #fff;
+}
+.content{
+    padding-top: 70%;
+}
+.list-block ul{
+    border: none;
+}
+.list-block ul:after, .list-block ul:before{
+    background-color: #fff;
+}
+.list-block li{
+    padding: 0 8%;
+}
+.list-block li i{
+    color: #73c9c0;
+    font-size: 1rem;
+    text-align: center;
+}
+.list-block li:first-child i{
+    font-size: 1.1rem;
+}
+.list-block li:nth-child(2) i{
+    font-size: 1.4rem;
+    margin-left: -0.1rem;
+}
+.list-block .item-title.label{
+    width: 15%;
+}
+.list-block input[type=text],
+.list-block input[type=password]{
+    font-size: 0.73rem;
+}
+.list-block li input::placeholder{
+    color: #9f9f9f;
+}
+.list-block li input::-webkit-input-placeholder{
+    color: #9f9f9f;
+}
+.list-block li input:-ms-input-placeholder{
+    color: #9f9f9f;
+}
+.list-block li input::-moz-placeholder{
+    color: #9f9f9f;
+}
+
+.content-block .login{
+    width: 75%;
+    border-radius: 3rem;
+    margin: auto;
+    background: linear-gradient(to right, #74cabf, #caf2ef);
+    box-shadow: 0 0.2rem 0.2rem 0.1rem rgba(61, 65, 69, 0.09019607843137255);
+    height: 2.3rem;
+    font-size: .75rem;
+    letter-spacing: 0.25rem;
+}
+.content-block .col-49,
+.content-block .col-2{
+    margin-top: 0.75rem;
+    font-size: 0.68rem;
+}
+.content-block [class^=col-] a{
+    color: #5cbfac;
+}
+.row{
+    margin: 0 1rem;
+}
+.row .col-49{
+    width: 45%;
+}
+.row .forget{
+    text-align: right;
+}
+.row .col-2{
+    width: 2%;
+    margin-left: 2%;
+    margin-right: 2%;
+    text-align: center;
+}
+
+/*logo的設置*/
+.logo{
+    display: inline-block;
+    position: relative;
+    left: 40%;
+    top: 5.5%;
+}
+.logo div{
+    background-color: #fff;
+    border-radius: 50%;
+    width: 4rem;
+    height: 4rem;
+    position: absolute;
+    top: -0.2rem;
+    left: 0;
+}
+.logo img{
+    width: 4rem;
+    height: 4rem;
+    position: absolute;
+    top: -0.6rem;
+    left: 0.2rem;
+}

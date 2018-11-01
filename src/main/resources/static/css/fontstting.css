@@ -1,0 +1,7 @@
+@font-face {
+    font-family: icon;
+    src: url('../fonts/ratchicons.eot?') format('eot'),/*IE*/
+        url('../fonts/ratchicons.woff') format('woff'),
+        url('../fonts/ratchicons.ttf') format('truetype');/*non-IE*/
+        url('../fonts/ratchicons.svg') format('svg');/*non-IE*/
+}

@@ -1,0 +1,38 @@
+.bottom img{
+    width: 1.75rem;
+    height: 1.75rem;
+}
+.bottom p{
+    margin: 0 0 -0.6rem;
+}
+.yuan{
+    /*background-color: rgb(115, 201, 191);
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 20%);
+    z-index: 15;*/
+   
+   	background-color: rgb(115, 201, 191);
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 20%);
+    z-index: 15;
+}
+
+.yuan i{
+	position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 35px;
+    color: #fff;
+    font-weight: 900;
+}

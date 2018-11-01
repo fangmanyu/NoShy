@@ -1,0 +1,27 @@
+/*.content {*/
+    /*padding-top: 35%;*/
+/*}*/
+.inter {
+    position: absolute;
+    right: 1rem;
+    bottom: 50%;
+    transform: translateY(50%);
+}
+.inter span{
+    color: #afc9c9;
+    font-size: 0.75rem;
+}
+.inter button{
+    color: #73c9bf;
+    background: transparent;
+    border: none;
+    text-decoration: none;
+    font-size: 0.75rem;
+}
+.hidden{
+    display: none;
+}
+
+.list-block li:last-child i{
+    font-size: 1.3rem;
+}
