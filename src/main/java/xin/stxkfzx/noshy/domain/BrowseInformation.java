@@ -9,6 +9,10 @@ public class BrowseInformation {
     public static final int POST = 2;
     public static final int CHALLENGE = 3;
 
+    public static final String PAGEVIEWS = "pageviews";
+    public static final String LIKES = "likes";
+    public static final String SHARES = "shares";
+
     private Integer browseId;
 
     /** 浏览量*/

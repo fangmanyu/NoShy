@@ -54,9 +54,9 @@ public class PostController {
         }
     }
 
-    @ApiOperation(value = "更新帖子点击量")
-    @ApiImplicitParam(name = "postId", value = "指定帖子Id", required = true, dataType = "int")
-    @GetMapping("/{postId}/addPageView")
+    // @ApiOperation(value = "更新帖子点击量")
+    // @ApiImplicitParam(name = "postId", value = "指定帖子Id", required = true, dataType = "int")
+    // @GetMapping("/{postId}/addPageView")
     public JSONResponse addPageView(@PathVariable @Min(1) int postId) {
         PostDTO postDTO = null;
         try {

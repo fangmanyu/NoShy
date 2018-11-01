@@ -85,12 +85,14 @@ public interface PostService {
     /**
      * 增加点击量
      *
+     * @deprecated 废弃,使用BrowseService的updateBrowseInfo方法
      * @param postId 帖子Id
      * @return 返回结果标识
      * @throws PostServiceException 论坛服务异常信息
      * @author fmy
      * @date 2018-08-05 17:46
      */
+    @Deprecated
     PostDTO addPageViewNum(int postId) throws PostServiceException;
 
     /**
