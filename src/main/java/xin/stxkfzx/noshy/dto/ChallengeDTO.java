@@ -9,43 +9,25 @@ import java.util.List;
  * @author fmy
  * @date 2018-09-17 19:05
  */
-public class ChallengeDTO {
-    private Boolean success;
-    private String message;
+public class ChallengeDTO extends BaseDTO{
+
     private Challenge challenge;
     private List<Rank> rankList;
     private Integer count;
     private List<Challenge> challengeList;
 
     public ChallengeDTO(Boolean success, String message) {
-        this.success = success;
-        this.message = message;
+        super(success, message);
     }
 
     @Override
     public String toString() {
         return "ChallengeDTO{" +
-                "success=" + success +
-                ", message='" + message + '\'' +
-                ", challenge=" + challenge +
+                "challenge=" + challenge +
                 ", rankList=" + rankList +
-                '}';
-    }
-
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(Boolean success) {
-        this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+                ", count=" + count +
+                ", challengeList=" + challengeList +
+                "} " + super.toString();
     }
 
     public Challenge getChallenge() {

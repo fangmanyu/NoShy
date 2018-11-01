@@ -10,28 +10,22 @@ import java.util.List;
  * @author fmy
  * @date 2018-09-05 13:48
  */
-public class CommentDTO {
-
-    private Boolean success;
-    private String message;
+public class CommentDTO extends BaseDTO{
     private List<Comment> commentList;
     private Comment comment;
 
     public CommentDTO(Boolean success, String message) {
-        this.success = success;
-        this.message = message;
+        super(success, message);
     }
 
     public CommentDTO(Boolean success, String message, Comment comment) {
-        this.success = success;
-        this.message = message;
+        super(success, message);
         this.comment = comment;
     }
 
     public CommentDTO(Boolean success, String message, List<Comment> commentList) {
 
-        this.success = success;
-        this.message = message;
+        super(success, message);
         this.commentList = commentList;
     }
 
@@ -46,27 +40,9 @@ public class CommentDTO {
     @Override
     public String toString() {
         return "CommentDTO{" +
-                "success=" + success +
-                ", message='" + message + '\'' +
-                ", commentList=" + commentList +
+                "commentList=" + commentList +
                 ", comment=" + comment +
-                '}';
-    }
-
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(Boolean success) {
-        this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+                "} " + super.toString();
     }
 
     public List<Comment> getCommentList() {

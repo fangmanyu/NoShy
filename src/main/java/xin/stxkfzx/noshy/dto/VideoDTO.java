@@ -11,9 +11,7 @@ import java.util.List;
  * @author fmy
  * @date 2018-07-24 17:36
  */
-public class VideoDTO {
-    private Boolean success;
-    private String message;
+public class VideoDTO extends BaseDTO{
     private Video video;
     private Integer count;
     private List<Video> videoList;
@@ -26,28 +24,23 @@ public class VideoDTO {
 
 
     public VideoDTO(Boolean success, String message) {
-        this.success = success;
-        this.message = message;
+        super(success, message);
     }
 
     public VideoDTO(Boolean success, String message, Video video) {
-        this.success = success;
-        this.message = message;
+        super(success, message);
         this.video = video;
     }
 
     public VideoDTO(Boolean success, String message, List<Video> videoList) {
-        this.success = success;
-        this.message = message;
+        super(success, message);
         this.videoList = videoList;
     }
 
     @Override
     public String toString() {
         return "VideoDTO{" +
-                "success=" + success +
-                ", message='" + message + '\'' +
-                ", video=" + video +
+                "video=" + video +
                 ", count=" + count +
                 ", videoList=" + videoList +
                 ", playUrl='" + playUrl + '\'' +
@@ -56,7 +49,7 @@ public class VideoDTO {
                 ", uploadAuth='" + uploadAuth + '\'' +
                 ", uploadAddress='" + uploadAddress + '\'' +
                 ", videoId='" + videoId + '\'' +
-                '}';
+                "} " + super.toString();
     }
 
     public List<VideoCategory> getVideoCategoryList() {
@@ -81,22 +74,6 @@ public class VideoDTO {
 
     public void setPlayUrl(String playUrl) {
         this.playUrl = playUrl;
-    }
-
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(Boolean success) {
-        this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public Video getVideo() {
