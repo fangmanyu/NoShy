@@ -1,16 +1,24 @@
 package xin.stxkfzx.noshy.vo.video;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * 视频回调参数
  *
  * @author 59261
  * @date 2018-10-03 13:59
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CallbackVO {
 
+    @JsonProperty(value = "Status")
     private String Status;
+    @JsonProperty(value = "EventType")
     private String EventType;
+    @JsonProperty(value = "VideoId")
     private String VideoId;
+    @JsonProperty(value = "FileUrl")
     private String FileUrl;
 
     public String getFileUrl() {
@@ -18,7 +26,7 @@ public class CallbackVO {
     }
 
     public void setFileUrl(String fileUrl) {
-        FileUrl = fileUrl;
+        this.FileUrl = fileUrl;
     }
 
     public String getStatus() {
@@ -26,7 +34,7 @@ public class CallbackVO {
     }
 
     public void setStatus(String status) {
-        Status = status;
+        this.Status = status;
     }
 
     public String getEventType() {
@@ -34,7 +42,7 @@ public class CallbackVO {
     }
 
     public void setEventType(String eventType) {
-        EventType = eventType;
+        this.EventType = eventType;
     }
 
     public String getVideoId() {
@@ -42,6 +50,16 @@ public class CallbackVO {
     }
 
     public void setVideoId(String videoId) {
-        VideoId = videoId;
+        this.VideoId = videoId;
+    }
+
+    @Override
+    public String toString() {
+        return "CallbackVO{" +
+                "Status='" + Status + '\'' +
+                ", EventType='" + EventType + '\'' +
+                ", VideoId='" + VideoId + '\'' +
+                ", FileUrl='" + FileUrl + '\'' +
+                '}';
     }
 }

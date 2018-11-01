@@ -20,6 +20,11 @@ public interface RankMapper {
     int updateByPrimaryKey(Rank record);
 
     List<Rank> findByChallengeIdAndType(@Param("challengeId")Integer challengeId,@Param("type")Integer type);
+    List<Rank> findByChallengeIdAndTypeAndStatusOrderByLikesDesc(@Param("challengeId")Integer challengeId,@Param("type")Integer type,@Param("status")Integer status);
+
+    int updateStatusByVideoId(@Param("updatedStatus")Integer updatedStatus,@Param("videoId")String videoId);
+
+
 
     Integer countByChallengeId(@Param("challengeId")Integer challengeId);
 

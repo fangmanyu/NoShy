@@ -16,7 +16,7 @@ public interface ChallengeService {
     /**
      * 创建挑战
      *
-     * @param challenge
+     * @param challenge challengeName(可选), challengeDescription
      * @param videoId
      * @param image
      * @return
@@ -101,4 +101,14 @@ public interface ChallengeService {
      * @date 2018-09-20 13:20
      */
     ChallengeDTO updateChallengeRank(int challengeId) throws ChallengeServiceException;
+
+    /**
+     * 根据视频的状态更新挑战状态
+     *
+     * @param videoId
+     * @return
+     * @author 59261
+     * @date 2018-10-06 1:58
+     */
+    ChallengeDTO updateChallengeStatus(String videoId) throws ChallengeServiceException;
 }

@@ -19,6 +19,7 @@ public class PostDTO {
     private Integer count;
     private List<PostInformation> postInformationList;
     private Integer infoId;
+    private Integer postId;
 
     @Override
     public String toString() {
@@ -101,5 +102,13 @@ public class PostDTO {
 
     public Integer getInfoId() {
         return infoId;
+    }
+
+    public void setPostId(Integer postId) {
+        this.postId = postId;
+    }
+
+    public Integer getPostId() {
+        return postId;
     }
 }

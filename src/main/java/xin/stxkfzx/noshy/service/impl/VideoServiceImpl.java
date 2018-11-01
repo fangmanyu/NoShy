@@ -74,6 +74,9 @@ public class VideoServiceImpl implements VideoService {
         }
 
         Video video = videoMapper.selectByPrimaryKey(videoId);
+        if (!video.getStatus().equals(Video.NORMAL)) {
+            return new VideoDTO(false, "状态错误");
+        }
         if (video.getPlayUrl() != null) {
             VideoDTO videoDTO = new VideoDTO(true, "获取播放地址成功");
             videoDTO.setPlayUrl(video.getPlayUrl());
@@ -279,16 +282,21 @@ public class VideoServiceImpl implements VideoService {
         if (video == null) {
             return new VideoDTO(false, "删除的视频不存在");
         }
+        // 删除参加的挑战记录
+        // 以该视频创建的挑战全部删除,参加的挑战删除视频和排名
+
 
         // 删除数据库中的记录
         /// 先解除标签与视频的外键约束
-        int effectedNum = videoTagMapper.updateVideoIdToNull(videoId);
-        if (effectedNum <= 0) {
+        try {
+            videoTagMapper.updateVideoIdToNull(videoId);
+        } catch (Exception e) {
             throw new VideoServiceException("数据库标签解除外键失败");
         }
         // 删除标签
-        effectedNum = videoTagMapper.deleteByVideoId(null);
-        if (effectedNum <= 0) {
+        try {
+            videoTagMapper.deleteByVideoId(null);
+        } catch (Exception e) {
             throw new VideoServiceException("数据库标签删除失败");
         }
 
@@ -337,7 +345,7 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public VideoDTO listVideo(Video videoCondition, int pageIndex, int pageSize, Integer schoolId, boolean isOurSchool) {
+    public VideoDTO listVideo(Video videoCondition, int pageIndex, int pageSize, Integer schoolId, Boolean isOurSchool) {
         if (pageIndex < 0 || pageSize < 0) {
             return new VideoDTO(false, "pageIndex 或 pageSize 错误");
         }
@@ -416,7 +424,7 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public VideoDTO listMyVideo(int userId) {
-        List<Video> videoList = videoMapper.findByUserId((long) userId);
+        List<Video> videoList = videoMapper.findByUserIdAndStatus((long) userId, Video.NORMAL);
         return new VideoDTO(true, "查询成功", videoList);
     }
 
@@ -685,7 +693,11 @@ public class VideoServiceImpl implements VideoService {
         try {
             response = initVodClient().getAcsResponse(request);
         } catch (ClientException e) {
-            e.printStackTrace();
+            if ("404".equals(e.getErrCode())) {
+                return new VideoDTO(false, "视频不存在");
+            } else {
+                throw new VideoServiceException(e.getMessage());
+            }
         }
 
         VideoDTO dto = new VideoDTO(true, "操作成功");

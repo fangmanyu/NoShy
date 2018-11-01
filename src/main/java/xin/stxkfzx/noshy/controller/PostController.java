@@ -61,7 +61,7 @@ public class PostController {
         PostDTO postDTO = null;
         try {
             postDTO = postService.addPageViewNum(postId);
-        return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage());
+            return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage());
         } catch (Exception e) {
             return new JSONResponse(false, "更新帖子点击量失败: " + e.getMessage());
         }
@@ -187,9 +187,10 @@ public class PostController {
         Post post = new Post();
         BeanUtils.copyProperties(postInfo, post);
         post.setUserId(currentUser.getUserId().intValue());
+
         try {
             PostDTO dto = postService.createPost(post);
-            return new JSONResponse(dto.getSuccess(), dto.getMessage());
+            return new JSONResponse(dto.getSuccess(), dto.getMessage(), dto.getPostId());
         } catch (PostServiceException e) {
             e.printStackTrace();
             return new JSONResponse(false, e.getMessage());

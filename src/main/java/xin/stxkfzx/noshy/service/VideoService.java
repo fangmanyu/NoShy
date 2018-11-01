@@ -84,7 +84,7 @@ public interface VideoService {
      * @author fmy
      * @date 2018-07-25 8:41
      */
-    VideoDTO listVideo(Video videoCondition, int pageIndex, int pageSize, Integer schoolId, boolean isOurSchool);
+    VideoDTO listVideo(Video videoCondition, int pageIndex, int pageSize, Integer schoolId, Boolean isOurSchool);
 
     /**
      * 获取视频分类

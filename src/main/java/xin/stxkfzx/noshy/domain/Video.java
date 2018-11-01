@@ -27,7 +27,7 @@ public class Video {
     /** Blocked（屏蔽） */
     public static final String BLOCKED = "Blocked";
     /** NORMAL（正常） */
-    public static final String NORMAL = "NORMAL";
+    public static final String NORMAL = "Normal";
 
     @ApiModelProperty(hidden = true)
     private String videoId;
@@ -62,7 +62,7 @@ public class Video {
     @ApiModelProperty(hidden = true)
     private Long userId;
     @ApiModelProperty(hidden = true)
-    private  String playUrl;
+    private String playUrl;
     @JsonIgnore
     private Integer browseId;
 

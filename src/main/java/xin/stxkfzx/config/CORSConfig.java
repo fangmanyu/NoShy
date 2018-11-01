@@ -28,7 +28,7 @@ public class CORSConfig {
         // 添加CORS配置信息
         CorsConfiguration configuration = new CorsConfiguration();
         // 放行哪些原始域
-        // configuration.addAllowedOrigin("http://127.0.0.1:8020");
+        // configuration.addAllowedOrigin("http://127.0.0.1:8080");
         configuration.addAllowedOrigin("*");
         // 是否发送cookie信息
         configuration.setAllowCredentials(true);

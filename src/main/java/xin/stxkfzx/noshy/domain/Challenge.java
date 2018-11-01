@@ -5,6 +5,7 @@ import java.util.Date;
 public class Challenge {
     public static final int CHALLENGEING = 0;
     public static final int CHALLENGE_FINISH = 1;
+    public static final int CREATE_CHALLENGE = -1;
 
     private Integer challengeId;
 

@@ -13,13 +13,11 @@ import com.aliyuncs.exceptions.ClientException;
 public interface SMSService {
     // 产品名称:云通信短信API产品,开发者无需替换
     String PRODUCT = "Dysmsapi";
-
     //产品域名,开发者无需替换
     String DOMAIN = "dysmsapi.aliyuncs.com";
 
     String ACCESS_KEY_ID = "LTAIPQqlRW1AMVLJ";
     String ACCESS_KEY_SECRET = "nVFZyVGzpNzLkhJATLVtMRhOiugBvy";
-
     /**
      * 发送短信
      *

@@ -15,7 +15,9 @@ import xin.stxkfzx.noshy.domain.User;
 import xin.stxkfzx.noshy.domain.Video;
 import xin.stxkfzx.noshy.domain.VideoTag;
 import xin.stxkfzx.noshy.dto.VideoDTO;
+import xin.stxkfzx.noshy.exception.ChallengeServiceException;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
+import xin.stxkfzx.noshy.service.ChallengeService;
 import xin.stxkfzx.noshy.service.VideoService;
 import xin.stxkfzx.noshy.util.CheckUtils;
 import xin.stxkfzx.noshy.vo.ImageHolder;
@@ -55,6 +57,7 @@ public class VideoController {
     private static final Logger log = LogManager.getLogger(VideoController.class);
 
     private final VideoService videoService;
+    private final ChallengeService challengeService;
     private User currentUser;
 
     @ApiOperation(value = "获取自己发布的视频列表")
@@ -215,9 +218,9 @@ public class VideoController {
     public JSONResponse listVideos(@RequestParam(value = "videoCondition", required = false) String videoCondition,
                                    @RequestParam("pageIndex") @Min(0) int pageIndex,
                                    @RequestParam("pageSize") @Min(0) int pageSize,
-                                   @RequestParam("isOurSchool") @NotNull Boolean isOurSchool) {
+                                   @RequestParam(value = "isOurSchool", required = false) Boolean isOurSchool) {
 
-        Video video = null;
+        Video video = new Video();
         Integer schoolId = Optional.ofNullable(currentUser).map(user ->
                 isOurSchool ? user.getSchoolId().intValue() : null).orElse(null);
 
@@ -235,8 +238,8 @@ public class VideoController {
             video.setDescription(vo.getSearch());
             Long categoryId = Optional.ofNullable(vo.getVideoCategory()).map(Long::valueOf).orElse(null);
             video.setVideoCategory(categoryId);
-            video.setStatus(Video.NORMAL);
         }
+        video.setStatus(Video.NORMAL);
         VideoDTO videoDTO = videoService.listVideo(video, pageIndex, pageSize, schoolId, isOurSchool);
 
 
@@ -283,7 +286,7 @@ public class VideoController {
             @ApiImplicitParam(name = "description", value = "视频描述"),
             @ApiImplicitParam(name = "tags", value = "视频标签。最多16个标签，每个标签不能超过5个字，标签之间以英文状态下的逗号(,)隔开")
     })
-    @PostMapping
+    // @PostMapping
     public JSONResponse uploadVideo(@RequestParam("title") String title,
                                     @RequestParam("videoCategory") Long videoCategory,
                                     @ApiParam(value = "视频文件流对象", required = true) @RequestParam("videoFile") MultipartFile videoFile,
@@ -422,9 +425,10 @@ public class VideoController {
     @ApiIgnore()
     public void getCallbackInfo(@RequestBody CallbackVO callbackVO, HttpServletRequest request) {
 
-        BufferedReader br = null;
+    /*    BufferedReader br = null;
+        //CallbackVO callbackVO = new CallbackVO();
         try {
-            br = new BufferedReader(new InputStreamReader((ServletInputStream) request.getInputStream(), "utf-8"));
+            br = new BufferedReader(new InputStreamReader(request.getInputStream(), "utf-8"));
             StringBuffer sb = new StringBuffer();
             String temp;
             while ((temp = br.readLine()) != null) {
@@ -434,31 +438,46 @@ public class VideoController {
 
             System.out.println("视频处理回调----------------");
             System.out.println(sb.toString());
+            //callbackVO = new ObjectMapper().readValue(sb.toString(), CallbackVO.class);
             System.out.println("视频处理回调结束----------------");
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }*/
 
         log.debug("视频上传回调信息: {}", callbackVO);
 
-        if ("success".equals(callbackVO.getStatus())) {
-            Video videoCondition = new Video();
-            videoCondition.setVideoId(callbackVO.getVideoId());
+        Video videoCondition = new Video();
+        videoCondition.setVideoId(callbackVO.getVideoId());
 
-            if ("FileUploadComplete".equals(callbackVO.getEventType())) {
-                // 视频上传完成
-                videoCondition.setStatus(Video.TRANSCODING);
-                log.debug("视频上传完成");
-            } else if ("StreamTranscodeComplete".equals(callbackVO.getEventType())) {
-                // 视频单个清晰度转码完成
-                videoCondition.setStatus(Video.NORMAL);
-                videoCondition.setPlayUrl(callbackVO.getFileUrl());
-                log.debug("视频单个清晰度转码完成");
-            }
+        if ("FileUploadComplete".equals(callbackVO.getEventType())) {
+            // 视频上传完成
+            videoCondition.setStatus(Video.TRANSCODING);
+            log.debug("视频上传完成");
+        } else if ("StreamTranscodeComplete".equals(callbackVO.getEventType())) {
+            // 视频单个清晰度转码完成
+            videoCondition.setStatus(Video.NORMAL);
+            videoCondition.setPlayUrl(callbackVO.getFileUrl());
+            log.debug("视频单个清晰度转码完成");
 
-            videoCondition.setLastEditTime(new Date());
-            videoService.updateVideoByVideoId(videoCondition);
+
         }
+
+        videoCondition.setLastEditTime(new Date());
+        try {
+            videoService.updateVideoByVideoId(videoCondition);
+            challengeService.updateChallengeStatus(videoCondition.getVideoId());
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @ModelAttribute
@@ -471,8 +490,9 @@ public class VideoController {
     }
 
     @Autowired
-    public VideoController(VideoService videoService) {
+    public VideoController(VideoService videoService, ChallengeService challengeService) {
         this.videoService = videoService;
+        this.challengeService = challengeService;
     }
 
 

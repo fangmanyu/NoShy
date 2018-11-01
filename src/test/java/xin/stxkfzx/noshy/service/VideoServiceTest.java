@@ -15,6 +15,7 @@ import xin.stxkfzx.noshy.domain.VideoTag;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
 import xin.stxkfzx.noshy.vo.ImageHolder;
+import xin.stxkfzx.noshy.vo.video.CallbackVO;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -228,4 +229,10 @@ public class VideoServiceTest extends BaseTest {
         System.out.println(dto.getUploadAddress());
     }
 
+    @Test
+    public void name() throws IOException {
+        String json = "{\"Status\":\"success\",\"IsAudio\":false,\"VideoId\":\"1359cfac2e1c44c5bea27f9958999f84\",\"EventType\":\"StreamTranscodeComplete\",\"Size\":150212,\"Definition\":\"LD\",\"Fps\":\"25\",\"Duration\":10.0,\"Bitrate\":\"120\",\"Encrypt\":false,\"FileUrl\":\"http://video.stxkfzx.xin/1359cfac2e1c44c5bea27f9958999f84/fde8baa73cf04d6592e44371164634ec-46e486a30d10b47ddab9a2fe2a892e2b-ld.m3u8\",\"Format\":\"m3u8\",\"EventTime\":\"2018-10-08T09:55:51Z\",\"Height\":540,\"Width\":960,\"JobId\":\"05794af1ffee414fa1ea2210720bff09\"}";
+        CallbackVO callbackVO = new ObjectMapper().readValue(json, CallbackVO.class);
+        System.out.println(callbackVO);
+    }
 }

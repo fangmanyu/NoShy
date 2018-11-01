@@ -129,7 +129,8 @@ browse_id
             #{browseId,jdbcType=INTEGER}
         )
 </insert>
-    <insert id="insertSelective" parameterType="xin.stxkfzx.noshy.domain.Post">
+    <insert id="insertSelective" parameterType="xin.stxkfzx.noshy.domain.Post" useGeneratedKeys="true" keyColumn="post_id"
+            keyProperty="postId">
         INSERT INTO post
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="postId!=null"> post_id,</if>

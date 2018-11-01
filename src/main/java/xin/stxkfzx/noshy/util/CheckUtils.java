@@ -51,6 +51,7 @@ public class CheckUtils {
         String verifyCodeExpected = (String) session.getAttribute(Constants.KAPTCHA_SESSION_KEY);
 
         log.debug("服务器验证码: {}, 客户端验证码: {}", verifyCodeExpected, verifyCodeActual);
+        log.debug("校验sessionId = {}", session.getId());
 
         if (verifyCodeActual == null || !verifyCodeActual.equals(verifyCodeExpected)) {
             return false;

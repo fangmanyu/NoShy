@@ -1,5 +1,7 @@
 package xin.stxkfzx.noshy.mapper;
+
 import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -19,7 +21,8 @@ public interface ChallengeMapper {
 
     int updateByPrimaryKey(Challenge record);
 
-    List<Challenge> find(@Param("rowIndex")int rowIndex, @Param("pageSize")int pageSize);
+    List<Challenge> find(@Param("rowIndex") int rowIndex, @Param("pageSize") int pageSize);
+
     Integer count();
 
     /**
@@ -31,8 +34,17 @@ public interface ChallengeMapper {
      * @author fmy
      * @date 2018-09-20 11:16
      */
-    String findOwnerVideoId(@Param("challengeId")int challengeId, @Param("userId")int userId);
+    String findOwnerVideoId(@Param("challengeId") int challengeId, @Param("userId") int userId);
 
+
+    Challenge findOneByChallengeIdAndStatusGreaterThanOrEqualTo(@Param("challengeId") Integer challengeId, @Param("minStatus") Integer minStatus);
+
+    List<Challenge> findByStatusGreaterThanOrEqualTo(@Param("minStatus") Integer minStatus, @Param("rowIndex") int rowIndex, @Param("pageSize") int pageSize);
+
+    Integer countByStatusGreaterThanOrEqualTo(@Param("minStatus") Integer minStatus);
+
+
+    int updateStatusByChallengeIdAndUserId(@Param("updatedStatus")Integer updatedStatus,@Param("challengeId")Integer challengeId,@Param("userId")Integer userId);
 
 
 

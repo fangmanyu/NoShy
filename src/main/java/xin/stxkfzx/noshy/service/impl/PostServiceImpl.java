@@ -66,7 +66,10 @@ public class PostServiceImpl implements PostService {
             throw new PostServiceException("创建帖子失败: " + e.getMessage());
         }
 
-        return new PostDTO(true, "创建帖子成功");
+        PostDTO dto = new PostDTO(true, "创建帖子成功");
+
+        dto.setPostId(post.getPostId());
+        return dto;
     }
 
     @Transactional(rollbackFor = PostServiceException.class)

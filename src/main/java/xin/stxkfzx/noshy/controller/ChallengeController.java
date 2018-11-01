@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import xin.stxkfzx.noshy.domain.Challenge;
 import xin.stxkfzx.noshy.domain.Rank;
 import xin.stxkfzx.noshy.domain.User;
@@ -18,18 +19,17 @@ import xin.stxkfzx.noshy.dto.ChallengeDTO;
 import xin.stxkfzx.noshy.exception.ChallengeServiceException;
 import xin.stxkfzx.noshy.service.ChallengeService;
 import xin.stxkfzx.noshy.service.UserService;
-import xin.stxkfzx.noshy.vo.ChallengeDetailVO;
-import xin.stxkfzx.noshy.vo.JSONResponse;
-import xin.stxkfzx.noshy.vo.LikeChallengeVO;
-import xin.stxkfzx.noshy.vo.UserVO;
+import xin.stxkfzx.noshy.vo.*;
 import xin.stxkfzx.noshy.vo.challenge.CreateChallengeVO;
 import xin.stxkfzx.noshy.vo.challenge.RankDetailVO;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 挑战API
@@ -119,6 +119,36 @@ public class ChallengeController {
     }
 
 
+    @ApiOperation(value = "创建挑战")
+    @PostMapping()
+    public JSONResponse createChallenge(@RequestParam(required = false) String challengeTitle,
+                                        @NotEmpty @RequestParam String videoId,
+                                        @RequestParam(required = false) MultipartFile image) {
+
+        Challenge challenge = new Challenge();
+        challenge.setChallengeName(challengeTitle);
+        try {
+            ImageHolder holder = Optional.ofNullable(image).map(multipartFile -> {
+                try {
+                    ImageHolder imageHolder = new ImageHolder(multipartFile.getOriginalFilename(), multipartFile.getInputStream());
+                    return imageHolder;
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            }).orElse(null);
+
+            try {
+                ChallengeDTO dto = challengeService.addChallenge(challenge, videoId, holder);
+                return new JSONResponse(dto.getSuccess(), dto.getMessage());
+            } catch (ChallengeServiceException e) {
+                log.error(e.getMessage());
+                return new JSONResponse(false, e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            return new JSONResponse(false, "系统内部错误");
+        }
+    }
 
 
     @ModelAttribute

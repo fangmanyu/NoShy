@@ -22,14 +22,14 @@ public interface VideoMapper {
 
     List<Video> selectByVideoCondition(@Param("videoCondition") Video videoCondition,
                                        @Param("rowIndex") int rowIndex,
-                                       @Param("pageSize") int pageSize, @Param("schoolId") Integer schoolId, @Param("isOurSchool")boolean isOurSchool);
+                                       @Param("pageSize") int pageSize, @Param("schoolId") Integer schoolId, @Param("isOurSchool")Boolean isOurSchool);
 
-    int countByVideoCondition(@Param("videoCondition") Video videoCondition, @Param("schoolId") Integer schoolId, @Param("isOurSchool")boolean isOurSchool);
+    int countByVideoCondition(@Param("videoCondition") Video videoCondition, @Param("schoolId") Integer schoolId, @Param("isOurSchool")Boolean isOurSchool);
 
 
     int updateVideoStatus(@Param("videoId") String videoId, @Param("status") String status);
 
     List<Video> selectByCategoryIdAndStatus(@Param("cateId") Long cateId, @Param("status")String status);
 
-    List<Video> findByUserId(@Param("userId")Long userId);
+    List<Video> findByUserIdAndStatus(@Param("userId") Long userId, @Param("status")String status);
 }

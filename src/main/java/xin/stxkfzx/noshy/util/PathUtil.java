@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class PathUtil {
     private static final String DEFAULT_PATH_WIN = "D:/doc/intellij/NoShy/images";
-    private static final String DEFAULT_PATH_OTHER = "/home/fmy/image/";
+    private static final String DEFAULT_PATH_OTHER = "/usr/local/spring-boot-product/noshy/images";
     public static final String DOMAIN = "119.23.208.165:8080";
     private static String separator = System.getProperty("file.separator");
 

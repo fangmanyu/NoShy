@@ -25,12 +25,11 @@ public class ChallengeServiceTest extends BaseTest {
     @Test
     public void addChallenge() {
         Challenge challenge = new Challenge();
-        challenge.setChallengeName("编成挑战");
-        challenge.setChallengeDescription("学习编程好能手");
-        challenge.setUserId(27);
+        challenge.setChallengeName("测试挑战三");
+        challenge.setChallengeDescription("测试挑战三");
 
         try {
-            ChallengeDTO challengeDTO = service.addChallenge(challenge, "a954b24b01294a6e9cd5d367b22467a3", null);
+            ChallengeDTO challengeDTO = service.addChallenge(challenge, "8360f865364a4bd284ac5c46b419c9e1", null);
             assertTrue(challengeDTO.getSuccess());
         } catch (ChallengeServiceException e) {
             e.printStackTrace();
@@ -44,11 +43,11 @@ public class ChallengeServiceTest extends BaseTest {
         System.out.println(s);
     }
 
-    // @Commit
+    @Commit
     @Test
     public void addChallengeVideo() {
-        String videoId = "962dbcf0eb424cbe93d62f8da5ffec80";
-        Integer challengeId = 3;
+        String videoId = "f29b6928de314b1e99c7997e41959173";
+        Integer challengeId = 10;
         ChallengeDTO dto = service.addChallengeVideo(videoId, challengeId);
         System.out.println(dto);
         assertTrue(dto.getSuccess());
