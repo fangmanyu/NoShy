@@ -48,15 +48,13 @@ public class CommentController {
     @ApiOperation(value = "添加评论")
     @PostMapping
     public JSONResponse addComment(@RequestBody @Validated @ApiParam AddCommentVO commentInfo) {
-        // FIXME: 2018/9/5 0005 解除注释
-        // if (currentUser == null || currentUser.getUserId() == null) {
-        //     return new JSONResponse(false, "用户尚未登录");
-        // }
+        if (currentUser == null || currentUser.getUserId() == null) {
+            return new JSONResponse(false, "用户尚未登录");
+        }
 
         Comment comment = new Comment();
         BeanUtils.copyProperties(commentInfo, comment);
-        // FIXME: 2018/9/5 0005 解除注释
-        // comment.setUserId(currentUser.getUserId());
+        comment.setUserId(currentUser.getUserId());
         log.debug("添加评论信息: {}", comment);
 
         try {
@@ -80,10 +78,9 @@ public class CommentController {
     @ApiImplicitParam(name = "commentId", value = "评论Id")
     @DeleteMapping("/{commentId}")
     public JSONResponse removeComment(@PathVariable @Min(0) int commentId) {
-        // FIXME: 2018/9/6 0006 解除注释
-        // if (currentUser == null || currentUser.getUserId() == null) {
-        //     return new JSONResponse(false, "用户尚未登录");
-        // }
+        if (currentUser == null || currentUser.getUserId() == null) {
+            return new JSONResponse(false, "用户尚未登录");
+        }
 
         try {
             CommentDTO commentDTO = commentService.removerComment(commentId);

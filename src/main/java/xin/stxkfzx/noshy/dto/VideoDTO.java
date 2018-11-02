@@ -1,5 +1,6 @@
 package xin.stxkfzx.noshy.dto;
 
+import xin.stxkfzx.noshy.domain.BrowseInformation;
 import xin.stxkfzx.noshy.domain.Video;
 import xin.stxkfzx.noshy.domain.VideoCategory;
 
@@ -21,6 +22,7 @@ public class VideoDTO extends BaseDTO{
     private String uploadAuth;
     private String uploadAddress;
     private String videoId;
+    private BrowseInformation browseInformation;
 
 
     public VideoDTO(Boolean success, String message) {
@@ -122,5 +124,13 @@ public class VideoDTO extends BaseDTO{
 
     public String getVideoId() {
         return videoId;
+    }
+
+    public void setBrowseInformation(BrowseInformation browseInformation) {
+        this.browseInformation = browseInformation;
+    }
+
+    public BrowseInformation getBrowseInformation() {
+        return browseInformation;
     }
 }

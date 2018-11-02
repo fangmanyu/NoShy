@@ -111,4 +111,14 @@ public interface ChallengeService {
      * @date 2018-10-06 1:58
      */
     ChallengeDTO updateChallengeStatus(String videoId) throws ChallengeServiceException;
+
+    /**
+     * 获取视频参与的挑战列表Id
+     *
+     * @param videoId
+     * @return
+     * @author fmy
+     * @date 2018-11-02 17:12
+     */
+    ChallengeDTO listChallengeIdByVideo(String videoId);
 }

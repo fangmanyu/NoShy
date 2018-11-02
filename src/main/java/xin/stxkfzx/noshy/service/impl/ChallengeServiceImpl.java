@@ -15,6 +15,7 @@ import xin.stxkfzx.noshy.util.PageCalculator;
 import xin.stxkfzx.noshy.util.PathUtil;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -178,7 +179,6 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeDTO challengeDTO = Optional.ofNullable(challenge).map(item -> {
             List<Rank> rankList = rankMapper.findByChallengeIdAndTypeAndStatusOrderByLikesDesc(item.getChallengeId(), Rank.CHALLENGE, Challenge.CHALLENGEING);
             ChallengeDTO dto = new ChallengeDTO(true, "查询成功");
-            dto.setChallenge(item);
             dto.setRankList(rankList);
             dto.setChallenge(challenge);
             return dto;
@@ -276,6 +276,15 @@ public class ChallengeServiceImpl implements ChallengeService {
         }).orElse(new ChallengeDTO(false, "视频不存在"));
 
 
+        return dto;
+    }
+
+    @Override
+    public ChallengeDTO listChallengeIdByVideo(String videoId) {
+        List<Integer> challengeIdList = relationMapper.findChallengeIdByVideoId(videoId);
+
+        ChallengeDTO dto = new ChallengeDTO(true, "查询成功");
+        dto.setChallengeIdList(challengeIdList);
         return dto;
     }
 

@@ -15,19 +15,15 @@ public class ChallengeDTO extends BaseDTO{
     private List<Rank> rankList;
     private Integer count;
     private List<Challenge> challengeList;
+    private List<Integer> challengeIdList;
 
     public ChallengeDTO(Boolean success, String message) {
         super(success, message);
     }
 
-    @Override
-    public String toString() {
-        return "ChallengeDTO{" +
-                "challenge=" + challenge +
-                ", rankList=" + rankList +
-                ", count=" + count +
-                ", challengeList=" + challengeList +
-                "} " + super.toString();
+    public ChallengeDTO(Boolean success, String message, List<Challenge> challengeList) {
+        super(success, message);
+        this.challengeList = challengeList;
     }
 
     public Challenge getChallenge() {
@@ -60,5 +56,24 @@ public class ChallengeDTO extends BaseDTO{
 
     public List<Challenge> getChallengeList() {
         return challengeList;
+    }
+
+    @Override
+    public String toString() {
+        return "ChallengeDTO{" +
+                "challenge=" + challenge +
+                ", rankList=" + rankList +
+                ", count=" + count +
+                ", challengeList=" + challengeList +
+                ", challengeIdList=" + challengeIdList +
+                "} " + super.toString();
+    }
+
+    public void setChallengeIdList(List<Integer> challengeIdList) {
+        this.challengeIdList = challengeIdList;
+    }
+
+    public List<Integer> getChallengeIdList() {
+        return challengeIdList;
     }
 }

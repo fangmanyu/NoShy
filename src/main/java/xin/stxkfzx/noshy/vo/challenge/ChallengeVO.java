@@ -1,4 +1,4 @@
-package xin.stxkfzx.noshy.vo.challenge.challenge;
+package xin.stxkfzx.noshy.vo.challenge;
 
 /**
  * 挑战信息 VO
@@ -6,14 +6,14 @@ package xin.stxkfzx.noshy.vo.challenge.challenge;
  * @author fmy
  * @date 2018-11-01 22:28
  */
-public class ChallengeInfoVO {
+public class ChallengeVO {
     private Integer challengeId;
     private String challengeName;
     private Integer joinNum;
 
     @Override
     public String toString() {
-        return "ChallengeInfoVO{" +
+        return "ChallengeVO{" +
                 "challengeId=" + challengeId +
                 ", challengeName='" + challengeName + '\'' +
                 ", joinNum=" + joinNum +

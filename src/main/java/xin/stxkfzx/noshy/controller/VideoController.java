@@ -2,6 +2,7 @@ package xin.stxkfzx.noshy.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,28 +15,22 @@ import springfox.documentation.annotations.ApiIgnore;
 import xin.stxkfzx.noshy.domain.User;
 import xin.stxkfzx.noshy.domain.Video;
 import xin.stxkfzx.noshy.domain.VideoTag;
+import xin.stxkfzx.noshy.dto.ChallengeDTO;
 import xin.stxkfzx.noshy.dto.VideoDTO;
-import xin.stxkfzx.noshy.exception.ChallengeServiceException;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
 import xin.stxkfzx.noshy.service.ChallengeService;
 import xin.stxkfzx.noshy.service.VideoService;
 import xin.stxkfzx.noshy.util.CheckUtils;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 import xin.stxkfzx.noshy.vo.JSONResponse;
-import xin.stxkfzx.noshy.vo.video.AuthVo;
-import xin.stxkfzx.noshy.vo.video.CallbackVO;
-import xin.stxkfzx.noshy.vo.video.ListVideosVO;
-import xin.stxkfzx.noshy.vo.video.UploadAuthVO;
+import xin.stxkfzx.noshy.vo.challenge.ChallengeVO;
+import xin.stxkfzx.noshy.vo.video.*;
 
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 
 /**
@@ -55,6 +50,8 @@ public class VideoController {
      */
     private static final long MAX_VIDEO_FILE_SIZE = 6710886400L;
     private static final Logger log = LogManager.getLogger(VideoController.class);
+    private static final String FILE_UPLOAD_COMPLETE = "FileUploadComplete";
+    private static final String STREAM_TRANSCODE_COMPLETE = "StreamTranscodeComplete";
 
     private final VideoService videoService;
     private final ChallengeService challengeService;
@@ -136,7 +133,8 @@ public class VideoController {
         } catch (VideoServiceException e) {
             e.printStackTrace();
         }
-        return new JSONResponse(videoDTO.getSuccess(), videoDTO.getMessage());
+
+        return new JSONResponse(BooleanUtils.isTrue(videoDTO.getSuccess()), videoDTO.getMessage());
     }
 
 
@@ -185,16 +183,20 @@ public class VideoController {
             return new JSONResponse(false, "videoId 为空");
         }
 
-        VideoDTO video = videoService.getVideoByVideoId(videoId);
+        VideoDTO dto = videoService.getVideoByVideoId(videoId);
+        return new JSONResponse(dto.getSuccess(), dto.getMessage(), getVideoDetail(dto));
+    }
 
-        JSONResponse jsonResponse = new JSONResponse(video.getSuccess(), video.getMessage());
-        if (video.getSuccess()) {
-            Video data = video.getVideo();
-            log.debug("查询的视频信息: {}", data);
-            jsonResponse.setData(data);
+    private VideoDetailVO getVideoDetail(VideoDTO dto) {
+        if (dto.getSuccess()) {
+            VideoVO videoVO = getVideoVO(dto.getVideo());
+            VideoDetailVO detailVO = new VideoDetailVO();
+            detailVO.setVideo(videoVO);
+            detailVO.setBrowseInformation(dto.getBrowseInformation());
+
+            return detailVO;
         }
-
-        return jsonResponse;
+        return null;
     }
 
 
@@ -242,23 +244,16 @@ public class VideoController {
         video.setStatus(Video.NORMAL);
         VideoDTO videoDTO = videoService.listVideo(video, pageIndex, pageSize, schoolId, isOurSchool);
 
-
         if (videoDTO.getSuccess()) {
+            List<Video> videoList = videoDTO.getVideoList();
+            List<VideoVO> videoVOS = new ArrayList<>(videoList.size());
             for (Video temp :
-                    videoDTO.getVideoList()) {
-                if (temp.getPlayUrl() == null) {
-
-                    String videoId = temp.getVideoId();
-                    VideoDTO playUrl = videoService.getPlayUrl(videoId);
-
-                    if (playUrl.getSuccess()) {
-                        temp.setPlayUrl(playUrl.getPlayUrl());
-                    }
-                }
+                    videoList) {
+                videoVOS.add(getVideoVO(temp));
             }
 
             Map<String, Object> modelMap = new HashMap<>(3);
-            modelMap.put("videoList", videoDTO.getVideoList());
+            modelMap.put("videoList", videoVOS);
             modelMap.put("count", videoDTO.getCount());
             return new JSONResponse(true, "查询成功", modelMap);
         }
@@ -266,10 +261,45 @@ public class VideoController {
         return new JSONResponse(false, "查询失败：" + videoDTO.getMessage());
     }
 
+    private VideoVO getVideoVO(Video video) {
+        VideoVO videoVO;
+        if (video.getPlayUrl() == null) {
+
+            String videoId = video.getVideoId();
+            VideoDTO playUrl = videoService.getPlayUrl(videoId);
+
+            if (playUrl.getSuccess()) {
+                video.setPlayUrl(playUrl.getPlayUrl());
+            }
+        }
+        videoVO = new VideoVO();
+        BeanUtils.copyProperties(video, videoVO);
+
+        ChallengeDTO challengeDTO = challengeService.listChallengeIdByVideo(video.getVideoId());
+        List<ChallengeVO> challengeVOS = Optional.ofNullable(challengeDTO.getChallengeIdList()).map(ids -> {
+            List<ChallengeVO> vos = new ArrayList<>(ids.size());
+            ChallengeVO vo;
+            for (Integer id : ids) {
+                ChallengeDTO dto = challengeService.getChallengeByChallengeId(id);
+                if (dto.getSuccess()) {
+                    vo = new ChallengeVO();
+                    BeanUtils.copyProperties(dto.getChallenge(), vo);
+                    vo.setJoinNum(dto.getRankList().size());
+                    vos.add(vo);
+                }
+
+            }
+            return vos;
+        }).orElse(null);
+        videoVO.setJoinChallengeList(challengeVOS);
+        return videoVO;
+    }
+
 
     /**
      * 上传视频
      *
+     * @deprecated 通过I/O流上传视频,已经不再使用.可以作为本地批量上传视频使用
      * @param title
      * @param videoCategory
      * @param videoFile
@@ -286,7 +316,7 @@ public class VideoController {
             @ApiImplicitParam(name = "description", value = "视频描述"),
             @ApiImplicitParam(name = "tags", value = "视频标签。最多16个标签，每个标签不能超过5个字，标签之间以英文状态下的逗号(,)隔开")
     })
-    // @PostMapping
+    @Deprecated
     public JSONResponse uploadVideo(@RequestParam("title") String title,
                                     @RequestParam("videoCategory") Long videoCategory,
                                     @ApiParam(value = "视频文件流对象", required = true) @RequestParam("videoFile") MultipartFile videoFile,
@@ -424,44 +454,16 @@ public class VideoController {
     @PostMapping("/callback")
     @ApiIgnore()
     public void getCallbackInfo(@RequestBody CallbackVO callbackVO, HttpServletRequest request) {
-
-    /*    BufferedReader br = null;
-        //CallbackVO callbackVO = new CallbackVO();
-        try {
-            br = new BufferedReader(new InputStreamReader(request.getInputStream(), "utf-8"));
-            StringBuffer sb = new StringBuffer();
-            String temp;
-            while ((temp = br.readLine()) != null) {
-                sb.append(temp);
-            }
-            br.close();
-
-            System.out.println("视频处理回调----------------");
-            System.out.println(sb.toString());
-            //callbackVO = new ObjectMapper().readValue(sb.toString(), CallbackVO.class);
-            System.out.println("视频处理回调结束----------------");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }*/
-
         log.debug("视频上传回调信息: {}", callbackVO);
 
         Video videoCondition = new Video();
         videoCondition.setVideoId(callbackVO.getVideoId());
 
-        if ("FileUploadComplete".equals(callbackVO.getEventType())) {
+        if (FILE_UPLOAD_COMPLETE.equals(callbackVO.getEventType())) {
             // 视频上传完成
             videoCondition.setStatus(Video.TRANSCODING);
             log.debug("视频上传完成");
-        } else if ("StreamTranscodeComplete".equals(callbackVO.getEventType())) {
+        } else if (STREAM_TRANSCODE_COMPLETE.equals(callbackVO.getEventType())) {
             // 视频单个清晰度转码完成
             videoCondition.setStatus(Video.NORMAL);
             videoCondition.setPlayUrl(callbackVO.getFileUrl());

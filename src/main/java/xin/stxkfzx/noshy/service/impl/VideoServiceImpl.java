@@ -74,7 +74,7 @@ public class VideoServiceImpl implements VideoService {
         }
 
         Video video = videoMapper.selectByPrimaryKey(videoId);
-        if (!video.getStatus().equals(Video.NORMAL)) {
+        if (!StringUtils.equals(Video.NORMAL, video.getStatus())) {
             return new VideoDTO(false, "状态错误");
         }
         if (video.getPlayUrl() != null) {
@@ -201,20 +201,15 @@ public class VideoServiceImpl implements VideoService {
             return new VideoDTO(false, "videoId 为空");
         }
 
-        // TODO 从阿里云获取视频状态，并更新到数据库中。这是获取视频状态的一个权宜之计(策略:你用我才更新),以后需要改进
-        try {
-            GetVideoInfoResponse response = getVideoInfo(videoId);
-            String status = response.getVideo().getStatus();
-            videoMapper.updateVideoStatus(videoId, status);
-        } catch (Exception e) {
-            log.error("视频状态获取失败");
-            throw new VideoServiceException("视频状态获取失败: " + e.getMessage());
-        }
-
         Video video = videoMapper.selectByPrimaryKey(videoId);
         log.debug("从数据库中查询的video信息: {}", video);
 
-        return new VideoDTO(true, "查询成功", video);
+        VideoDTO dto = new VideoDTO(true, "查询成功", video);
+        // 添加浏览信息
+        Optional.ofNullable(video).ifPresent(v ->
+                dto.setBrowseInformation(browseInformationMapper.selectByPrimaryKey(v.getBrowseId())));
+
+        return dto;
     }
 
 
