@@ -32,8 +32,8 @@ public class BrowseServiceImpl implements BrowseService {
     private final ChallengeMapper challengeMapper;
     private final BrowseInformationMapper browseInformationMapper;
 
-    // isolation = Isolation.READ_COMMITTED 表示该事务只能读取另一个事务已提交的的数据.可以避免脏读
-    @Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = BrowseException.class)
+
+    @Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = BrowseException.class) // isolation = Isolation.READ_COMMITTED 表示该事务只能读取另一个事务已提交的的数据.可以避免脏读
     @Override
     public BrowseDTO updateBrowseInfo(int browseType, String belongId, String typeName) throws BrowseException {
         Integer browseId = getBrowseIdByBrowseTypeAndBelongId(browseType, belongId);
