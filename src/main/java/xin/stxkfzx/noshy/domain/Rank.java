@@ -11,7 +11,7 @@ public class Rank {
 
     private Integer rankId;
 
-    private Integer grade;
+
 
     private Integer type;
 
@@ -32,7 +32,6 @@ public class Rank {
     public String toString() {
         return "Rank{" +
                 "rankId=" + rankId +
-                ", grade=" + grade +
                 ", type=" + type +
                 ", status=" + status +
                 ", likes=" + likes +
@@ -58,14 +57,6 @@ public class Rank {
 
     public void setRankId(Integer rankId) {
         this.rankId = rankId;
-    }
-
-    public Integer getGrade() {
-        return grade;
-    }
-
-    public void setGrade(Integer grade) {
-        this.grade = grade;
     }
 
     public Integer getType() {

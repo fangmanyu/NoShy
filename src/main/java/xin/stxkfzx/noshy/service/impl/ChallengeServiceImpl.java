@@ -1,9 +1,11 @@
 package xin.stxkfzx.noshy.service.impl;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import xin.stxkfzx.noshy.domain.*;
 import xin.stxkfzx.noshy.dto.ChallengeDTO;
@@ -15,7 +17,6 @@ import xin.stxkfzx.noshy.util.PageCalculator;
 import xin.stxkfzx.noshy.util.PathUtil;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final BrowseInformationMapper browseInformationMapper;
     private final VideoMapper videoMapper;
     private final ImageMapper imageMapper;
+    private final UserChallengeVideoLikesMapper userChallengeVideoLikesMapper;
 
     @Transactional(rollbackFor = ChallengeServiceException.class)
     @Override
@@ -105,7 +107,6 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         // 添加排名
         Rank rank = new Rank();
-        rank.setGrade(1);
         rank.setUserId(challenge.getUserId());
         rank.setChallengeId(challenge.getChallengeId());
         rank.setCreateTime(new Date());
@@ -150,7 +151,6 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         // 添加排名
         Rank rank = new Rank();
-        rank.setGrade(rankMapper.countByChallengeId(challengeId) + 1);
         rank.setUserId(video.getUserId().intValue());
         rank.setChallengeId(challenge.getChallengeId());
         rank.setCreateTime(new Date());
@@ -175,7 +175,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     public ChallengeDTO getChallengeByChallengeId(int challengeId) {
         // 获取具体的挑战信息,包括:挑战信息,排名信息
         Challenge challenge = challengeMapper.findOneByChallengeIdAndStatusGreaterThanOrEqualTo(challengeId, Challenge.CHALLENGEING);
-
+        // 根据点赞量进行排名
         ChallengeDTO challengeDTO = Optional.ofNullable(challenge).map(item -> {
             List<Rank> rankList = rankMapper.findByChallengeIdAndTypeAndStatusOrderByLikesDesc(item.getChallengeId(), Rank.CHALLENGE, Challenge.CHALLENGEING);
             ChallengeDTO dto = new ChallengeDTO(true, "查询成功");
@@ -214,33 +214,26 @@ public class ChallengeServiceImpl implements ChallengeService {
         // 直接找挑战图片,有则返回,没有下一步
         // 查找创建挑战视频封面,有则返回,没有返回null
         Challenge challenge = challengeMapper.selectByPrimaryKey(challengeId);
-        String image = Optional.ofNullable(challenge).map(item -> {
+
+        return Optional.ofNullable(challenge).map(item -> {
             String imageUrl = item.getImageUrl();
-            String addr = Optional.ofNullable(imageUrl).orElseGet(() -> {
+            return Optional.ofNullable(imageUrl).orElseGet(() -> {
                 String videoId = challengeMapper.findOwnerVideoId(item.getChallengeId(), item.getUserId());
                 return Optional.ofNullable(videoId).map(id -> {
                     Video video = videoMapper.selectByPrimaryKey(id);
                     return video.getImageUrl();
                 }).orElse(null);
             });
-            return addr;
 
         }).orElse(null);
-
-        return image;
     }
-
-    @Override
-    public ChallengeDTO updateChallengeRank(int challengeId) throws ChallengeServiceException {
-        return null;
-    }
-
 
     @Transactional(rollbackFor = ChallengeServiceException.class)
     @Override
     public ChallengeDTO updateChallengeStatus(String videoId) throws ChallengeServiceException {
         Video video = videoMapper.selectByPrimaryKey(videoId);
-        ChallengeDTO dto = Optional.ofNullable(video).map(v -> {
+
+        return Optional.ofNullable(video).map(v -> {
             Integer userId = v.getUserId().intValue();
             String status = v.getStatus();
             int updatedStatus = statusTransposition(status);
@@ -274,9 +267,6 @@ public class ChallengeServiceImpl implements ChallengeService {
             }
 
         }).orElse(new ChallengeDTO(false, "视频不存在"));
-
-
-        return dto;
     }
 
     @Override
@@ -288,14 +278,75 @@ public class ChallengeServiceImpl implements ChallengeService {
         return dto;
     }
 
+    @Override
+    public boolean isLiked(Integer rankId, Integer currentUserId) {
+        UserChallengeVideoLikes userChallengeVideoLikes = userChallengeVideoLikesMapper.selectByPrimaryKey(currentUserId, rankId);
+        return Optional.ofNullable(userChallengeVideoLikes).map(UserChallengeVideoLikes::getStatus).map(status -> status.equals(UserChallengeVideoLikes.LIKED)).orElse(false);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = ChallengeServiceException.class)
+    @Override
+    public ChallengeDTO likeIt(Integer rankId, Integer currentUserId) throws ChallengeServiceException {
+        // 创建或更新UserChallengeVideoLike记录, 更新挑战视频点赞量
+        Rank rank = rankMapper.selectByPrimaryKey(rankId);
+        Optional.ofNullable(userChallengeVideoLikesMapper.selectByPrimaryKey(currentUserId, rankId)).map(userChallengeVideoLikes -> {
+            Integer status = userChallengeVideoLikes.getStatus();
+
+            if (status == UserChallengeVideoLikes.LIKED) {
+                rank.setLikes(rank.getLikes() - 1);
+                userChallengeVideoLikes.setStatus(UserChallengeVideoLikes.NOT_LiKE);
+            } else if (status == UserChallengeVideoLikes.NOT_LiKE) {
+                rank.setLikes(rank.getLikes() + 1);
+                userChallengeVideoLikes.setStatus(UserChallengeVideoLikes.LIKED);
+            } else {
+                log.error("status: {} 错误", status);
+                throw new ChallengeServiceException("status 异常");
+            }
+            userChallengeVideoLikes.setLastEditTime(new Date());
+            rank.setLastEditTime(new Date());
+
+            try {
+                rankMapper.updateByPrimaryKeySelective(rank);
+                userChallengeVideoLikesMapper.updateByPrimaryKeySelective(userChallengeVideoLikes);
+            } catch (Exception e) {
+                throw new ChallengeServiceException(e);
+            }
+            return rank;
+        }).orElseGet(() -> {
+            UserChallengeVideoLikes userChallengeVideoLikes = new UserChallengeVideoLikes();
+            userChallengeVideoLikes.setStatus(UserChallengeVideoLikes.LIKED);
+            userChallengeVideoLikes.setCreateTime(new Date());
+            userChallengeVideoLikes.setLastEditTime(new Date());
+            userChallengeVideoLikes.setRankId(rankId);
+            userChallengeVideoLikes.setUserId(currentUserId);
+
+            rank.setLikes(rank.getLikes() + 1);
+            rank.setLastEditTime(new Date());
+
+            try {
+                rankMapper.updateByPrimaryKeySelective(rank);
+                userChallengeVideoLikesMapper.updateByPrimaryKeySelective(userChallengeVideoLikes);
+            } catch (Exception e) {
+                throw new ChallengeServiceException(e);
+            }
+
+            return rank;
+        });
+
+        return new ChallengeDTO(true, "操作成功");
+    }
+
     @Autowired
-    public ChallengeServiceImpl(ChallengeMapper challengeMapper, RankMapper rankMapper, ChallengeVideoRelationMapper relationMapper, BrowseInformationMapper browseInformationMapper, VideoMapper videoMapper, ImageMapper imageMapper) {
+    public ChallengeServiceImpl(ChallengeMapper challengeMapper, RankMapper rankMapper,
+                                ChallengeVideoRelationMapper relationMapper, BrowseInformationMapper browseInformationMapper,
+                                VideoMapper videoMapper, ImageMapper imageMapper, UserChallengeVideoLikesMapper userChallengeVideoLikesMapper) {
         this.challengeMapper = challengeMapper;
         this.rankMapper = rankMapper;
         this.relationMapper = relationMapper;
         this.browseInformationMapper = browseInformationMapper;
         this.videoMapper = videoMapper;
         this.imageMapper = imageMapper;
+        this.userChallengeVideoLikesMapper = userChallengeVideoLikesMapper;
     }
 
     private int statusTransposition(String videoStatus) {

@@ -19,6 +19,7 @@ import xin.stxkfzx.noshy.dto.ChallengeDTO;
 import xin.stxkfzx.noshy.exception.ChallengeServiceException;
 import xin.stxkfzx.noshy.service.ChallengeService;
 import xin.stxkfzx.noshy.service.UserService;
+import xin.stxkfzx.noshy.util.CheckUtils;
 import xin.stxkfzx.noshy.vo.*;
 import xin.stxkfzx.noshy.vo.challenge.CreateChallengeVO;
 import xin.stxkfzx.noshy.vo.challenge.RankDetailVO;
@@ -68,9 +69,13 @@ public class ChallengeController {
             UserVO userVO = new UserVO();
             userVO.setUserName(user.getUserName());
             userVO.setUserId(userId);
+
             BeanUtils.copyProperties(rank, detailVO);
             detailVO.setUserInfo(userVO);
             detailVO.setHeadPortraitAddr(userDetail.getHeadPortraitAddr());
+            Integer currentUserId = Optional.ofNullable(currentUser).map(User::getUserId).map(Long::intValue).orElse(-1);
+            boolean liked = challengeService.isLiked(rank.getRankId(), currentUserId);
+            detailVO.setHasLiked(liked);
             rankDetailVOList.add(detailVO);
         }
 
@@ -103,7 +108,7 @@ public class ChallengeController {
             @ApiImplicitParam(name = "videoId", value = "视频Id"),
             @ApiImplicitParam(name = "challengeId", value = "加入挑战Id")
     })
-    @GetMapping("/{challengeId}/{videoId}/addChallengeVideo")
+    @PostMapping("/{challengeId}/{videoId}/addChallengeVideo")
     public JSONResponse addVideoToChallenge(@PathVariable @NotEmpty String videoId,
                                             @PathVariable @Min(0) Integer challengeId) {
 
@@ -148,6 +153,17 @@ public class ChallengeController {
         } catch (RuntimeException e) {
             return new JSONResponse(false, "系统内部错误");
         }
+    }
+
+    @ApiOperation(value = "挑战视频点赞")
+    @ApiImplicitParam(name = "rankId", value = "排名Id")
+    @PutMapping("/{rankId}/addLike")
+    public JSONResponse addLike(@PathVariable @Min(0) Integer rankId) {
+        if (!CheckUtils.checkCurrentUserExist(currentUser)) {
+            return new JSONResponse(false, "用户尚未登录");
+        }
+        ChallengeDTO dto = challengeService.likeIt(rankId, currentUser.getUserId().intValue());
+        return new JSONResponse(dto.getSuccess(), dto.getMessage());
     }
 
 

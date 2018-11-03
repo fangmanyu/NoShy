@@ -92,21 +92,11 @@ public interface ChallengeService {
     String getChallengeImage(int challengeId);
 
     /**
-     * 更新指定挑战排名
-     *
-     * @param challengeId
-     * @return
-     * @throws ChallengeServiceException
-     * @author fmy
-     * @date 2018-09-20 13:20
-     */
-    ChallengeDTO updateChallengeRank(int challengeId) throws ChallengeServiceException;
-
-    /**
      * 根据视频的状态更新挑战状态
      *
      * @param videoId
      * @return
+     * @throws ChallengeServiceException
      * @author 59261
      * @date 2018-10-06 1:58
      */
@@ -121,4 +111,26 @@ public interface ChallengeService {
      * @date 2018-11-02 17:12
      */
     ChallengeDTO listChallengeIdByVideo(String videoId);
+
+    /**
+     * 判断当前用户对于指定挑战视频是否进行点赞
+     *
+     * @param rankId
+     * @param currentUserId
+     * @return true-点赞; false-未点赞
+     * @author fmy
+     * @date 2018-11-03 15:45
+     */
+    boolean isLiked(Integer rankId, Integer currentUserId);
+
+    /**
+     * 对挑战视频进行点赞
+     *
+     * @param rankId
+     * @param currentUserId
+     * @return
+     * @author fmy
+     * @date 2018-11-03 16:18
+     */
+    ChallengeDTO likeIt(Integer rankId, Integer currentUserId) throws ChallengeServiceException;
 }
