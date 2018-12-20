@@ -5,6 +5,7 @@ import xin.stxkfzx.noshy.domain.Video;
 import xin.stxkfzx.noshy.domain.VideoCategory;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 封装Video的DTO类
@@ -23,6 +24,7 @@ public class VideoDTO extends BaseDTO{
     private String uploadAddress;
     private String videoId;
     private BrowseInformation browseInformation;
+    private Map<Video, BrowseInformation> videoDetailMap;
 
 
     public VideoDTO(Boolean success, String message) {
@@ -48,10 +50,19 @@ public class VideoDTO extends BaseDTO{
                 ", playUrl='" + playUrl + '\'' +
                 ", videoCategory=" + videoCategory +
                 ", videoCategoryList=" + videoCategoryList +
+                ", videoDetailMap=" + videoDetailMap +
                 ", uploadAuth='" + uploadAuth + '\'' +
                 ", uploadAddress='" + uploadAddress + '\'' +
                 ", videoId='" + videoId + '\'' +
                 "} " + super.toString();
+    }
+
+    public  Map<Video, BrowseInformation> getVideoDetailMap() {
+        return videoDetailMap;
+    }
+
+    public void setVideoDetailMap(Map<Video, BrowseInformation> videoDetailMap) {
+        this.videoDetailMap = videoDetailMap;
     }
 
     public List<VideoCategory> getVideoCategoryList() {

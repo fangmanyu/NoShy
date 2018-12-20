@@ -72,7 +72,7 @@ public interface ChallengeService {
     /**
      * 根据条件分页获取挑战列表
      *
-     * @param challengeCondition 查询条件: 创建时间,状态
+     * @param challengeCondition 查询条件: 创建时间,状态,挑战名称
      * @param pageIndex
      * @param pageSize
      * @return
@@ -133,4 +133,14 @@ public interface ChallengeService {
      * @date 2018-11-03 16:18
      */
     ChallengeDTO likeIt(Integer rankId, Integer currentUserId) throws ChallengeServiceException;
+
+    /**
+     * 获取我参与的挑战列表
+     *
+     * @param userId
+     * @return
+     * @author fmy
+     * @date 2018-11-07 15:37
+     */
+    ChallengeDTO listMyJoinChallenge(Integer userId);
 }

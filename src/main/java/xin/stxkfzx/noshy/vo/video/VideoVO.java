@@ -1,5 +1,6 @@
 package xin.stxkfzx.noshy.vo.video;
 
+import xin.stxkfzx.noshy.vo.UserVO;
 import xin.stxkfzx.noshy.vo.challenge.ChallengeVO;
 
 import java.util.Date;
@@ -19,9 +20,10 @@ public class VideoVO {
     private String imageUrl;
     private Date createTime;
     private Date lastEditTime;
-    private Long userId;
+
     private String playUrl;
     private List<ChallengeVO> joinChallengeList;
+    private UserVO userInfo;
 
     @Override
     public String toString() {
@@ -33,10 +35,18 @@ public class VideoVO {
                 ", imageUrl='" + imageUrl + '\'' +
                 ", createTime=" + createTime +
                 ", lastEditTime=" + lastEditTime +
-                ", userId=" + userId +
                 ", playUrl='" + playUrl + '\'' +
                 ", joinChallengeList=" + joinChallengeList +
+                ", userInfo=" + userInfo +
                 '}';
+    }
+
+    public UserVO getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserVO userInfo) {
+        this.userInfo = userInfo;
     }
 
     public List<ChallengeVO> getJoinChallengeList() {
@@ -101,14 +111,6 @@ public class VideoVO {
 
     public void setLastEditTime(Date lastEditTime) {
         this.lastEditTime = lastEditTime;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 
     public String getPlayUrl() {

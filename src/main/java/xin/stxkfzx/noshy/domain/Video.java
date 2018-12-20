@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @ApiModel
 public class Video {
@@ -220,5 +221,35 @@ public class Video {
                 ", playUrl='" + playUrl + '\'' +
                 ", browseId=" + browseId +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Video video = (Video) o;
+        return Objects.equals(videoId, video.videoId) &&
+                Objects.equals(title, video.title) &&
+                Objects.equals(name, video.name) &&
+                Objects.equals(videoInputStream, video.videoInputStream) &&
+                Objects.equals(videoCategory, video.videoCategory) &&
+                Objects.equals(tags, video.tags) &&
+                Objects.equals(description, video.description) &&
+                Objects.equals(imageUrl, video.imageUrl) &&
+                Objects.equals(status, video.status) &&
+                Objects.equals(createTime, video.createTime) &&
+                Objects.equals(lastEditTime, video.lastEditTime) &&
+                Objects.equals(userId, video.userId) &&
+                Objects.equals(playUrl, video.playUrl) &&
+                Objects.equals(browseId, video.browseId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(videoId, title, name, videoInputStream, videoCategory, tags, description, imageUrl, status, createTime, lastEditTime, userId, playUrl, browseId);
     }
 }

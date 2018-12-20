@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import xin.stxkfzx.noshy.domain.Post;
 import xin.stxkfzx.noshy.domain.PostInformation;
 import xin.stxkfzx.noshy.domain.User;
+import xin.stxkfzx.noshy.domain.UserInformation;
 import xin.stxkfzx.noshy.dto.PostDTO;
 import xin.stxkfzx.noshy.exception.PostServiceException;
 import xin.stxkfzx.noshy.service.PostService;
@@ -24,6 +25,7 @@ import xin.stxkfzx.noshy.vo.ResponseSocketMessage;
 import xin.stxkfzx.noshy.vo.UserVO;
 import xin.stxkfzx.noshy.vo.post.AddPostVO;
 import xin.stxkfzx.noshy.vo.post.PostConditionVO;
+import xin.stxkfzx.noshy.vo.post.PostVO;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
@@ -138,12 +140,35 @@ public class PostController {
 
             postDTO = postService.listPost(post, pageIndex, pageSize);
         }
-
+        List<Post> postList = postDTO.getPostList();
+        List<PostVO> vos = getPostVOS(postList);
         Map<String, Object> modelMap = new HashMap<>(3);
         modelMap.put("count", postDTO.getCount());
-        modelMap.put("postList", postDTO.getPostList());
+        modelMap.put("postList", vos);
 
         return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage(), modelMap);
+    }
+
+    private List<PostVO> getPostVOS(List<Post> postList) {
+        List<PostVO> vos = new ArrayList<>(postList.size());
+        postList.forEach(post -> {
+            PostVO vo = new PostVO();
+            BeanUtils.copyProperties(post, vo);
+            vo.setUserInfo(getUserVo(Long.valueOf(post.getUserId())));
+            vos.add(vo);
+        });
+        return vos;
+    }
+
+    private UserVO getUserVo(Long userId) {
+        UserInformation userDetail = userService.getUserDetail(userId);
+        User user = userService.getUser(userId);
+        UserVO userVO = new UserVO();
+        userVO.setUserName(user.getUserName());
+        userVO.setUserId(userId);
+        userVO.setHeadPortraitAddr(userDetail.getHeadPortraitAddr());
+
+        return userVO;
     }
 
     @ApiOperation(value = "获取之前帖子信息")
@@ -167,10 +192,10 @@ public class PostController {
                 postInformationList) {
             message = new ResponseSocketMessage();
             BeanUtils.copyProperties(info, message);
-            message.setImageAddr(info.getImageUrl());
             message.setMessage(info.getInfoContent());
             Boolean myMessage = Optional.ofNullable(currentUser).map(user -> user.getUserId().equals(Long.valueOf(info.getUserId()))).orElse(null);
             message.setMyMessage(myMessage);
+            message.setUserInfo(getUserVo(Long.valueOf(info.getUserId())));
             messageList.add(message);
 
         }
@@ -195,6 +220,12 @@ public class PostController {
             e.printStackTrace();
             return new JSONResponse(false, e.getMessage());
         }
+    }
+
+    @ApiOperation(value = "获取讨论页面URL地址")
+    @GetMapping("/url")
+    public String getPostHtmlURL() {
+        return "http://119.23.208.165/NoShy/html/discuss/discuss.html";
     }
 
 

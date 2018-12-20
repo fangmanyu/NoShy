@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import springfox.documentation.annotations.ApiIgnore;
 import xin.stxkfzx.noshy.domain.User;
 import xin.stxkfzx.noshy.exception.RegisterException;
 import xin.stxkfzx.noshy.service.UserService;
@@ -80,11 +81,23 @@ public class RegisterLoginController {
         }
     }
 
+    @ApiOperation(value = "获取个人页面URL地址")
+    @GetMapping("/profile")
+    public String getProfileHtmlURL() {
+        return "http://119.23.208.165/NoShy/html/myself/profile.html";
+    }
+
+
     @GetMapping("/login")
     public ModelAndView getLoginHtml() {
         return new ModelAndView("html/login");
     }
 
+    @ApiIgnore
+    @GetMapping("/register")
+    public ModelAndView getRegisterHtml() {
+        return new ModelAndView("html/registered");
+    }
 
     @Autowired
     public RegisterLoginController(UserService userService) {

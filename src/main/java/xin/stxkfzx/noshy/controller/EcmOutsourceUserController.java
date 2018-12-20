@@ -23,9 +23,8 @@ import java.nio.charset.StandardCharsets;
  * @date 2018-10-29 18:58
  */
 
-@Api(value = "外包人员信息管理相关接口", description = "外包人员信息管理相关接口")
+@Api(value = "测试", description = "测试相关接口")
 @RestController
-@RequestMapping("/download")
 public class EcmOutsourceUserController {
 
     @Resource
@@ -39,7 +38,7 @@ public class EcmOutsourceUserController {
      * @author:[全冉]
      */
     @ApiOperation("下载模板功能[15175223269@163.com]")
-    @GetMapping("/app")
+    @GetMapping("/download/app")
     public void downloadTemplate(HttpServletResponse response, HttpServletRequest request) {
         InputStream inputStream = null;
         ServletOutputStream servletOutputStream = null;
@@ -77,6 +76,11 @@ public class EcmOutsourceUserController {
                 e.printStackTrace();
             }
         }
+    }
+
+    @GetMapping("/version")
+    public String getVersion() {
+        return "1235";
     }
 
 }

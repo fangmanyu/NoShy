@@ -11,15 +11,18 @@ import xin.stxkfzx.noshy.bo.PostSocketInfoBO;
 import xin.stxkfzx.noshy.bo.PostSocketUserInfo;
 import xin.stxkfzx.noshy.domain.PostInformation;
 import xin.stxkfzx.noshy.domain.User;
+import xin.stxkfzx.noshy.domain.UserInformation;
 import xin.stxkfzx.noshy.dto.PostDTO;
 import xin.stxkfzx.noshy.exception.PostServiceException;
 import xin.stxkfzx.noshy.mapper.BrowseInformationMapper;
 import xin.stxkfzx.noshy.mapper.PostInformationMapper;
 import xin.stxkfzx.noshy.mapper.PostMapper;
 import xin.stxkfzx.noshy.mapper.UserInformationMapper;
+import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 import xin.stxkfzx.noshy.vo.RequestSocketMessage;
 import xin.stxkfzx.noshy.vo.ResponseSocketMessage;
+import xin.stxkfzx.noshy.vo.UserVO;
 
 import java.io.IOException;
 import java.util.*;
@@ -33,6 +36,7 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
     private static final Logger log = LogManager.getLogger(PostSocketHandler.class);
     private static final PostSocketInfoBO socketInfo;
     private final UserInformationMapper userInformationMapper;
+    private final UserService userService;
     private static final ObjectMapper mapper = new ObjectMapper();
 
     static {
@@ -40,9 +44,10 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
     }
 
     @Autowired
-    public PostSocketHandler(PostMapper postMapper, PostInformationMapper postInformationMapper, BrowseInformationMapper browseInformationMapper, UserInformationMapper userInformationMapper) {
-        super(postMapper, postInformationMapper, browseInformationMapper);
+    public PostSocketHandler(PostMapper postMapper, PostInformationMapper postInformationMapper, BrowseInformationMapper browseInformationMapper, UserInformationMapper userInformationMapper, UserService userService) {
+        super(postMapper, postInformationMapper, browseInformationMapper, userService);
         this.userInformationMapper = userInformationMapper;
+        this.userService = userService;
     }
 
     @Override
@@ -108,11 +113,9 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
             webSocketSession.sendMessage(new TextMessage(errJson));
         }
 
-        String imgAddr = userInformationMapper.findOneHeadPortraitAddrByUserId(Long.valueOf(userId));
-        responseSocketMessage.setImageAddr(imgAddr);
         responseSocketMessage.setMessage(message);
         responseSocketMessage.setPostId(Integer.valueOf(postId));
-        responseSocketMessage.setUserId(userId);
+        responseSocketMessage.setUserInfo(getUserVo(Long.valueOf(userId)));
         jsonResponse.setSuccess(true);
         jsonResponse.setMessage("成功");
         jsonResponse.setData(responseSocketMessage);
@@ -170,6 +173,18 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
 
         return userId;
     }
+
+    private UserVO getUserVo(Long userId) {
+        UserInformation userDetail = userService.getUserDetail(userId);
+        User user = userService.getUser(userId);
+        UserVO userVO = new UserVO();
+        userVO.setUserName(user.getUserName());
+        userVO.setUserId(userId);
+        userVO.setHeadPortraitAddr(userDetail.getHeadPortraitAddr());
+
+        return userVO;
+    }
+
 
     private boolean sendToPostRoom(String postId, String msg, Integer sendUserId) {
         boolean flag = true;

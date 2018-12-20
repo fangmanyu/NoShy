@@ -3,18 +3,17 @@ package xin.stxkfzx.noshy.service.impl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import xin.stxkfzx.noshy.domain.BrowseInformation;
-import xin.stxkfzx.noshy.domain.Post;
-import xin.stxkfzx.noshy.domain.PostInformation;
+import xin.stxkfzx.noshy.domain.*;
 import xin.stxkfzx.noshy.dto.PostDTO;
 import xin.stxkfzx.noshy.exception.PostServiceException;
 import xin.stxkfzx.noshy.mapper.BrowseInformationMapper;
 import xin.stxkfzx.noshy.mapper.PostInformationMapper;
 import xin.stxkfzx.noshy.mapper.PostMapper;
 import xin.stxkfzx.noshy.service.PostService;
+import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.util.PageCalculator;
+import xin.stxkfzx.noshy.vo.UserVO;
 
 import java.util.Date;
 import java.util.List;
@@ -31,7 +30,7 @@ public class PostServiceImpl implements PostService {
     private static final Logger log = LogManager.getLogger(PostServiceImpl.class);
 
     @Autowired
-    public PostServiceImpl(PostMapper postMapper, PostInformationMapper postInformationMapper, BrowseInformationMapper browseInformationMapper) {
+    public PostServiceImpl(PostMapper postMapper, PostInformationMapper postInformationMapper, BrowseInformationMapper browseInformationMapper, UserService userService) {
         this.postMapper = postMapper;
         this.postInformationMapper = postInformationMapper;
         this.browseInformationMapper = browseInformationMapper;
@@ -186,6 +185,7 @@ public class PostServiceImpl implements PostService {
 
         return postDTO;
     }
+
 
     @Override
     public PostDTO listPost(Post postCondition, int pageIndex, int pageSize) {

@@ -1,3 +1,4 @@
+
 package xin.stxkfzx.noshy.service.impl;
 
 import com.aliyun.vod.upload.impl.UploadImageImpl;
@@ -14,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import xin.stxkfzx.noshy.domain.BrowseInformation;
@@ -30,10 +32,7 @@ import xin.stxkfzx.noshy.util.PathUtil;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 
 import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author fmy
@@ -43,12 +42,17 @@ import java.util.Optional;
 public class VideoServiceImpl implements VideoService {
     private static final Logger log = LogManager.getLogger(VideoServiceImpl.class);
 
-    private static final String VIDEO_CALLBACK_URL = "http://fmy.ngrok.xiaomiqiu.cn:8080/video/callback";
+    private static final String VIDEO_NOT_FIND = "404";
     private final VideoMapper videoMapper;
     private final VideoTagMapper videoTagMapper;
     private final VideoCategoryMapper videoCategoryMapper;
     private final BrowseInformationMapper browseInformationMapper;
     private final ImageMapper imageMapper;
+
+    @Value("${ali.accessKey.id}")
+    private String accessKeyId;
+    @Value("${ali.accessKye.secret}")
+    private String accessKeySecret;
 
     /**
      * 高清度模板
@@ -84,7 +88,7 @@ public class VideoServiceImpl implements VideoService {
             return videoDTO;
         }
 
-        DefaultAcsClient client = VideoServiceImpl.initVodClient();
+        DefaultAcsClient client = initVodClient();
         GetPlayInfoResponse response;
         try {
             response = getPlayInfo(client, videoId);
@@ -226,7 +230,6 @@ public class VideoServiceImpl implements VideoService {
         }
 
         // 设置不允许更新字段和更新时间
-        videoCondition.setStatus(null);
         videoCondition.setUserId(null);
         videoCondition.setCreateTime(null);
         videoCondition.setLastEditTime(new Date());
@@ -420,7 +423,15 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public VideoDTO listMyVideo(int userId) {
         List<Video> videoList = videoMapper.findByUserIdAndStatus((long) userId, Video.NORMAL);
-        return new VideoDTO(true, "查询成功", videoList);
+        VideoDTO dto = new VideoDTO(true, "查询成功");
+        Optional.ofNullable(videoList).ifPresent(videos -> {
+            Map<Video, BrowseInformation> videoDetailMap = new HashMap<>(18);
+            videos.forEach(video ->
+                    videoDetailMap.put(video, browseInformationMapper.selectByPrimaryKey(video.getBrowseId())));
+            dto.setVideoDetailMap(videoDetailMap);
+        });
+
+        return dto;
     }
 
     @Transactional(rollbackFor = VideoServiceException.class)
@@ -508,7 +519,7 @@ public class VideoServiceImpl implements VideoService {
     }
 
     private String uploadStream(Video video) throws VideoServiceException {
-        UploadStreamRequest request = new UploadStreamRequest(ACCESS_KEY_ID, ACCESS_KEY_SECRET, video.getTitle(),
+        UploadStreamRequest request = new UploadStreamRequest(accessKeyId, accessKeySecret, video.getTitle(),
                 video.getName(), video.getVideoInputStream());
         /* 是否使用默认水印(可选)，指定模板组ID时，根据模板组配置确定是否使用默认水印*/
         ///request.setShowWaterMark(true);
@@ -562,10 +573,10 @@ public class VideoServiceImpl implements VideoService {
         return "".equals(sb.toString()) ? null : sb.toString();
     }
 
-    private static DefaultAcsClient initVodClient() {
+    private DefaultAcsClient initVodClient() {
         //点播服务所在的Region，国内请填cn-shanghai，不要填写别的区域
         String regionId = "cn-shanghai";
-        DefaultProfile profile = DefaultProfile.getProfile(regionId, ACCESS_KEY_ID, ACCESS_KEY_SECRET);
+        DefaultProfile profile = DefaultProfile.getProfile(regionId, accessKeyId, accessKeySecret);
         return new DefaultAcsClient(profile);
     }
 
@@ -688,7 +699,7 @@ public class VideoServiceImpl implements VideoService {
         try {
             response = initVodClient().getAcsResponse(request);
         } catch (ClientException e) {
-            if ("404".equals(e.getErrCode())) {
+            if (VIDEO_NOT_FIND.equals(e.getErrCode())) {
                 return new VideoDTO(false, "视频不存在");
             } else {
                 throw new VideoServiceException(e.getMessage());
@@ -718,7 +729,7 @@ public class VideoServiceImpl implements VideoService {
         // 流式上传时，InputStream为必选，fileName为源文件名称，如:文件名称.png(可选)
 
         log.debug("开始上传阿里云视频封面");
-        UploadImageRequest request = new UploadImageRequest(ACCESS_KEY_ID, ACCESS_KEY_SECRET, imageType);
+        UploadImageRequest request = new UploadImageRequest(accessKeyId, accessKeySecret, imageType);
         request.setInputStream(inputStream);
         request.setFileName(fileName);
         UploadImageImpl uploadImage = new UploadImageImpl();

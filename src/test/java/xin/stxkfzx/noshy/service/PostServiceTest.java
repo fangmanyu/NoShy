@@ -2,6 +2,7 @@ package xin.stxkfzx.noshy.service;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Commit;
 import xin.stxkfzx.noshy.BaseTest;
 import xin.stxkfzx.noshy.domain.Post;
 import xin.stxkfzx.noshy.domain.PostInformation;
@@ -37,9 +38,10 @@ public class PostServiceTest extends BaseTest {
         assertTrue(postDTO.getSuccess());
     }
 
+    // @Commit
     @Test
     public void removePost() {
-        PostDTO postDTO = postService.removePost(2);
+        PostDTO postDTO = postService.removePost(18);
         assertTrue(postDTO.getSuccess());
     }
 

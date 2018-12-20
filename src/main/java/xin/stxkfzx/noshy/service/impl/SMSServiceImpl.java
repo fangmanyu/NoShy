@@ -9,6 +9,7 @@ import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import xin.stxkfzx.noshy.service.SMSService;
 
@@ -21,6 +22,11 @@ import java.util.Date;
  */
 @Service
 public class SMSServiceImpl implements SMSService {
+
+    @Value("${ali.accessKey.id}")
+    private String accessKeyId;
+    @Value("${ali.accessKye.secret}")
+    private String accessKeySecret;
 
     @Override
     public SendSmsResponse sendSms(String phone, String code) throws ClientException {
@@ -37,7 +43,7 @@ public class SMSServiceImpl implements SMSService {
         System.setProperty("sun.net.client.defaultReadTimeout", "10000");
 
         //初始化acsClient,暂不支持region化
-        IClientProfile profile = DefaultProfile.getProfile("cn-hangzhou", ACCESS_KEY_ID, ACCESS_KEY_SECRET);
+        IClientProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKeyId, accessKeySecret);
         DefaultProfile.addEndpoint("cn-hangzhou", "cn-hangzhou", PRODUCT, DOMAIN);
         IAcsClient acsClient = new DefaultAcsClient(profile);
 
@@ -73,7 +79,7 @@ public class SMSServiceImpl implements SMSService {
         System.setProperty("sun.net.client.defaultReadTimeout", "10000");
 
         //初始化acsClient,暂不支持region化
-        IClientProfile profile = DefaultProfile.getProfile("cn-hangzhou", ACCESS_KEY_ID, ACCESS_KEY_SECRET);
+        IClientProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKeyId, accessKeySecret);
         DefaultProfile.addEndpoint("cn-hangzhou", "cn-hangzhou", PRODUCT, DOMAIN);
         IAcsClient acsClient = new DefaultAcsClient(profile);
 

@@ -8,21 +8,20 @@ package xin.stxkfzx.noshy.vo;
  */
 public class ResponseSocketMessage {
     private Integer postId;
-    private Integer userId;
     private String message;
     private Integer infoId;
-    private String imageAddr;
+
     private Boolean myMessage;
+    private UserVO userInfo;
 
     @Override
     public String toString() {
         return "ResponseSocketMessage{" +
                 "postId=" + postId +
-                ", userId=" + userId +
                 ", message='" + message + '\'' +
                 ", infoId=" + infoId +
-                ", imageAddr='" + imageAddr + '\'' +
                 ", myMessage=" + myMessage +
+                ", userInfo=" + userInfo +
                 '}';
     }
 
@@ -42,12 +41,12 @@ public class ResponseSocketMessage {
         this.postId = postId;
     }
 
-    public Integer getUserId() {
-        return userId;
+    public UserVO getUserInfo() {
+        return userInfo;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
+    public void setUserInfo(UserVO userInfo) {
+        this.userInfo = userInfo;
     }
 
     public String getMessage() {
@@ -66,11 +65,4 @@ public class ResponseSocketMessage {
         this.infoId = infoId;
     }
 
-    public String getImageAddr() {
-        return imageAddr;
-    }
-
-    public void setImageAddr(String imageAddr) {
-        this.imageAddr = imageAddr;
-    }
 }

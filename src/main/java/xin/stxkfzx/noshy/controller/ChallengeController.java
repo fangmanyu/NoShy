@@ -1,9 +1,11 @@
 package xin.stxkfzx.noshy.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeanUtils;
@@ -11,18 +13,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import xin.stxkfzx.noshy.domain.Challenge;
-import xin.stxkfzx.noshy.domain.Rank;
-import xin.stxkfzx.noshy.domain.User;
-import xin.stxkfzx.noshy.domain.UserInformation;
+import xin.stxkfzx.noshy.domain.*;
 import xin.stxkfzx.noshy.dto.ChallengeDTO;
+import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.ChallengeServiceException;
+import xin.stxkfzx.noshy.service.BrowseService;
 import xin.stxkfzx.noshy.service.ChallengeService;
 import xin.stxkfzx.noshy.service.UserService;
+import xin.stxkfzx.noshy.service.VideoService;
 import xin.stxkfzx.noshy.util.CheckUtils;
 import xin.stxkfzx.noshy.vo.*;
-import xin.stxkfzx.noshy.vo.challenge.CreateChallengeVO;
-import xin.stxkfzx.noshy.vo.challenge.RankDetailVO;
+import xin.stxkfzx.noshy.vo.challenge.*;
+import xin.stxkfzx.noshy.vo.video.VideoDetailVO;
+import xin.stxkfzx.noshy.vo.video.VideoVO;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
@@ -45,7 +48,9 @@ import java.util.Optional;
 public class ChallengeController {
     private static final Logger log = LogManager.getLogger(ChallengeController.class);
     private final ChallengeService challengeService;
+    private final VideoService videoService;
     private final UserService userService;
+    private final BrowseService browseService;
     private User currentUser;
 
     @ApiOperation(value = "获取指定挑战")
@@ -64,15 +69,12 @@ public class ChallengeController {
                 rankList) {
             detailVO = new RankDetailVO();
             Long userId = Long.valueOf(rank.getUserId());
-            User user = userService.getUser(userId);
-            UserInformation userDetail = userService.getUserDetail(userId);
-            UserVO userVO = new UserVO();
-            userVO.setUserName(user.getUserName());
-            userVO.setUserId(userId);
+            String videoId = rank.getVideoId();
 
+            VideoDTO videoDTO = videoService.getVideoByVideoId(videoId);
             BeanUtils.copyProperties(rank, detailVO);
-            detailVO.setUserInfo(userVO);
-            detailVO.setHeadPortraitAddr(userDetail.getHeadPortraitAddr());
+            detailVO.setUserInfo(getUserVo(userId));
+            detailVO.setVideoInfo(getVideoDetail(videoDTO.getVideo(), videoDTO.getBrowseInformation()));
             Integer currentUserId = Optional.ofNullable(currentUser).map(User::getUserId).map(Long::intValue).orElse(-1);
             boolean liked = challengeService.isLiked(rank.getRankId(), currentUserId);
             detailVO.setHasLiked(liked);
@@ -84,6 +86,64 @@ public class ChallengeController {
         data.setRankList(rankDetailVOList);
 
         return new JSONResponse(dto.getSuccess(), dto.getMessage(), data);
+    }
+
+    private VideoDetailVO getVideoDetail(Video video, BrowseInformation browseInformation) {
+        if (video != null && browseInformation != null) {
+            VideoVO videoVO = getVideoVO(video);
+            VideoDetailVO detailVO = new VideoDetailVO();
+            detailVO.setVideo(videoVO);
+            detailVO.setBrowseInformation(browseInformation);
+
+            return detailVO;
+        }
+        return null;
+    }
+
+    private VideoVO getVideoVO(Video video) {
+        VideoVO videoVO;
+        if (video.getPlayUrl() == null) {
+
+            String videoId = video.getVideoId();
+            VideoDTO playUrl = videoService.getPlayUrl(videoId);
+
+            if (playUrl.getSuccess()) {
+                video.setPlayUrl(playUrl.getPlayUrl());
+            }
+        }
+        videoVO = new VideoVO();
+        BeanUtils.copyProperties(video, videoVO);
+
+        ChallengeDTO challengeDTO = challengeService.listChallengeIdByVideo(video.getVideoId());
+        List<ChallengeVO> challengeVOS = Optional.ofNullable(challengeDTO.getChallengeIdList()).map(ids -> {
+            List<ChallengeVO> vos = new ArrayList<>(ids.size());
+            ChallengeVO vo;
+            for (Integer id : ids) {
+                ChallengeDTO dto = challengeService.getChallengeByChallengeId(id);
+                if (dto.getSuccess()) {
+                    vo = new ChallengeVO();
+                    BeanUtils.copyProperties(dto.getChallenge(), vo);
+                    vo.setJoinNum(dto.getRankList().size());
+                    vos.add(vo);
+                }
+
+            }
+            return vos;
+        }).orElse(null);
+        videoVO.setJoinChallengeList(challengeVOS);
+        videoVO.setUserInfo(getUserVo(video.getUserId()));
+        return videoVO;
+    }
+
+    private UserVO getUserVo(Long userId) {
+        UserInformation userDetail = userService.getUserDetail(userId);
+        User user = userService.getUser(userId);
+        UserVO userVO = new UserVO();
+        userVO.setUserName(user.getUserName());
+        userVO.setUserId(userId);
+        userVO.setHeadPortraitAddr(userDetail.getHeadPortraitAddr());
+
+        return userVO;
     }
 
     @ApiOperation(value = "分页获取猜你喜欢挑战列表")
@@ -121,6 +181,62 @@ public class ChallengeController {
         }
         return new JSONResponse(dto.getSuccess(), dto.getMessage());
 
+    }
+
+    @ApiOperation(value = "获取挑战列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "challengeQueryStr", value = "查询参数"),
+            @ApiImplicitParam(name = "pageIndex", value = "分页起始位置", required = true, dataType = "int"),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", required = true, dataType = "int")
+    })
+    @GetMapping
+    public JSONResponse listChallenge(@RequestParam(required = false) String challengeQueryStr,
+                                      @RequestParam @Min(0) int pageIndex,
+                                      @RequestParam @Min(0) int pageSize) {
+        ChallengeDTO dto;
+        if (StringUtils.isEmpty(challengeQueryStr)) {
+            dto = challengeService.listChallengeByCondition(null, pageIndex, pageSize);
+        } else {
+            try {
+                ListChallengeQuery challenge = new ObjectMapper().readValue(challengeQueryStr, ListChallengeQuery.class);
+                Challenge challengeCondition = new Challenge();
+                BeanUtils.copyProperties(challenge, challengeCondition);
+
+                dto = challengeService.listChallengeByCondition(challengeCondition, pageIndex, pageSize);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return new JSONResponse(false, "查询参数错误: " + e.getLocalizedMessage());
+            }
+        }
+
+        return new JSONResponse(dto.getSuccess(), dto.getMessage(), getChallengeListVO(dto));
+    }
+
+    private ChallengeListVO getChallengeListVO(ChallengeDTO dto) {
+        ChallengeListVO vos = new ChallengeListVO();
+        vos.setCount(dto.getCount());
+
+        Optional.ofNullable(dto.getChallengeList()).ifPresent(challenges -> {
+            List<ChallengeVO> voList = new ArrayList<>(challenges.size());
+            challenges.forEach(challenge -> Optional.ofNullable(getChallengeVO(challenge)).ifPresent(voList::add));
+            if (!voList.isEmpty()) {
+                vos.setChallengeVOList(voList);
+            }
+        });
+
+        return vos;
+    }
+
+    private ChallengeVO getChallengeVO(Challenge challenge) {
+        ChallengeDTO dto = challengeService.getChallengeByChallengeId(challenge.getChallengeId());
+        if (dto.getSuccess()) {
+            ChallengeVO vo = new ChallengeVO();
+            BeanUtils.copyProperties(dto.getChallenge(), vo);
+            vo.setJoinNum(dto.getRankList().size());
+
+            return vo;
+        }
+        return null;
     }
 
 
@@ -162,10 +278,37 @@ public class ChallengeController {
         if (!CheckUtils.checkCurrentUserExist(currentUser)) {
             return new JSONResponse(false, "用户尚未登录");
         }
-        ChallengeDTO dto = challengeService.likeIt(rankId, currentUser.getUserId().intValue());
+        ChallengeDTO dto = null;
+        try {
+            dto = challengeService.likeIt(rankId, currentUser.getUserId().intValue());
+        } catch (ChallengeServiceException e) {
+            e.printStackTrace();
+            return new JSONResponse(false, e.getMessage());
+        }
         return new JSONResponse(dto.getSuccess(), dto.getMessage());
     }
 
+    @GetMapping("/myChallenge")
+    public JSONResponse listMyJoinChallenge() {
+        if (!CheckUtils.checkCurrentUserExist(currentUser)) {
+            return new JSONResponse(false, "用户尚未登录");
+        }
+
+        ChallengeDTO dto = challengeService.listMyJoinChallenge(currentUser.getUserId().intValue());
+        return new JSONResponse(dto.getSuccess(), dto.getMessage(), getChallengeListVO(dto));
+    }
+
+    @ApiOperation(value = "获取挑战页面URL地址")
+    @GetMapping("/url")
+    public String getChallengeHtmlURL() {
+        return "http://119.23.208.165/NoShy/html/challenge/challenge_index.html";
+    }
+
+    @ApiOperation(value = "获取上传挑战页面URL地址")
+    @GetMapping("/url/upload")
+    public String getUploadChallengeHtmlURL() {
+        return "http://119.23.208.165/NoShy/html/share/publish.html?type=1";
+    }
 
     @ModelAttribute
     public void getCurrentUser(HttpSession session) {
@@ -177,8 +320,10 @@ public class ChallengeController {
     }
 
     @Autowired
-    public ChallengeController(ChallengeService challengeService, UserService userService) {
+    public ChallengeController(ChallengeService challengeService, VideoService videoService, UserService userService, BrowseService browseService) {
         this.challengeService = challengeService;
+        this.videoService = videoService;
         this.userService = userService;
+        this.browseService = browseService;
     }
 }

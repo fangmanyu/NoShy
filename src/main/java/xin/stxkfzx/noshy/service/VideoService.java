@@ -1,5 +1,6 @@
 package xin.stxkfzx.noshy.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import xin.stxkfzx.noshy.domain.Video;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
@@ -12,9 +13,6 @@ import xin.stxkfzx.noshy.vo.ImageHolder;
  * @date 2018-07-23 14:21
  */
 public interface VideoService {
-    String ACCESS_KEY_ID = "LTAIPQqlRW1AMVLJ";
-    String ACCESS_KEY_SECRET = "nVFZyVGzpNzLkhJATLVtMRhOiugBvy";
-
     /**
      * 将视频上传到阿里云点播库，并将保存的视频信息保存保存到数据库中,并创建浏览信息
      * @deprecated 使用createUploadVideo()

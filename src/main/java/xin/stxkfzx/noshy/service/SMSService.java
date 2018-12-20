@@ -3,6 +3,8 @@ package xin.stxkfzx.noshy.service;
 import com.aliyuncs.dysmsapi.model.v20170525.QuerySendDetailsResponse;
 import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
 import com.aliyuncs.exceptions.ClientException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 
 /**
  * 短信服务
@@ -16,8 +18,6 @@ public interface SMSService {
     //产品域名,开发者无需替换
     String DOMAIN = "dysmsapi.aliyuncs.com";
 
-    String ACCESS_KEY_ID = "LTAIPQqlRW1AMVLJ";
-    String ACCESS_KEY_SECRET = "nVFZyVGzpNzLkhJATLVtMRhOiugBvy";
     /**
      * 发送短信
      *

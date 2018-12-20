@@ -46,6 +46,7 @@ public interface ChallengeMapper {
 
     int updateStatusByChallengeIdAndUserId(@Param("updatedStatus")Integer updatedStatus,@Param("challengeId")Integer challengeId,@Param("userId")Integer userId);
 
+    List<Challenge> listChallengeByChallengeCondition(@Param("challengeCondition")Challenge challengeCondition, @Param("rowIndex")int rowIndex, @Param("pageSize")int pageSize);
 
-
+    int countChallengeByChallengeCondition(@Param("challengeCondition")Challenge challengeCondition);
 }

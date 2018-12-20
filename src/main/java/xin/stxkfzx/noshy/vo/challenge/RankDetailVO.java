@@ -1,6 +1,8 @@
 package xin.stxkfzx.noshy.vo.challenge;
 
 import xin.stxkfzx.noshy.vo.UserVO;
+import xin.stxkfzx.noshy.vo.video.VideoDetailVO;
+import xin.stxkfzx.noshy.vo.video.VideoVO;
 
 /**
  * @author fmy
@@ -9,10 +11,31 @@ import xin.stxkfzx.noshy.vo.UserVO;
 public class RankDetailVO {
 
     private UserVO userInfo;
-    private String headPortraitAddr;
     private Integer likes;
     private String videoId;
     private Integer rankId;
+    private VideoDetailVO videoInfo;
+
+    @Override
+    public String toString() {
+        return "RankDetailVO{" +
+                "userInfo=" + userInfo +
+                ", likes=" + likes +
+                ", videoId='" + videoId + '\'' +
+                ", rankId=" + rankId +
+                ", videoInfo=" + videoInfo +
+                ", hasLiked=" + hasLiked +
+                '}';
+    }
+
+
+    public VideoDetailVO getVideoInfo() {
+        return videoInfo;
+    }
+
+    public void setVideoInfo(VideoDetailVO videoInfo) {
+        this.videoInfo = videoInfo;
+    }
 
     /**当前用户是否已经点赞*/
     private Boolean hasLiked;
@@ -23,18 +46,6 @@ public class RankDetailVO {
 
     public void setRankId(Integer rankId) {
         this.rankId = rankId;
-    }
-
-    @Override
-    public String toString() {
-        return "RankDetailVO{" +
-                "userInfo=" + userInfo +
-                ", headPortraitAddr='" + headPortraitAddr + '\'' +
-                ", likes=" + likes +
-                ", videoId='" + videoId + '\'' +
-                ", rankId=" + rankId +
-                ", hasLiked=" + hasLiked +
-                '}';
     }
 
     public Boolean getHasLiked() {
@@ -61,13 +72,6 @@ public class RankDetailVO {
         this.userInfo = userInfo;
     }
 
-    public String getHeadPortraitAddr() {
-        return headPortraitAddr;
-    }
-
-    public void setHeadPortraitAddr(String headPortraitAddr) {
-        this.headPortraitAddr = headPortraitAddr;
-    }
 
     public Integer getLikes() {
         return likes;

@@ -10,6 +10,7 @@ import xin.stxkfzx.noshy.mapper.BrowseInformationMapper;
 import xin.stxkfzx.noshy.mapper.PostInformationMapper;
 import xin.stxkfzx.noshy.mapper.PostMapper;
 import xin.stxkfzx.noshy.mapper.UserInformationMapper;
+import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.service.impl.PostSocketHandler;
 
 /**
@@ -29,10 +30,12 @@ public class PostSocketConfig implements WebSocketConfigurer {
     private BrowseInformationMapper browseInformationMapper;
     @Autowired
     private UserInformationMapper userInformationMapper;
+    @Autowired
+    private UserService userService;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
-        webSocketHandlerRegistry.addHandler(new PostSocketHandler(postMapper, postInformationMapper, browseInformationMapper, userInformationMapper), "/post/chat/{postId}")
+        webSocketHandlerRegistry.addHandler(new PostSocketHandler(postMapper, postInformationMapper, browseInformationMapper, userInformationMapper, userService), "/post/chat/{postId}")
                 .setAllowedOrigins("*")
                 .addInterceptors(new PostSocketInterceptor());
     }

@@ -48,7 +48,15 @@ video_id
     <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.Rank">
         UPDATE rank
         <set>
-            <if test="rankId != null">rank_id = #{rankId,jdbcType=INTEGER}</if>
+            <if test="rankId != null">rank_id = #{rankId,jdbcType=INTEGER},</if>
+            <if test="type != null">type = #{type}, </if>
+            <if test="status != null">status = #{status}, </if>
+            <if test="likes != null">likes = #{likes}, </if>
+            <if test="createTime != null">create_time = #{createTime}, </if>
+            <if test="lastEditTime != null">last_edit_time = #{lastEditTime}, </if>
+            <if test="userId != null">user_id = #{userId}, </if>
+            <if test="challengeId != null">challenge_id = #{challengeId}, </if>
+            <if test="videoId != null">video_id = #{videoId} </if>
         </set>
         where rank_id = #{rankId,jdbcType=INTEGER}
     </update>

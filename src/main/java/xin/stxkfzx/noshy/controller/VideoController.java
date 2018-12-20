@@ -12,17 +12,17 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
-import xin.stxkfzx.noshy.domain.User;
-import xin.stxkfzx.noshy.domain.Video;
-import xin.stxkfzx.noshy.domain.VideoTag;
+import xin.stxkfzx.noshy.domain.*;
 import xin.stxkfzx.noshy.dto.ChallengeDTO;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.VideoServiceException;
 import xin.stxkfzx.noshy.service.ChallengeService;
+import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.service.VideoService;
 import xin.stxkfzx.noshy.util.CheckUtils;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.UserVO;
 import xin.stxkfzx.noshy.vo.challenge.ChallengeVO;
 import xin.stxkfzx.noshy.vo.video.*;
 
@@ -55,6 +55,7 @@ public class VideoController {
 
     private final VideoService videoService;
     private final ChallengeService challengeService;
+    private final UserService userService;
     private User currentUser;
 
     @ApiOperation(value = "获取自己发布的视频列表")
@@ -65,7 +66,20 @@ public class VideoController {
         }
 
         VideoDTO videoDTO = videoService.listMyVideo(currentUser.getUserId().intValue());
-        return new JSONResponse(true, "查询成功", videoDTO.getVideoList());
+        // return new JSONResponse(true, "查询成功", videoDTO.getVideoList());
+        return new JSONResponse(true, "查询成功",getVideoDetailList(videoDTO));
+    }
+
+    private List<VideoDetailVO> getVideoDetailList(VideoDTO videoDTO) {
+        if (!videoDTO.getSuccess()) {
+            return null;
+        }
+
+        Map<Video, BrowseInformation> videoDetailMap = videoDTO.getVideoDetailMap();
+        List<VideoDetailVO> vos = new ArrayList<>(videoDetailMap.size());
+        videoDetailMap.forEach((k, v) -> vos.add(getVideoDetail(k, v)));
+
+        return vos.isEmpty() ? null : vos;
     }
 
     @ApiOperation(value = "通过分类获取视频列表")
@@ -184,15 +198,15 @@ public class VideoController {
         }
 
         VideoDTO dto = videoService.getVideoByVideoId(videoId);
-        return new JSONResponse(dto.getSuccess(), dto.getMessage(), getVideoDetail(dto));
+        return new JSONResponse(dto.getSuccess(), dto.getMessage(), getVideoDetail(dto.getVideo(), dto.getBrowseInformation()));
     }
 
-    private VideoDetailVO getVideoDetail(VideoDTO dto) {
-        if (dto.getSuccess()) {
-            VideoVO videoVO = getVideoVO(dto.getVideo());
+    private VideoDetailVO getVideoDetail(Video video, BrowseInformation browseInformation) {
+        if (video != null && browseInformation != null) {
+            VideoVO videoVO = getVideoVO(video);
             VideoDetailVO detailVO = new VideoDetailVO();
             detailVO.setVideo(videoVO);
-            detailVO.setBrowseInformation(dto.getBrowseInformation());
+            detailVO.setBrowseInformation(browseInformation);
 
             return detailVO;
         }
@@ -292,8 +306,10 @@ public class VideoController {
             return vos;
         }).orElse(null);
         videoVO.setJoinChallengeList(challengeVOS);
+        videoVO.setUserInfo(getUserVo(video.getUserId()));
         return videoVO;
     }
+
 
 
     /**
@@ -482,6 +498,29 @@ public class VideoController {
 
     }
 
+    private UserVO getUserVo(Long userId) {
+        UserInformation userDetail = userService.getUserDetail(userId);
+        User user = userService.getUser(userId);
+        UserVO userVO = new UserVO();
+        userVO.setUserName(user.getUserName());
+        userVO.setUserId(userId);
+        userVO.setHeadPortraitAddr(userDetail.getHeadPortraitAddr());
+
+        return userVO;
+    }
+
+    @ApiOperation(value = "获取视频主场页URL地址")
+    @GetMapping("/url")
+    public String getVideoHtmlURL() {
+        return "http://119.23.208.165/NoShy/html/mainPage/index.html";
+    }
+
+    @ApiOperation(value = "获取上传视频主场页URL地址")
+    @GetMapping("/url/upload")
+    public String getUploadVideoHtmlURL() {
+        return "http://119.23.208.165/NoShy/html/share/publish.html?type=2";
+    }
+
     @ModelAttribute
     public void initUser(HttpSession session) {
         Object currentUser = session.getAttribute("currentUser");
@@ -492,9 +531,10 @@ public class VideoController {
     }
 
     @Autowired
-    public VideoController(VideoService videoService, ChallengeService challengeService) {
+    public VideoController(VideoService videoService, ChallengeService challengeService, UserService userService) {
         this.videoService = videoService;
         this.challengeService = challengeService;
+        this.userService = userService;
     }
 
 

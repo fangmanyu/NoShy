@@ -9,13 +9,23 @@ package xin.stxkfzx.noshy.vo;
 public class UserVO {
     private Long userId;
     private String userName;
+    private String headPortraitAddr;
 
     @Override
     public String toString() {
         return "UserVO{" +
                 "userId=" + userId +
                 ", userName='" + userName + '\'' +
+                ", headPortraitAddr='" + headPortraitAddr + '\'' +
                 '}';
+    }
+
+    public String getHeadPortraitAddr() {
+        return headPortraitAddr;
+    }
+
+    public void setHeadPortraitAddr(String headPortraitAddr) {
+        this.headPortraitAddr = headPortraitAddr;
     }
 
     public Long getUserId() {

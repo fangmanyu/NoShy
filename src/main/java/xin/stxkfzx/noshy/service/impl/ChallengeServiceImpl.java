@@ -17,9 +17,7 @@ import xin.stxkfzx.noshy.util.PageCalculator;
 import xin.stxkfzx.noshy.util.PathUtil;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author fmy
@@ -206,7 +204,13 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ChallengeDTO listChallengeByCondition(Challenge challengeCondition, int pageIndex, int pageSize) {
-        return null;
+        int rowIndex = PageCalculator.calculateRowIndex(pageIndex, pageSize);
+        List<Challenge> challengeList = challengeMapper.listChallengeByChallengeCondition(challengeCondition, rowIndex, pageSize);
+        int count = challengeMapper.countChallengeByChallengeCondition(challengeCondition);
+        ChallengeDTO dto = new ChallengeDTO(true, "查询成功", challengeList);
+        dto.setCount(count);
+
+        return dto;
     }
 
     @Override
@@ -325,7 +329,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
             try {
                 rankMapper.updateByPrimaryKeySelective(rank);
-                userChallengeVideoLikesMapper.updateByPrimaryKeySelective(userChallengeVideoLikes);
+                userChallengeVideoLikesMapper.insert(userChallengeVideoLikes);
             } catch (Exception e) {
                 throw new ChallengeServiceException(e);
             }
@@ -334,6 +338,21 @@ public class ChallengeServiceImpl implements ChallengeService {
         });
 
         return new ChallengeDTO(true, "操作成功");
+    }
+
+    @Override
+    public ChallengeDTO listMyJoinChallenge(Integer userId) {
+        List<Video> videoList = videoMapper.findByUserIdAndStatus(Long.valueOf(userId), Video.NORMAL);
+
+        ChallengeDTO dto = new ChallengeDTO(true, "查询成功");
+        Optional.ofNullable(videoList).ifPresent(videos -> {
+            Set<Integer> set = new HashSet<>();
+            videos.forEach(video -> set.addAll(relationMapper.findChallengeIdByVideoId(video.getVideoId())));
+            List<Challenge> challengeList = new ArrayList<>(set.size());
+            set.forEach(id -> challengeList.add(challengeMapper.selectByPrimaryKey(id)));
+            dto.setChallengeList(challengeList);
+        });
+        return dto;
     }
 
     @Autowired
