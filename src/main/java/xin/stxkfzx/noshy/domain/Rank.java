@@ -1,13 +1,15 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Rank {
+public class Rank implements Serializable {
 
     public static final int LIKE = 0;
     public static final int PAGEVIEW = 1;
     public static final int ATTENTION = 2;
     public static final int CHALLENGE = 3;
+    private static final long serialVersionUID = -8121811332978128752L;
 
     private Integer rankId;
 

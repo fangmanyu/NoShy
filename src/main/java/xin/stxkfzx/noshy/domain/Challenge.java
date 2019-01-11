@@ -1,11 +1,13 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Challenge {
+public class Challenge implements Serializable {
     public static final int CHALLENGEING = 0;
     public static final int CHALLENGE_FINISH = 1;
     public static final int CREATE_CHALLENGE = -1;
+    private static final long serialVersionUID = 8035792875831119214L;
 
     private Integer challengeId;
 

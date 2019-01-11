@@ -59,13 +59,12 @@ public class RegisterLoginController {
     @ApiOperation(value = "注册用户", produces = "application/json")
     @PostMapping("/register")
     public JSONResponse register(@RequestBody @ApiParam(name = "user", value = "用户对象") User user,
-                                 @ApiParam(name = "smsCode", value = "手机验证码") @RequestParam("smsCode") String smsCode,
-                                 HttpSession session) {
+                                 @ApiParam(name = "smsCode", value = "手机验证码") @RequestParam("smsCode") String smsCode) {
         if (user == null || StringUtils.isAnyEmpty(user.getUserPhone(), user.getUserPassword())) {
             return new JSONResponse(false, "用户信息为空");
         }
 
-        if (StringUtils.isEmpty(smsCode) || !CheckUtils.checkSmsCode(smsCode, session)) {
+        if (StringUtils.isEmpty(smsCode) || !CheckUtils.checkSmsCode(user.getUserPhone(), smsCode)) {
             return new JSONResponse(false, "手机验证码错误");
         }
 

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="xin.stxkfzx.noshy.mapper.UserInformationMapper">
+  <cache type="xin.stxkfzx.noshy.cache.MyBatisCache"/>
+
   <resultMap id="BaseResultMap" type="xin.stxkfzx.noshy.domain.UserInformation">
     <id column="user_id" jdbcType="INTEGER" property="userId" />
     <result column="head_portrait_addr" jdbcType="VARCHAR" property="headPortraitAddr" />
@@ -64,7 +66,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.UserInformation">
+  <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.UserInformation" flushCache="true">
     update user_information
     <set>
       <if test="headPortraitAddr != null">
@@ -82,7 +84,7 @@
     </set>
     where user_id = #{userId,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.UserInformation">
+  <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.UserInformation" flushCache="true">
     update user_information
     set head_portrait_addr = #{headPortraitAddr,jdbcType=VARCHAR},
       rank = #{rank,jdbcType=INTEGER},

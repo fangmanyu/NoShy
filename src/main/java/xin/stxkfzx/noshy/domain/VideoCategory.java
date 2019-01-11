@@ -1,8 +1,10 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class VideoCategory {
+public class VideoCategory implements Serializable {
+    private static final long serialVersionUID = 6663671532107877503L;
     private Long categoryId;
 
     private String categoryName;

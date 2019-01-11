@@ -1,8 +1,10 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class UserFavoriteRecord {
+public class UserFavoriteRecord implements Serializable {
+    private static final long serialVersionUID = -3780554905193952440L;
     private Integer favoriteRecordId;
 
     private Long userId;

@@ -1,6 +1,9 @@
 package xin.stxkfzx.noshy.domain;
 
-public class UserInformation {
+import java.io.Serializable;
+
+public class UserInformation implements Serializable {
+    private static final long serialVersionUID = -786180867400350687L;
     private Long userId;
 
     private String headPortraitAddr;

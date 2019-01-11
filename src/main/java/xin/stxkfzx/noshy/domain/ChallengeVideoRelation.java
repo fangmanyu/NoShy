@@ -1,8 +1,10 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class ChallengeVideoRelation {
+public class ChallengeVideoRelation implements Serializable {
+    private static final long serialVersionUID = 8179040678421135672L;
     private Integer challengeId;
 
     private String videoId;

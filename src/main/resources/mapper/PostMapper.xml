@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="xin.stxkfzx.noshy.mapper.PostMapper">
+    <cache type="xin.stxkfzx.noshy.cache.MyBatisCache"/>
+
     <resultMap id="BaseResultMap" type="xin.stxkfzx.noshy.domain.Post">
         <id column="post_id" jdbcType="INTEGER" property="postId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -162,7 +164,7 @@ browse_id
             <if test="browseId!=null"> #{browseId,jdbcType=INTEGER}</if>
         </trim>
 </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.Post">
+    <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.Post" flushCache="true">
         UPDATE post
         <set>
                 <if test="postId != null"> post_id = #{postId,jdbcType=INTEGER},</if>
@@ -180,7 +182,7 @@ browse_id
         </set>
 		where post_id = #{postId,jdbcType=INTEGER}
     </update>
-    <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.Post">
+    <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.Post" flushCache="true">
         UPDATE post
         set
                 post_id = #{postId,jdbcType=INTEGER},

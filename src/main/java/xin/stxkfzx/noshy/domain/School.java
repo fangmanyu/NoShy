@@ -1,5 +1,6 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -8,7 +9,8 @@ import java.util.Date;
  * @author fmy
  * @date 2018-07-24 13:46
  */
-public class School {
+public class School implements Serializable {
+    private static final long serialVersionUID = 5307149136047908044L;
     private Integer schoolId;
 
     private String schoolName;

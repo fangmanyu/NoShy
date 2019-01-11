@@ -4,6 +4,7 @@ import com.google.code.kaptcha.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.data.redis.core.RedisTemplate;
 import xin.stxkfzx.noshy.domain.User;
 
 import javax.servlet.http.HttpSession;
@@ -83,17 +84,17 @@ public class CheckUtils {
     /**
      * 检验短信验证码
      *
-     * @param code  需要检验的短信验证码
-     * @param session   HTTPSession对象
-     * @return  如果需要检验的短信验证码正确，返回true；否则返回false
+     * @param phone	手机号
+     * @param code	 需要检验的短信验证码
+     * @return 如果需要检验的短信验证码正确，返回true；否则返回false
      * @author fmy
-     * @date 2018-07-22 23:43
+     * @date 2018-12-21 13:21
      */
-    public static boolean checkSmsCode(String code, HttpSession session) {
-        String smsCode = (String) session.getAttribute("smsCode");
+    public static boolean checkSmsCode(String phone, String code) {
+        RedisTemplate redisTemplate = ApplicationContextUtil.getRedisTemplate();
+        String smsCode = (String) redisTemplate.opsForValue().get(phone);
         return StringUtils.equals(code, smsCode);
     }
-
 
     /**
      * 显式Bean校验

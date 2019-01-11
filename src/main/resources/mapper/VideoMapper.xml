@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="xin.stxkfzx.noshy.mapper.VideoMapper">
+    <cache type="xin.stxkfzx.noshy.cache.MyBatisCache"/>
+
     <sql id="Base_Column_List">
         video_id,
         title,
@@ -180,7 +182,7 @@ ${alias}.play_url
         </trim>
 </insert>
 
-    <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.Video">
+    <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.Video" flushCache="true">
         UPDATE video
         <set>
                 <if test="videoId != null"> video_id = #{videoId,jdbcType=CHAR},</if>
@@ -199,7 +201,7 @@ ${alias}.play_url
 		where video_id = #{videoId,jdbcType=CHAR}
     </update>
 
-    <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.Video">
+    <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.Video" flushCache="true">
         UPDATE video
         set
                 video_id = #{videoId,jdbcType=CHAR},
@@ -216,7 +218,7 @@ ${alias}.play_url
                 play_url = #{playUrl,jdbcType=VARCHAR}
 		where video_id = #{videoId,jdbcType=CHAR}
     </update>
-    <update id="updateVideoStatus">
+    <update id="updateVideoStatus" flushCache="true">
         update video
         set
             status = #{status,jdbcType=VARCHAR}

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="xin.stxkfzx.noshy.mapper.PostCategoryMapper">
+  <cache type="xin.stxkfzx.noshy.cache.MyBatisCache"/>
+
   <resultMap id="BaseResultMap" type="xin.stxkfzx.noshy.domain.PostCategory">
     <id column="category_id" jdbcType="INTEGER" property="categoryId" />
     <result column="category_name" jdbcType="VARCHAR" property="categoryName" />
@@ -59,7 +61,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.PostCategory">
+  <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.PostCategory" flushCache="true">
     update post_category
     <set>
       <if test="categoryName != null">
@@ -74,7 +76,7 @@
     </set>
     where category_id = #{categoryId,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.PostCategory">
+  <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.PostCategory" flushCache="true">
     update post_category
     set category_name = #{categoryName,jdbcType=VARCHAR},
       description = #{description,jdbcType=VARCHAR},

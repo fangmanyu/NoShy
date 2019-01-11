@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 @ApiModel
-public class Post {
+public class Post implements Serializable {
 
     /**
      * 私人权限，仅自己可见
@@ -54,6 +55,7 @@ public class Post {
      * 删除状态(从数据库中删除)
      */
     public static final int DELETE = -1;
+    private static final long serialVersionUID = 8508467515543172046L;
 
     @ApiModelProperty(hidden = true)
     private Integer postId;

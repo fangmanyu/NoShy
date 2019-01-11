@@ -1,10 +1,12 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class UserChallengeVideoLikes {
-    public static final int NOT_LiKE = 0;
+public class UserChallengeVideoLikes implements Serializable {
+    public static final int NOT_LIKE = 0;
     public static final int LIKED = 1;
+    private static final long serialVersionUID = 7797776037364422065L;
 
     private Integer userId;
 

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="xin.stxkfzx.noshy.mapper.ChallengeMapper">
+    <cache type="xin.stxkfzx.noshy.cache.MyBatisCache"/>
+
     <resultMap id="BaseResultMap" type="xin.stxkfzx.noshy.domain.Challenge">
         <id column="challenge_id" jdbcType="INTEGER" property="challengeId"/>
         <result column="challenge_name" jdbcType="VARCHAR" property="challengeName"/>
@@ -73,7 +75,7 @@ image_url
             <if test="imageUrl!=null">#{imageUrl,jdbcType=VARCHAR}</if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.Challenge">
+    <update id="updateByPrimaryKeySelective" parameterType="xin.stxkfzx.noshy.domain.Challenge" flushCache="true">
         UPDATE challenge
         <set>
             <if test="challengeId != null">challenge_id = #{challengeId,jdbcType=INTEGER},</if>
@@ -88,7 +90,7 @@ image_url
         </set>
         where challenge_id = #{challengeId,jdbcType=INTEGER}
     </update>
-    <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.Challenge">
+    <update id="updateByPrimaryKey" parameterType="xin.stxkfzx.noshy.domain.Challenge" flushCache="true">
         UPDATE challenge
         set
                 challenge_id = #{challengeId,jdbcType=INTEGER},

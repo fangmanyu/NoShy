@@ -1,8 +1,10 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class UserCollectionRecord {
+public class UserCollectionRecord implements Serializable {
+    private static final long serialVersionUID = -2105538406094955654L;
     private Integer collectionRecordId;
 
     private Long userId;

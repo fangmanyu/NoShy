@@ -5,16 +5,14 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotEmpty;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 @ApiModel
-public class Video {
+public class Video implements Serializable {
+
     /** Uploading（上传中） */
     public static final String UPLOADING = "Uploading";
     /** UploadSucc（上传完成） */
@@ -29,6 +27,7 @@ public class Video {
     public static final String BLOCKED = "Blocked";
     /** NORMAL（正常） */
     public static final String NORMAL = "Normal";
+    private static final long serialVersionUID = -8629928087519862335L;
 
     @ApiModelProperty(hidden = true)
     private String videoId;

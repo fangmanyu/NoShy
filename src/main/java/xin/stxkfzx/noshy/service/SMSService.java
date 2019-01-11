@@ -1,10 +1,8 @@
 package xin.stxkfzx.noshy.service;
 
 import com.aliyuncs.dysmsapi.model.v20170525.QuerySendDetailsResponse;
-import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
 import com.aliyuncs.exceptions.ClientException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
+import xin.stxkfzx.noshy.dto.SMSDTO;
 
 /**
  * 短信服务
@@ -22,20 +20,18 @@ public interface SMSService {
      * 发送短信
      *
      * @param phone 电话号码
-     * @param code  验证码
      * @return  发送响应
-     * @exception ClientException
      * @author fmy
      * @date 2018-07-20 15:32
      */
-    SendSmsResponse sendSms(String phone, String code) throws ClientException;
+    SMSDTO sendSms(String phone);
 
     /**
      * 短信明细查询
      *
-     * @param phone
-     * @return
-     * @exception ClientException
+     * @param phone 手机号
+     * @return 查询细节参数
+     * @exception ClientException 阿里云客户端异常
      * @author fmy
      * @date 2018-07-20 15:39
      */

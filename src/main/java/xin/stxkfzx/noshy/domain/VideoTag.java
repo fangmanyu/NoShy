@@ -5,10 +5,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.Serializable;
+
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @ApiModel(description = "视频标签")
-public class VideoTag {
+public class VideoTag implements Serializable {
 
+    private static final long serialVersionUID = 7653346475942776742L;
     @ApiModelProperty(hidden = true)
     private Integer tagId;
 

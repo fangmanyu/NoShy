@@ -1,8 +1,10 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Comment {
+public class Comment implements Serializable {
+    private static final long serialVersionUID = -1294871909104031092L;
     private Integer commentId;
 
     private Integer browseId;

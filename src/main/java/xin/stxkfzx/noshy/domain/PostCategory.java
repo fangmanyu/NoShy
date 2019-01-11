@@ -1,8 +1,10 @@
 package xin.stxkfzx.noshy.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class PostCategory {
+public class PostCategory implements Serializable {
+    private static final long serialVersionUID = 551889428021163508L;
     private Integer categoryId;
 
     private String categoryName;

@@ -6,10 +6,15 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * @author fmy
+ */
 @ApiModel(description = "帖子消息")
-public class PostInformation {
+public class PostInformation implements Serializable {
+    private static final long serialVersionUID = -1362960463109856781L;
     @ApiModelProperty(hidden = true)
     private Integer infoId;
 

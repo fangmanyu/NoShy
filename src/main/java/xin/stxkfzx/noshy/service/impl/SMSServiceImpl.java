@@ -9,12 +9,21 @@ import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import xin.stxkfzx.noshy.dto.SMSDTO;
 import xin.stxkfzx.noshy.service.SMSService;
+import xin.stxkfzx.noshy.util.ApplicationContextUtil;
+import xin.stxkfzx.noshy.util.CheckUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author fmy
@@ -22,20 +31,23 @@ import java.util.Date;
  */
 @Service
 public class SMSServiceImpl implements SMSService {
+    private static final Logger log = LogManager.getLogger(SMSServiceImpl.class);
 
     @Value("${ali.accessKey.id}")
     private String accessKeyId;
     @Value("${ali.accessKye.secret}")
     private String accessKeySecret;
+    private static final long EXPIRE_TIME = 180L;
+    private static final String OK = "OK";
+    private static final String ISV_BUSINESS_LIMIT_CONTROL = "isv.BUSINESS_LIMIT_CONTROL";
 
-    @Override
-    public SendSmsResponse sendSms(String phone, String code) throws ClientException {
-        if (phone == null || "".equals(phone.trim())) {
-            throw new ClientException("电话号码错误");
+    private SendSmsResponse sendSmsDetail(String phone, String code) throws ClientException {
+        if (!CheckUtils.checkPhone(phone)) {
+            throw new IllegalArgumentException("电话号码格式错误");
         }
 
         if (code == null || code.length() != 4) {
-            throw new ClientException("验证码错误");
+            throw new IllegalArgumentException("验证码格式错误");
         }
 
         //可自助调整超时时间
@@ -66,6 +78,41 @@ public class SMSServiceImpl implements SMSService {
 
         return acsClient.getAcsResponse(request);
 
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public SMSDTO sendSms(String phone) {
+        // 生成校验码
+        String code = new Random().nextInt(9000) + 1000 + "";
+        log.debug("手机号：{}， 发送的验证码 {}", phone, code);
+
+        SendSmsResponse sendSmsResponse = null;
+        try {
+            sendSmsResponse = sendSmsDetail(phone, code);
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("阿里云短信接口调用失败：{}", e.getMessage());
+        }
+
+        // 发送成功
+        if (sendSmsResponse.getCode() != null && sendSmsResponse.getCode().equals(OK)) {
+            // 将手机验证码存到redis中，设置过期时间
+            RedisTemplate redisTemplate = ApplicationContextUtil.getRedisTemplate();
+            ValueOperations valueOperations = redisTemplate.opsForValue();
+            valueOperations.set(phone, code, EXPIRE_TIME, TimeUnit.SECONDS);
+
+            log.info("手机号：{} 发送短信成功", phone);
+            return new SMSDTO(true, "成功发送");
+
+        } else if (sendSmsResponse.getCode() != null
+                && sendSmsResponse.getCode().equals(ISV_BUSINESS_LIMIT_CONTROL)) {
+            // 业务限流。将短信发送频率限制在正常的业务流控范围内，默认流控：短信验证码 ：使用同一个签名，对同一个手机号码发送短信验证码，
+            // 支持1条/分钟，5条/小时 ，累计10条/天。
+            return new SMSDTO(false, "短信发送频率过快或达到限制");
+        }
+
+        return new SMSDTO(false, sendSmsResponse.getCode());
     }
 
     @Override

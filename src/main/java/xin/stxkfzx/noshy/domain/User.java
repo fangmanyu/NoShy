@@ -3,6 +3,7 @@ package xin.stxkfzx.noshy.domain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -12,7 +13,8 @@ import java.util.Date;
  * @date 2018-07-20 23:55
  */
 @ApiModel(description = "用户实体类")
-public class User {
+public class User implements Serializable {
+    private static final long serialVersionUID = -3806990489424872411L;
     @ApiModelProperty(hidden = true)
     private Long userId;
 

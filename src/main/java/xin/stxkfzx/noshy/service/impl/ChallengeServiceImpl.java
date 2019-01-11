@@ -1,6 +1,5 @@
 package xin.stxkfzx.noshy.service.impl;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -298,8 +297,8 @@ public class ChallengeServiceImpl implements ChallengeService {
 
             if (status == UserChallengeVideoLikes.LIKED) {
                 rank.setLikes(rank.getLikes() - 1);
-                userChallengeVideoLikes.setStatus(UserChallengeVideoLikes.NOT_LiKE);
-            } else if (status == UserChallengeVideoLikes.NOT_LiKE) {
+                userChallengeVideoLikes.setStatus(UserChallengeVideoLikes.NOT_LIKE);
+            } else if (status == UserChallengeVideoLikes.NOT_LIKE) {
                 rank.setLikes(rank.getLikes() + 1);
                 userChallengeVideoLikes.setStatus(UserChallengeVideoLikes.LIKED);
             } else {
