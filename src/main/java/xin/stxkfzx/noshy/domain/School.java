@@ -2,6 +2,7 @@ package xin.stxkfzx.noshy.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  *  用户所属的学校
@@ -70,5 +71,26 @@ public class School implements Serializable {
                 ", createTime=" + createTime +
                 ", schoolAddr='" + schoolAddr + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        School school = (School) o;
+        return Objects.equals(schoolId, school.schoolId) &&
+                Objects.equals(schoolName, school.schoolName) &&
+                Objects.equals(schoolDesc, school.schoolDesc) &&
+                Objects.equals(createTime, school.createTime) &&
+                Objects.equals(schoolAddr, school.schoolAddr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(schoolId, schoolName, schoolDesc, createTime, schoolAddr);
     }
 }
