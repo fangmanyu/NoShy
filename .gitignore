@@ -25,4 +25,4 @@
 /.nb-gradle/
 
 images/
-*.properties
+application-*.properties
