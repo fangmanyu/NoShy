@@ -2,6 +2,7 @@ package xin.stxkfzx.noshy.vo;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import xin.stxkfzx.noshy.enums.ResponseCodeEnum;
 
 /**
  * json对象封装
@@ -16,8 +17,14 @@ public class JSONResponse {
     private String message;
 
     private Object data;
+    private ResponseCodeEnum code;
 
     public JSONResponse() {
+    }
+
+    public JSONResponse(boolean success, ResponseCodeEnum code) {
+        this.success = success;
+        this.code = code;
     }
 
     public JSONResponse(boolean success, String errorMsg) {

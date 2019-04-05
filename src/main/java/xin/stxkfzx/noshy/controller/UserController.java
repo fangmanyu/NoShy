@@ -12,6 +12,7 @@ import xin.stxkfzx.noshy.domain.User;
 import xin.stxkfzx.noshy.exception.RegisterException;
 import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.util.CheckUtils;
+import xin.stxkfzx.noshy.util.UserUtils;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 import xin.stxkfzx.noshy.vo.LoginInfoVO;
 
@@ -19,17 +20,17 @@ import javax.servlet.http.HttpSession;
 import java.util.Date;
 
 /**
- * 注册登录 Controller
+ * 用户 Controller
  *
  * @author fmy
  * @date 2018-07-21 23:49
  */
-@Api(description = "登录注册接口API")
+@Api(description = "用户API")
 @RestController
-public class RegisterLoginController {
+public class UserController {
 
     private final UserService userService;
-    private static final Logger log = LogManager.getLogger(RegisterLoginController.class);
+    private static final Logger log = LogManager.getLogger(UserController.class);
 
     @ApiOperation(value = "用户登录", notes = "根据用户的电话号码和密码进行登录")
     @PostMapping("/login")
@@ -47,8 +48,8 @@ public class RegisterLoginController {
 
         User user = userService.login(loginInfo.getPhone(), loginInfo.getPassword());
         if (user != null) {
-            session.setAttribute("currentUser", user);
-        System.out.println("session id"+session.getId());
+            session.setAttribute(UserUtils.KEY_USER, user);
+
             return new JSONResponse(true, "登陆成功");
         }
 
@@ -99,7 +100,7 @@ public class RegisterLoginController {
     }
 
     @Autowired
-    public RegisterLoginController(UserService userService) {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 }
