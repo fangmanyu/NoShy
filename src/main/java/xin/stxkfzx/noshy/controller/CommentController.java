@@ -8,16 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import xin.stxkfzx.noshy.domain.Comment;
-import xin.stxkfzx.noshy.domain.User;
 import xin.stxkfzx.noshy.dto.CommentDTO;
 import xin.stxkfzx.noshy.exception.CommentServiceException;
 import xin.stxkfzx.noshy.service.CommentService;
+import xin.stxkfzx.noshy.util.UserUtils;
 import xin.stxkfzx.noshy.vo.AddCommentVO;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
-import java.util.List;
 
 /**
  * 评论接口
@@ -32,29 +30,20 @@ import java.util.List;
 public class CommentController {
     private static final Logger log = LogManager.getLogger(CommentController.class);
     private final CommentService commentService;
-    private User currentUser;
 
     @Autowired
     public CommentController(CommentService commentService) {
         this.commentService = commentService;
     }
 
-    @ModelAttribute
-    public void getCurrentUser(HttpSession session) {
-        this.currentUser = (User) session.getAttribute("currentUser");
-        log.debug("当前登录用户信息: {}", currentUser);
-    }
-
     @ApiOperation(value = "添加评论")
     @PostMapping
     public JSONResponse addComment(@RequestBody @Validated @ApiParam AddCommentVO commentInfo) {
-        if (currentUser == null || currentUser.getUserId() == null) {
-            return new JSONResponse(false, "用户尚未登录");
-        }
+        Long currentUserId = UserUtils.getUserId();
 
         Comment comment = new Comment();
         BeanUtils.copyProperties(commentInfo, comment);
-        comment.setUserId(currentUser.getUserId());
+        comment.setUserId(currentUserId);
         log.debug("添加评论信息: {}", comment);
 
         try {
@@ -78,11 +67,10 @@ public class CommentController {
     @ApiImplicitParam(name = "commentId", value = "评论Id")
     @DeleteMapping("/{commentId}")
     public JSONResponse removeComment(@PathVariable @Min(0) int commentId) {
-        if (currentUser == null || currentUser.getUserId() == null) {
-            return new JSONResponse(false, "用户尚未登录");
-        }
+        Long currentUserId = UserUtils.getUserId();
 
         try {
+            // TODO 判断是否有权限删除评论
             CommentDTO commentDTO = commentService.removerComment(commentId);
 
             return new JSONResponse(commentDTO.getSuccess(), commentDTO.getMessage());

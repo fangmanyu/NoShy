@@ -20,6 +20,7 @@ import xin.stxkfzx.noshy.service.ChallengeService;
 import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.service.VideoService;
 import xin.stxkfzx.noshy.util.CheckUtils;
+import xin.stxkfzx.noshy.util.UserUtils;
 import xin.stxkfzx.noshy.vo.ImageHolder;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 import xin.stxkfzx.noshy.vo.UserVO;
@@ -27,7 +28,6 @@ import xin.stxkfzx.noshy.vo.challenge.ChallengeVO;
 import xin.stxkfzx.noshy.vo.video.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.io.IOException;
@@ -56,18 +56,14 @@ public class VideoController {
     private final VideoService videoService;
     private final ChallengeService challengeService;
     private final UserService userService;
-    private User currentUser;
 
     @ApiOperation(value = "获取自己发布的视频列表")
     @GetMapping("/myVideo")
     public JSONResponse listMyVideo() {
-        if (currentUser == null || currentUser.getUserId() == null) {
-            return new JSONResponse(false, "用户未登录");
-        }
+        Long currentUserId = UserUtils.getUserId();
 
-        VideoDTO videoDTO = videoService.listMyVideo(currentUser.getUserId().intValue());
-        // return new JSONResponse(true, "查询成功", videoDTO.getVideoList());
-        return new JSONResponse(true, "查询成功",getVideoDetailList(videoDTO));
+        VideoDTO videoDTO = videoService.listMyVideo(currentUserId.intValue());
+        return new JSONResponse(true, "查询成功", getVideoDetailList(videoDTO));
     }
 
     private List<VideoDetailVO> getVideoDetailList(VideoDTO videoDTO) {
@@ -237,8 +233,8 @@ public class VideoController {
                                    @RequestParam(value = "isOurSchool", required = false) Boolean isOurSchool) {
 
         Video video = new Video();
-        Integer schoolId = Optional.ofNullable(currentUser).map(user ->
-                isOurSchool ? user.getSchoolId().intValue() : null).orElse(null);
+        User user = userService.getUser(UserUtils.getUserId());
+        Integer schoolId = isOurSchool ? user.getSchoolId().intValue() : null;
 
         if (StringUtils.isNotEmpty(videoCondition) && StringUtils.isNotBlank(videoCondition)) {
             log.debug("视频列表条件参数: {}", videoCondition);
@@ -311,11 +307,9 @@ public class VideoController {
     }
 
 
-
     /**
      * 上传视频
      *
-     * @deprecated 通过I/O流上传视频,已经不再使用.可以作为本地批量上传视频使用
      * @param title
      * @param videoCategory
      * @param videoFile
@@ -324,6 +318,7 @@ public class VideoController {
      * @return
      * @author fmy
      * @date 2018-07-25 16:23
+     * @deprecated 通过I/O流上传视频,已经不再使用.可以作为本地批量上传视频使用
      */
     @ApiOperation(value = "上传视频", produces = "multipart/form-data")
     @ApiImplicitParams({
@@ -342,9 +337,7 @@ public class VideoController {
 
         // 传参检查
         /// 获取当前登录用户
-        if (!CheckUtils.checkCurrentUserExist(currentUser)) {
-            return new JSONResponse(false, "userId 错误");
-        }
+        Long currentUserId = UserUtils.getUserId();
         boolean flag = StringUtils.isEmpty(title) || videoCategory == null || videoCategory < 0;
         if (flag) {
             return new JSONResponse(false, "video 对象错误");
@@ -364,7 +357,7 @@ public class VideoController {
         video.setTitle(title);
         video.setVideoCategory(videoCategory);
         video.setDescription(description);
-        video.setUserId(currentUser.getUserId());
+        video.setUserId(currentUserId);
         video.setTags(strTagsToList(tags));
         ImageHolder imageHolder = null;
         try {
@@ -424,9 +417,7 @@ public class VideoController {
     @PostMapping("/uploadAuth")
     public JSONResponse createUploadVideo(@RequestParam String videoInfo,
                                           @RequestParam MultipartFile videoImage) {
-        if (!CheckUtils.checkCurrentUserExist(currentUser)) {
-            return new JSONResponse(false, "用户尚未登录");
-        }
+        Long currentUserId = UserUtils.getUserId();
 
         UploadAuthVO uploadAuthVO;
         try {
@@ -442,7 +433,7 @@ public class VideoController {
         }
         Video video = new Video();
         BeanUtils.copyProperties(uploadAuthVO, video);
-        video.setUserId(currentUser.getUserId());
+        video.setUserId(currentUserId);
 
         ImageHolder imageHolder;
         try {
@@ -519,15 +510,6 @@ public class VideoController {
     @GetMapping("/url/upload")
     public String getUploadVideoHtmlURL() {
         return "http://119.23.208.165/NoShy/html/share/publish.html?type=2";
-    }
-
-    @ModelAttribute
-    public void initUser(HttpSession session) {
-        Object currentUser = session.getAttribute("currentUser");
-        if (currentUser instanceof User) {
-            log.debug("获取当前登录用户: " + currentUser);
-            this.currentUser = (User) currentUser;
-        }
     }
 
     @Autowired

@@ -17,17 +17,18 @@ import xin.stxkfzx.noshy.domain.*;
 import xin.stxkfzx.noshy.dto.ChallengeDTO;
 import xin.stxkfzx.noshy.dto.VideoDTO;
 import xin.stxkfzx.noshy.exception.ChallengeServiceException;
-import xin.stxkfzx.noshy.service.BrowseService;
 import xin.stxkfzx.noshy.service.ChallengeService;
 import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.service.VideoService;
-import xin.stxkfzx.noshy.util.CheckUtils;
+import xin.stxkfzx.noshy.util.UserUtils;
 import xin.stxkfzx.noshy.vo.*;
-import xin.stxkfzx.noshy.vo.challenge.*;
+import xin.stxkfzx.noshy.vo.challenge.ChallengeListVO;
+import xin.stxkfzx.noshy.vo.challenge.ChallengeVO;
+import xin.stxkfzx.noshy.vo.challenge.ListChallengeQuery;
+import xin.stxkfzx.noshy.vo.challenge.RankDetailVO;
 import xin.stxkfzx.noshy.vo.video.VideoDetailVO;
 import xin.stxkfzx.noshy.vo.video.VideoVO;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.io.IOException;
@@ -50,12 +51,11 @@ public class ChallengeController {
     private final ChallengeService challengeService;
     private final VideoService videoService;
     private final UserService userService;
-    private final BrowseService browseService;
-    private User currentUser;
 
     @ApiOperation(value = "获取指定挑战")
     @GetMapping("/{challengeId}")
     public JSONResponse getChallenge(@PathVariable @Min(0) int challengeId) {
+        Long currentUserId = UserUtils.getUserId();
         ChallengeDTO dto = challengeService.getChallengeByChallengeId(challengeId);
 
         if (!dto.getSuccess()) {
@@ -75,8 +75,8 @@ public class ChallengeController {
             BeanUtils.copyProperties(rank, detailVO);
             detailVO.setUserInfo(getUserVo(userId));
             detailVO.setVideoInfo(getVideoDetail(videoDTO.getVideo(), videoDTO.getBrowseInformation()));
-            Integer currentUserId = Optional.ofNullable(currentUser).map(User::getUserId).map(Long::intValue).orElse(-1);
-            boolean liked = challengeService.isLiked(rank.getRankId(), currentUserId);
+
+            boolean liked = challengeService.isLiked(rank.getRankId(), currentUserId.intValue());
             detailVO.setHasLiked(liked);
             rankDetailVOList.add(detailVO);
         }
@@ -275,12 +275,11 @@ public class ChallengeController {
     @ApiImplicitParam(name = "rankId", value = "排名Id")
     @PutMapping("/{rankId}/addLike")
     public JSONResponse addLike(@PathVariable @Min(0) Integer rankId) {
-        if (!CheckUtils.checkCurrentUserExist(currentUser)) {
-            return new JSONResponse(false, "用户尚未登录");
-        }
+        Long userId = UserUtils.getUserId();
+
         ChallengeDTO dto = null;
         try {
-            dto = challengeService.likeIt(rankId, currentUser.getUserId().intValue());
+            dto = challengeService.likeIt(rankId, userId.intValue());
         } catch (ChallengeServiceException e) {
             e.printStackTrace();
             return new JSONResponse(false, e.getMessage());
@@ -290,11 +289,9 @@ public class ChallengeController {
 
     @GetMapping("/myChallenge")
     public JSONResponse listMyJoinChallenge() {
-        if (!CheckUtils.checkCurrentUserExist(currentUser)) {
-            return new JSONResponse(false, "用户尚未登录");
-        }
+        Long userId = UserUtils.getUserId();
 
-        ChallengeDTO dto = challengeService.listMyJoinChallenge(currentUser.getUserId().intValue());
+        ChallengeDTO dto = challengeService.listMyJoinChallenge(userId.intValue());
         return new JSONResponse(dto.getSuccess(), dto.getMessage(), getChallengeListVO(dto));
     }
 
@@ -310,20 +307,11 @@ public class ChallengeController {
         return "http://119.23.208.165/NoShy/html/share/publish.html?type=1";
     }
 
-    @ModelAttribute
-    public void getCurrentUser(HttpSession session) {
-        Object currentUser = session.getAttribute("currentUser");
-        if (currentUser instanceof User) {
-            this.currentUser = (User) currentUser;
-            log.debug("当前登录用户: {}", this.currentUser);
-        }
-    }
 
     @Autowired
-    public ChallengeController(ChallengeService challengeService, VideoService videoService, UserService userService, BrowseService browseService) {
+    public ChallengeController(ChallengeService challengeService, VideoService videoService, UserService userService) {
         this.challengeService = challengeService;
         this.videoService = videoService;
         this.userService = userService;
-        this.browseService = browseService;
     }
 }

@@ -24,7 +24,9 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(userLoginInterceptor).addPathPatterns("/**")
-                .excludePathPatterns("/login", "/register", "/swagger*/**", "/webjars/**", "/kaptcha");
+                .excludePathPatterns("/webjars/**")
+                .excludePathPatterns("/swagger-*/**")
+                .excludePathPatterns("/upload/**");
     }
 
 }

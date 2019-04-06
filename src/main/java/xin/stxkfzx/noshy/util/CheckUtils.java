@@ -32,11 +32,8 @@ public class CheckUtils {
      * @date 2018-09-16 21:13
      */
     public static boolean checkCurrentUserExist(User currentUser) {
-        if (currentUser != null && currentUser.getUserId() != null) {
-            return true;
-        }
+        return currentUser != null && currentUser.getUserId() != null;
 
-        return false;
     }
 
     /**
@@ -54,11 +51,7 @@ public class CheckUtils {
         log.debug("服务器验证码: {}, 客户端验证码: {}", verifyCodeExpected, verifyCodeActual);
         log.debug("校验sessionId = {}", session.getId());
 
-        if (verifyCodeActual == null || !verifyCodeActual.equals(verifyCodeExpected)) {
-            return false;
-        }
-
-        return true;
+        return verifyCodeActual != null && verifyCodeActual.equals(verifyCodeExpected);
     }
 
 
@@ -74,18 +67,14 @@ public class CheckUtils {
         // 校验手机号的正则表达式
         final String phoneNumberReg = "^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\\d{8}$";
 
-        if (phone == null || "".equals(phone.trim()) || !Pattern.matches(phoneNumberReg, phone)) {
-            return false;
-        }
-
-        return true;
+        return phone != null && !"".equals(phone.trim()) && Pattern.matches(phoneNumberReg, phone);
     }
 
     /**
      * 检验短信验证码
      *
-     * @param phone	手机号
-     * @param code	 需要检验的短信验证码
+     * @param phone 手机号
+     * @param code  需要检验的短信验证码
      * @return 如果需要检验的短信验证码正确，返回true；否则返回false
      * @author fmy
      * @date 2018-12-21 13:21

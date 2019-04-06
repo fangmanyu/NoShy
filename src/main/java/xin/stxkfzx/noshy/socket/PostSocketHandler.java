@@ -1,11 +1,11 @@
-package xin.stxkfzx.noshy.service.impl;
+package xin.stxkfzx.noshy.socket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import xin.stxkfzx.noshy.bo.PostSocketInfoBO;
 import xin.stxkfzx.noshy.bo.PostSocketUserInfo;
@@ -14,10 +14,7 @@ import xin.stxkfzx.noshy.domain.User;
 import xin.stxkfzx.noshy.domain.UserInformation;
 import xin.stxkfzx.noshy.dto.PostDTO;
 import xin.stxkfzx.noshy.exception.PostServiceException;
-import xin.stxkfzx.noshy.mapper.BrowseInformationMapper;
-import xin.stxkfzx.noshy.mapper.PostInformationMapper;
-import xin.stxkfzx.noshy.mapper.PostMapper;
-import xin.stxkfzx.noshy.mapper.UserInformationMapper;
+import xin.stxkfzx.noshy.service.PostService;
 import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 import xin.stxkfzx.noshy.vo.RequestSocketMessage;
@@ -25,17 +22,19 @@ import xin.stxkfzx.noshy.vo.ResponseSocketMessage;
 import xin.stxkfzx.noshy.vo.UserVO;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Objects;
+import java.util.Vector;
 
 /**
  * @author fmy
  * @date 2018-09-09 13:55
  */
-@Service(value = "postService")
-public class PostSocketHandler extends PostServiceImpl implements WebSocketHandler {
+@Component
+public class PostSocketHandler implements WebSocketHandler {
     private static final Logger log = LogManager.getLogger(PostSocketHandler.class);
+
+    private final PostService postService;
     private static final PostSocketInfoBO socketInfo;
-    private final UserInformationMapper userInformationMapper;
     private final UserService userService;
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -44,55 +43,45 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
     }
 
     @Autowired
-    public PostSocketHandler(PostMapper postMapper, PostInformationMapper postInformationMapper, BrowseInformationMapper browseInformationMapper, UserInformationMapper userInformationMapper, UserService userService) {
-        super(postMapper, postInformationMapper, browseInformationMapper, userService);
-        this.userInformationMapper = userInformationMapper;
+    public PostSocketHandler(PostService postService, UserService userService) {
+        this.postService = postService;
         this.userService = userService;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
         log.info("建立socket连接");
-        Map<String, Object> attributes = webSocketSession.getAttributes();
-        User currentUser = (User) attributes.get("currentUser");
-        log.debug("currentUser: {}", currentUser);
-        String postId = (String) attributes.get("postId");
+        Integer currentUserId = getUserId(webSocketSession);
+        log.debug("currentUserId: {}", currentUserId);
+        String postId = getPostId(webSocketSession);
         log.debug("postId: {}", postId);
-        Boolean isLogin = (Boolean) attributes.get("isLogin");
-        log.debug("isLogin: {}", isLogin);
 
-        Integer userId = isLogin ? currentUser.getUserId().intValue() : null;
         if (postId != null) {
-            socketInfo.addUserInfo(new PostSocketUserInfo(userId, webSocketSession, postId));
-            log.debug("postId: {}, userId: {} 加入socket中", postId, userId);
+            socketInfo.addUserInfo(new PostSocketUserInfo(currentUserId, webSocketSession, postId));
+            log.debug("postId: {}, userId: {} 加入socket中", postId, currentUserId);
         }
     }
 
     @Override
     public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) throws Exception {
         log.info("socket 开始处理数据");
-        Integer userId = getUserId(webSocketSession);
-        String postId = getPostId(webSocketSession);
-
         // 读取消息
         Object payload = webSocketMessage.getPayload();
-        log.debug("handleMessage  " + payload);
         RequestSocketMessage socketMessage = mapper.readValue(payload.toString(), RequestSocketMessage.class);
         String message = socketMessage.getMessage();
         if (StringUtils.isEmpty(message)) {
             return;
         }
+        userChat(webSocketSession, message);
 
-        // 判断当前用户是否登录,没有登录返回错误
+        log.info("socket 处理数据结束");
+    }
+
+
+    private void userChat(WebSocketSession webSocketSession, String message) throws IOException {
+        Integer userId = getUserId(webSocketSession);
+        String postId = getPostId(webSocketSession);
         JSONResponse jsonResponse = new JSONResponse();
-        if (!isLogin(webSocketSession)) {
-            log.debug("用户未登录");
-            jsonResponse.setSuccess(false);
-            jsonResponse.setMessage("用户未登录");
-            String json = mapper.writeValueAsString(jsonResponse);
-            webSocketSession.sendMessage(new TextMessage(json));
-            return;
-        }
 
         // 构建帖子消息,存到数据库中
         PostInformation information = new PostInformation();
@@ -103,7 +92,7 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
         ResponseSocketMessage responseSocketMessage = new ResponseSocketMessage();
         try {
             log.debug("信息存到数据库中");
-            PostDTO postDTO = super.addPostInformation(information);
+            PostDTO postDTO = postService.addPostInformation(information);
             responseSocketMessage.setInfoId(postDTO.getInfoId());
         } catch (PostServiceException e) {
             log.error(e.getMessage());
@@ -130,8 +119,6 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
         json = mapper.writeValueAsString(jsonResponse);
         webSocketSession.sendMessage(new TextMessage(json));
         log.debug("给自己发送的消息: {}", json);
-
-        log.info("socket 处理数据结束");
     }
 
     @Override
@@ -158,20 +145,12 @@ public class PostSocketHandler extends PostServiceImpl implements WebSocketHandl
     }
 
     private String getPostId(WebSocketSession webSocketSession) {
-        String postId = (String) webSocketSession.getAttributes().get("postId");
-        return postId;
-    }
-
-    private Boolean isLogin(WebSocketSession webSocketSession) {
-        Boolean isLogin = (Boolean) webSocketSession.getAttributes().get("isLogin");
-        return isLogin;
+        return (String) webSocketSession.getAttributes().get("postId");
     }
 
     private Integer getUserId(WebSocketSession webSocketSession) {
-        User currentUser = (User) webSocketSession.getAttributes().get("currentUser");
-        Integer userId = isLogin(webSocketSession) ? currentUser.getUserId().intValue() : null;
-
-        return userId;
+        Long currentUserId = (Long) webSocketSession.getAttributes().get("currentUserId");
+        return currentUserId.intValue();
     }
 
     private UserVO getUserVo(Long userId) {

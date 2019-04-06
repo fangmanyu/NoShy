@@ -5,15 +5,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 import xin.stxkfzx.noshy.domain.User;
+import xin.stxkfzx.noshy.util.UserUtils;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.Optional;
-
-import static java.util.regex.Pattern.*;
 
 /**
  * 论坛聊天拦截器
@@ -21,6 +21,7 @@ import static java.util.regex.Pattern.*;
  * @author fmy
  * @date 2018-09-09 15:04
  */
+@Component
 public class PostSocketInterceptor extends HttpSessionHandshakeInterceptor {
     private static final Logger log = LogManager.getLogger(PostSocketInterceptor.class);
 
@@ -33,12 +34,15 @@ public class PostSocketInterceptor extends HttpSessionHandshakeInterceptor {
             String postId = request.getURI().toString().split("postId=")[1];
             log.debug("进入论坛房间Id: {}", postId);
 
-            User currentUser = (User) request.getServletRequest().getSession().getAttribute("currentUser");
-            log.debug("当前登录用户: {}", currentUser);
+            HttpSession session = request.getServletRequest().getSession(false);
+            if (session == null) {
+                return false;
+            }
+            Long userId = (Long)session.getAttribute(UserUtils.KEY_USER);
+            UserUtils.setUserId(userId);
 
             // map 是ConcurrentMap类,key-value 都不能为空
-            map.put("currentUser", Optional.ofNullable(currentUser).orElse(new User()));
-            map.put("isLogin", currentUser != null);
+            map.put("currentUserId", userId);
             map.put("postId", postId);
         }
 

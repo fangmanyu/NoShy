@@ -2,7 +2,6 @@ package xin.stxkfzx.noshy.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +17,7 @@ import xin.stxkfzx.noshy.dto.PostDTO;
 import xin.stxkfzx.noshy.exception.PostServiceException;
 import xin.stxkfzx.noshy.service.PostService;
 import xin.stxkfzx.noshy.service.UserService;
-import xin.stxkfzx.noshy.util.CheckUtils;
+import xin.stxkfzx.noshy.util.UserUtils;
 import xin.stxkfzx.noshy.vo.JSONResponse;
 import xin.stxkfzx.noshy.vo.PostInformationVO;
 import xin.stxkfzx.noshy.vo.ResponseSocketMessage;
@@ -27,7 +26,6 @@ import xin.stxkfzx.noshy.vo.post.AddPostVO;
 import xin.stxkfzx.noshy.vo.post.PostConditionVO;
 import xin.stxkfzx.noshy.vo.post.PostVO;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Min;
 import java.util.*;
 
@@ -45,29 +43,6 @@ public class PostController {
     private static final Logger log = LogManager.getLogger(PostController.class);
     private final PostService postService;
     private final UserService userService;
-    private User currentUser;
-
-    @ModelAttribute
-    public void initUser(HttpSession session) {
-        Object currentUser = session.getAttribute("currentUser");
-        log.debug("获取当前登录用户: " + currentUser);
-        if (currentUser instanceof User) {
-            this.currentUser = (User) currentUser;
-        }
-    }
-
-    // @ApiOperation(value = "更新帖子点击量")
-    // @ApiImplicitParam(name = "postId", value = "指定帖子Id", required = true, dataType = "int")
-    // @GetMapping("/{postId}/addPageView")
-    public JSONResponse addPageView(@PathVariable @Min(1) int postId) {
-        PostDTO postDTO = null;
-        try {
-            postDTO = postService.addPageViewNum(postId);
-            return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage());
-        } catch (Exception e) {
-            return new JSONResponse(false, "更新帖子点击量失败: " + e.getMessage());
-        }
-    }
 
     private List<PostInformationVO> getPostInformationVOS(PostDTO afterPostInfo) {
         // DO -> VO
@@ -101,7 +76,7 @@ public class PostController {
 
         Map<String, Object> modelMap = new HashMap<>(3);
         modelMap.put("count", post.getCount());
-        modelMap.put("currentUserId", Optional.ofNullable(currentUser).map(u -> u.getUserId()).orElse(-1L));
+        modelMap.put("currentUserId", UserUtils.getUserId());
         modelMap.put("post", post.getPost());
 
         // DO -> VO
@@ -188,12 +163,13 @@ public class PostController {
         List<PostInformation> postInformationList = postDTO.getPostInformationList();
         List<ResponseSocketMessage> messageList = new ArrayList<>(postInformationList.size());
         ResponseSocketMessage message;
+        Long currentUserId = UserUtils.getUserId();
         for (PostInformation info :
                 postInformationList) {
             message = new ResponseSocketMessage();
             BeanUtils.copyProperties(info, message);
             message.setMessage(info.getInfoContent());
-            Boolean myMessage = Optional.ofNullable(currentUser).map(user -> user.getUserId().equals(Long.valueOf(info.getUserId()))).orElse(null);
+            Boolean myMessage = Optional.ofNullable(currentUserId).map(id -> id.equals(Long.valueOf(info.getUserId()))).orElse(null);
             message.setMyMessage(myMessage);
             message.setUserInfo(getUserVo(Long.valueOf(info.getUserId())));
             messageList.add(message);
@@ -205,13 +181,11 @@ public class PostController {
     @ApiOperation(value = "添加帖子")
     @PostMapping
     public JSONResponse addPost(@RequestBody @ApiParam AddPostVO postInfo) {
-        if (currentUser == null || currentUser.getUserId() == null) {
-            return new JSONResponse(false, "用户未登录");
-        }
+        Long currentUserId = UserUtils.getUserId();
 
         Post post = new Post();
         BeanUtils.copyProperties(postInfo, post);
-        post.setUserId(currentUser.getUserId().intValue());
+        post.setUserId(currentUserId.intValue());
 
         try {
             PostDTO dto = postService.createPost(post);

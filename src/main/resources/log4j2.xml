@@ -10,6 +10,7 @@
         <Property name="fileName">D:\doc\log\idea-log\noshy</Property>
         <Property name="fileGz">D:\doc\log\idea-log\noshy\7z</Property>
         <!--<Property name="PID">????</Property>-->
+        <!--TODO 添加MDC，修改日志格式-->
         <Property name="LOG_PATTERN">%clr{%d{yyyy-MM-dd HH:mm:ss.SSS}}{faint} %clr{%5p} %clr{${sys:PID}}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n%xwEx</Property>
     </properties>
 

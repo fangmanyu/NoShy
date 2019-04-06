@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import xin.stxkfzx.noshy.domain.BrowseInformation;
@@ -39,6 +40,7 @@ import java.util.*;
  * @date 2018-07-23 14:21
  */
 @Service
+@PropertySource("classpath:application-protected.properties")
 public class VideoServiceImpl implements VideoService {
     private static final Logger log = LogManager.getLogger(VideoServiceImpl.class);
 

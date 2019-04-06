@@ -5,8 +5,8 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import xin.stxkfzx.noshy.util.UserUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -80,6 +80,9 @@ public class EcmOutsourceUserController {
 
     @GetMapping("/version")
     public String getVersion() {
+        Long user = UserUtils.getUserId();
+        System.out.println(user);
+
         return "1235";
     }
 

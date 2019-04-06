@@ -23,7 +23,7 @@ public class UserUtils {
      * @author fmy
      * @date 2019-04-05 18:17
      */
-    public static Long getUser() {
+    public static Long getUserId() {
         Long userId = userThreadLocal.get();
 
         if (userId == null) {
@@ -33,14 +33,14 @@ public class UserUtils {
         return userId;
     }
 
-    public static void setUser(Long userId) {
+    public static void setUserId(Long userId) {
         userThreadLocal.set(userId);
         // 将用户信息放到日志
         MDC.put(KEY_USER, String.valueOf(userId));
 
     }
 
-    public static void removeUser() {
+    public static void removeUserId() {
         userThreadLocal.remove();
         MDC.remove(KEY_USER);
     }

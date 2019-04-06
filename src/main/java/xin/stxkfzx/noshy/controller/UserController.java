@@ -48,7 +48,7 @@ public class UserController {
 
         User user = userService.login(loginInfo.getPhone(), loginInfo.getPassword());
         if (user != null) {
-            session.setAttribute(UserUtils.KEY_USER, user);
+            session.setAttribute(UserUtils.KEY_USER, user.getUserId());
 
             return new JSONResponse(true, "登陆成功");
         }

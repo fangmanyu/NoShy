@@ -3,6 +3,7 @@ package xin.stxkfzx.noshy.service.impl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import xin.stxkfzx.noshy.domain.*;
 import xin.stxkfzx.noshy.dto.PostDTO;
@@ -23,6 +24,7 @@ import java.util.Optional;
  * @author fmy
  * @date 2018-07-28 20:34
  */
+@Service
 public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final PostInformationMapper postInformationMapper;
