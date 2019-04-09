@@ -1,5 +1,6 @@
 package xin.stxkfzx.noshy.interceptor;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,16 +42,17 @@ public class UserLoginInterceptor implements HandlerInterceptor {
 
         // 获取lang
         String lang = getLocalValue(request);
-        log.debug("当前用户语言：{}", lang);
-        UserUtils.setLocaleThreadLocal(lang);
+        if (StringUtils.isNotEmpty(lang)) {
+            log.debug("当前用户语言：{}", lang);
+            UserUtils.setLocaleThreadLocal(lang);
+        }
     }
 
     private String getLocalValue(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        for (Cookie c :
-                cookies) {
-            if (UserUtils.KEY_LANG.equalsIgnoreCase(c.getName())) {
-                return c.getValue();
+        for (int i = 0; cookies != null && i < cookies.length; i++) {
+            if (UserUtils.KEY_LANG.equalsIgnoreCase(cookies[i].getName())) {
+                return cookies[i].getValue();
             }
         }
         return null;
