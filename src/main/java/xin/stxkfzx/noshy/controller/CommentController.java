@@ -13,7 +13,7 @@ import xin.stxkfzx.noshy.exception.CommentServiceException;
 import xin.stxkfzx.noshy.service.CommentService;
 import xin.stxkfzx.noshy.util.UserUtils;
 import xin.stxkfzx.noshy.vo.AddCommentVO;
-import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.JsonResponse;
 
 import javax.validation.constraints.Min;
 
@@ -38,7 +38,7 @@ public class CommentController {
 
     @ApiOperation(value = "添加评论")
     @PostMapping
-    public JSONResponse addComment(@RequestBody @Validated @ApiParam AddCommentVO commentInfo) {
+    public JsonResponse addComment(@RequestBody @Validated @ApiParam AddCommentVO commentInfo) {
         Long currentUserId = UserUtils.getUserId();
 
         Comment comment = new Comment();
@@ -48,35 +48,35 @@ public class CommentController {
 
         try {
             CommentDTO dto = commentService.addComment(comment);
-            return new JSONResponse(dto.getSuccess(), dto.getMessage());
+            return new JsonResponse(dto.getSuccess(), dto.getMessage());
         } catch (CommentServiceException e) {
             log.error(e.getMessage());
-            return new JSONResponse(false, "系统错误");
+            return new JsonResponse(false, "系统错误");
         }
     }
 
     @ApiOperation(value = "获取全部评论信息")
     @ApiImplicitParam(name = "browseId", value = "浏览信息Id")
     @GetMapping()
-    public JSONResponse listCommentByBrowseId(@RequestParam @Min(0) int browseId) {
+    public JsonResponse listCommentByBrowseId(@RequestParam @Min(0) int browseId) {
         CommentDTO commentDTO = commentService.listCommentByBrowseId(browseId);
-        return new JSONResponse(commentDTO.getSuccess(), commentDTO.getMessage(), commentDTO.getCommentList());
+        return new JsonResponse(commentDTO.getSuccess(), commentDTO.getMessage(), commentDTO.getCommentList());
     }
 
     @ApiOperation(value = "删除评论,包括子类评论")
     @ApiImplicitParam(name = "commentId", value = "评论Id")
     @DeleteMapping("/{commentId}")
-    public JSONResponse removeComment(@PathVariable @Min(0) int commentId) {
+    public JsonResponse removeComment(@PathVariable @Min(0) int commentId) {
         Long currentUserId = UserUtils.getUserId();
 
         try {
             // TODO 判断是否有权限删除评论
             CommentDTO commentDTO = commentService.removerComment(commentId);
 
-            return new JSONResponse(commentDTO.getSuccess(), commentDTO.getMessage());
+            return new JsonResponse(commentDTO.getSuccess(), commentDTO.getMessage());
         } catch (CommentServiceException e) {
             log.error(e.getMessage());
-            return new JSONResponse(false, e.getMessage());
+            return new JsonResponse(false, e.getMessage());
         }
     }
 
@@ -85,8 +85,8 @@ public class CommentController {
             @ApiImplicitParam(name = "commentId", value = "评论Id")
     })
     @GetMapping("/{commentId}")
-    public JSONResponse getComment(@PathVariable @Min(0) int commentId) {
+    public JsonResponse getComment(@PathVariable @Min(0) int commentId) {
         CommentDTO comment = commentService.getComment(commentId);
-        return new JSONResponse(comment.getSuccess(), comment.getMessage(), comment.getComment());
+        return new JsonResponse(comment.getSuccess(), comment.getMessage(), comment.getComment());
     }
 }

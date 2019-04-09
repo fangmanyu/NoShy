@@ -4,8 +4,9 @@ import com.google.code.kaptcha.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.MessageSource;
 import org.springframework.data.redis.core.RedisTemplate;
-import xin.stxkfzx.noshy.domain.User;
+import xin.stxkfzx.noshy.exception.CheckException;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.ConstraintViolation;
@@ -22,18 +23,25 @@ import java.util.regex.Pattern;
  */
 public class CheckUtils {
     private static final Logger log = LogManager.getLogger(CheckUtils.class);
+    private static MessageSource source;
+
+    public static void setSource(MessageSource source) {
+        CheckUtils.source = source;
+    }
 
     /**
-     * 检查当前用户是否存在
+     * 检验条件是否成立
      *
-     * @param currentUser
-     * @return
+     * @param condition 条件
+     * @param msgKey 错误信息
+     * @param args 错误参数
      * @author fmy
-     * @date 2018-09-16 21:13
+     * @date 2019-04-08 14:48
      */
-    public static boolean checkCurrentUserExist(User currentUser) {
-        return currentUser != null && currentUser.getUserId() != null;
-
+    public static void check(boolean condition, String msgKey, Object... args) {
+        if (!condition) {
+            fail(msgKey, args);
+        }
     }
 
     /**
@@ -103,6 +111,10 @@ public class CheckUtils {
             sb.append(item.getPropertyPath().toString()).append(item.getMessage()).append(";");
         }
         return sb.toString();
+    }
+
+    private static void fail(String msgKey, Object... args) {
+        throw new CheckException(source.getMessage(msgKey, args, UserUtils.getLocaleThreadLocal()));
     }
 
     private CheckUtils() {

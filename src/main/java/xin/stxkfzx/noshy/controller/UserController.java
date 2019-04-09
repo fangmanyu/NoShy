@@ -13,7 +13,7 @@ import xin.stxkfzx.noshy.exception.RegisterException;
 import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.util.CheckUtils;
 import xin.stxkfzx.noshy.util.UserUtils;
-import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.JsonResponse;
 import xin.stxkfzx.noshy.vo.LoginInfoVO;
 
 import javax.servlet.http.HttpSession;
@@ -34,39 +34,39 @@ public class UserController {
 
     @ApiOperation(value = "用户登录", notes = "根据用户的电话号码和密码进行登录")
     @PostMapping("/login")
-    public JSONResponse login(@RequestBody @ApiParam LoginInfoVO loginInfo,
+    public JsonResponse login(@RequestBody @ApiParam LoginInfoVO loginInfo,
                               HttpSession session) {
         log.debug("登录信息: {}", loginInfo);
 
         if (!CheckUtils.checkVerifyCode(loginInfo.getVerifyCodeActual(), session)) {
-            return new JSONResponse(false, "验证码错误");
+            return new JsonResponse(false, "验证码错误");
         }
 
         if (!CheckUtils.checkPhone(loginInfo.getPhone()) || StringUtils.isEmpty(loginInfo.getPassword())) {
-            return new JSONResponse(false, "手机或密码格式错误");
+            return new JsonResponse(false, "手机或密码格式错误");
         }
 
         User user = userService.login(loginInfo.getPhone(), loginInfo.getPassword());
         if (user != null) {
             session.setAttribute(UserUtils.KEY_USER, user.getUserId());
 
-            return new JSONResponse(true, "登陆成功");
+            return new JsonResponse(true, "登陆成功");
         }
 
-        return new JSONResponse(false, "登陆失败，手机或密码错误");
+        return new JsonResponse(false, "登陆失败，手机或密码错误");
 
     }
 
     @ApiOperation(value = "注册用户", produces = "application/json")
     @PostMapping("/register")
-    public JSONResponse register(@RequestBody @ApiParam(name = "user", value = "用户对象") User user,
+    public JsonResponse register(@RequestBody @ApiParam(name = "user", value = "用户对象") User user,
                                  @ApiParam(name = "smsCode", value = "手机验证码") @RequestParam("smsCode") String smsCode) {
         if (user == null || StringUtils.isAnyEmpty(user.getUserPhone(), user.getUserPassword())) {
-            return new JSONResponse(false, "用户信息为空");
+            return new JsonResponse(false, "用户信息为空");
         }
 
         if (StringUtils.isEmpty(smsCode) || !CheckUtils.checkSmsCode(user.getUserPhone(), smsCode)) {
-            return new JSONResponse(false, "手机验证码错误");
+            return new JsonResponse(false, "手机验证码错误");
         }
 
         // 初始化信息
@@ -75,9 +75,9 @@ public class UserController {
 
         try {
             userService.register(user);
-            return new JSONResponse(true, "注册成功");
+            return new JsonResponse(true, "注册成功");
         } catch (RegisterException e) {
-            return new JSONResponse(false, e.getMessage());
+            return new JsonResponse(false, e.getMessage());
         }
     }
 

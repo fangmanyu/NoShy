@@ -54,12 +54,12 @@ public class ChallengeController {
 
     @ApiOperation(value = "获取指定挑战")
     @GetMapping("/{challengeId}")
-    public JSONResponse getChallenge(@PathVariable @Min(0) int challengeId) {
+    public JsonResponse getChallenge(@PathVariable @Min(0) int challengeId) {
         Long currentUserId = UserUtils.getUserId();
         ChallengeDTO dto = challengeService.getChallengeByChallengeId(challengeId);
 
         if (!dto.getSuccess()) {
-            return new JSONResponse(false, dto.getMessage());
+            return new JsonResponse(false, dto.getMessage());
         }
 
         List<Rank> rankList = dto.getRankList();
@@ -85,7 +85,7 @@ public class ChallengeController {
         BeanUtils.copyProperties(dto.getChallenge(), data);
         data.setRankList(rankDetailVOList);
 
-        return new JSONResponse(dto.getSuccess(), dto.getMessage(), data);
+        return new JsonResponse(dto.getSuccess(), dto.getMessage(), data);
     }
 
     private VideoDetailVO getVideoDetail(Video video, BrowseInformation browseInformation) {
@@ -148,7 +148,7 @@ public class ChallengeController {
 
     @ApiOperation(value = "分页获取猜你喜欢挑战列表")
     @GetMapping("/like")
-    public JSONResponse listChallengeByLike(@RequestParam @Min(0) int pageIndex,
+    public JsonResponse listChallengeByLike(@RequestParam @Min(0) int pageIndex,
                                             @RequestParam @Min(0) int pageSize) {
         ChallengeDTO dto = challengeService.listInterestedChallenge(pageIndex, pageSize);
         List<Challenge> challengeList = dto.getChallengeList();
@@ -160,7 +160,7 @@ public class ChallengeController {
             BeanUtils.copyProperties(item, likeChallengeVO);
             list.add(likeChallengeVO);
         }
-        return new JSONResponse(dto.getSuccess(), dto.getMessage(), list);
+        return new JsonResponse(dto.getSuccess(), dto.getMessage(), list);
     }
 
     @ApiOperation(value = "添加挑战视频")
@@ -169,7 +169,7 @@ public class ChallengeController {
             @ApiImplicitParam(name = "challengeId", value = "加入挑战Id")
     })
     @PostMapping("/{challengeId}/{videoId}/addChallengeVideo")
-    public JSONResponse addVideoToChallenge(@PathVariable @NotEmpty String videoId,
+    public JsonResponse addVideoToChallenge(@PathVariable @NotEmpty String videoId,
                                             @PathVariable @Min(0) Integer challengeId) {
 
         ChallengeDTO dto = null;
@@ -177,9 +177,9 @@ public class ChallengeController {
             dto = challengeService.addChallengeVideo(videoId, challengeId);
         } catch (ChallengeServiceException e) {
             e.printStackTrace();
-            return new JSONResponse(false, "添加失败");
+            return new JsonResponse(false, "添加失败");
         }
-        return new JSONResponse(dto.getSuccess(), dto.getMessage());
+        return new JsonResponse(dto.getSuccess(), dto.getMessage());
 
     }
 
@@ -190,7 +190,7 @@ public class ChallengeController {
             @ApiImplicitParam(name = "pageSize", value = "每页大小", required = true, dataType = "int")
     })
     @GetMapping
-    public JSONResponse listChallenge(@RequestParam(required = false) String challengeQueryStr,
+    public JsonResponse listChallenge(@RequestParam(required = false) String challengeQueryStr,
                                       @RequestParam @Min(0) int pageIndex,
                                       @RequestParam @Min(0) int pageSize) {
         ChallengeDTO dto;
@@ -205,11 +205,11 @@ public class ChallengeController {
                 dto = challengeService.listChallengeByCondition(challengeCondition, pageIndex, pageSize);
             } catch (IOException e) {
                 e.printStackTrace();
-                return new JSONResponse(false, "查询参数错误: " + e.getLocalizedMessage());
+                return new JsonResponse(false, "查询参数错误: " + e.getLocalizedMessage());
             }
         }
 
-        return new JSONResponse(dto.getSuccess(), dto.getMessage(), getChallengeListVO(dto));
+        return new JsonResponse(dto.getSuccess(), dto.getMessage(), getChallengeListVO(dto));
     }
 
     private ChallengeListVO getChallengeListVO(ChallengeDTO dto) {
@@ -242,7 +242,7 @@ public class ChallengeController {
 
     @ApiOperation(value = "创建挑战")
     @PostMapping()
-    public JSONResponse createChallenge(@RequestParam(required = false) String challengeTitle,
+    public JsonResponse createChallenge(@RequestParam(required = false) String challengeTitle,
                                         @NotEmpty @RequestParam String videoId,
                                         @RequestParam(required = false) MultipartFile image) {
 
@@ -261,20 +261,20 @@ public class ChallengeController {
 
             try {
                 ChallengeDTO dto = challengeService.addChallenge(challenge, videoId, holder);
-                return new JSONResponse(dto.getSuccess(), dto.getMessage());
+                return new JsonResponse(dto.getSuccess(), dto.getMessage());
             } catch (ChallengeServiceException e) {
                 log.error(e.getMessage());
-                return new JSONResponse(false, e.getMessage());
+                return new JsonResponse(false, e.getMessage());
             }
         } catch (RuntimeException e) {
-            return new JSONResponse(false, "系统内部错误");
+            return new JsonResponse(false, "系统内部错误");
         }
     }
 
     @ApiOperation(value = "挑战视频点赞")
     @ApiImplicitParam(name = "rankId", value = "排名Id")
     @PutMapping("/{rankId}/addLike")
-    public JSONResponse addLike(@PathVariable @Min(0) Integer rankId) {
+    public JsonResponse addLike(@PathVariable @Min(0) Integer rankId) {
         Long userId = UserUtils.getUserId();
 
         ChallengeDTO dto = null;
@@ -282,17 +282,17 @@ public class ChallengeController {
             dto = challengeService.likeIt(rankId, userId.intValue());
         } catch (ChallengeServiceException e) {
             e.printStackTrace();
-            return new JSONResponse(false, e.getMessage());
+            return new JsonResponse(false, e.getMessage());
         }
-        return new JSONResponse(dto.getSuccess(), dto.getMessage());
+        return new JsonResponse(dto.getSuccess(), dto.getMessage());
     }
 
     @GetMapping("/myChallenge")
-    public JSONResponse listMyJoinChallenge() {
+    public JsonResponse listMyJoinChallenge() {
         Long userId = UserUtils.getUserId();
 
         ChallengeDTO dto = challengeService.listMyJoinChallenge(userId.intValue());
-        return new JSONResponse(dto.getSuccess(), dto.getMessage(), getChallengeListVO(dto));
+        return new JsonResponse(dto.getSuccess(), dto.getMessage(), getChallengeListVO(dto));
     }
 
     @ApiOperation(value = "获取挑战页面URL地址")

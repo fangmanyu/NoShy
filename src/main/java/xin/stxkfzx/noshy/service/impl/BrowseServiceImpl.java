@@ -62,7 +62,7 @@ public class BrowseServiceImpl implements BrowseService {
                 record.setShares(record.getShares() + 1);
                 break;
             default:
-                throw new BrowseException("typeName: " + typeName + ", 类型错误");
+                throw new IllegalArgumentException("typeName: " + typeName + ", 类型错误");
         }
         return record;
     }
@@ -80,7 +80,7 @@ public class BrowseServiceImpl implements BrowseService {
                 Challenge challenge = challengeMapper.selectByPrimaryKey(Integer.valueOf(belongId));
                 return Optional.ofNullable(challenge).map(Challenge::getBrowseId).orElseThrow(() -> new BrowseException("没有找到Id为:" + belongId + " 的Challenge"));
             default:
-                throw new BrowseException("browseType: " + browseType + ", 类型错误");
+                throw new IllegalArgumentException("browseType: " + browseType + ", 类型错误");
         }
     }
 

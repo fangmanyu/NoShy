@@ -3,12 +3,11 @@ package xin.stxkfzx.noshy.exception;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.JsonResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
@@ -24,8 +23,8 @@ import static java.util.regex.Pattern.compile;
  * @author fmy
  * @date 2018-08-01 20:56
  */
-@RestControllerAdvice
-@Component
+// @RestControllerAdvice
+// @Component
 public class GlobalExceptionHandler {
 
     private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
@@ -40,11 +39,11 @@ public class GlobalExceptionHandler {
      * @date 2018-08-01 21:34
      */
     @ExceptionHandler(value = ValidationException.class)
-    public JSONResponse validationExceptionHandle(HttpServletRequest request, Exception e) {
+    public JsonResponse validationExceptionHandle(HttpServletRequest request, Exception e) {
         log.error("error url: " + request.getRequestURI());
         log.error(e.getMessage());
 
-        return new JSONResponse(false, e.getLocalizedMessage());
+        return new JsonResponse(false, e.getLocalizedMessage());
     }
 
     /**
@@ -57,7 +56,7 @@ public class GlobalExceptionHandler {
      * @date 2018-08-01 21:37
      */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public JSONResponse bindExceptionHandle(HttpServletRequest request, Exception e) {
+    public JsonResponse bindExceptionHandle(HttpServletRequest request, Exception e) {
         log.error("error url: " + request.getRequestURI());
         log.error(e.getMessage());
 
@@ -76,7 +75,7 @@ public class GlobalExceptionHandler {
             sb.append(Optional.ofNullable(errField).orElse("")).append(error.getDefaultMessage()).append(";");
         }
 
-        return new JSONResponse(false, sb.toString());
+        return new JsonResponse(false, sb.toString());
     }
 
 }

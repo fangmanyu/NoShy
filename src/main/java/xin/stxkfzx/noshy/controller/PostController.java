@@ -18,7 +18,7 @@ import xin.stxkfzx.noshy.exception.PostServiceException;
 import xin.stxkfzx.noshy.service.PostService;
 import xin.stxkfzx.noshy.service.UserService;
 import xin.stxkfzx.noshy.util.UserUtils;
-import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.JsonResponse;
 import xin.stxkfzx.noshy.vo.PostInformationVO;
 import xin.stxkfzx.noshy.vo.ResponseSocketMessage;
 import xin.stxkfzx.noshy.vo.UserVO;
@@ -68,7 +68,7 @@ public class PostController {
             @ApiImplicitParam(name = "pageSize", value = "每页大小", required = true, dataType = "int")
     })
     @GetMapping("/{postId}")
-    public JSONResponse getPost(@PathVariable @Min(1) int postId,
+    public JsonResponse getPost(@PathVariable @Min(1) int postId,
                                 @RequestParam(value = "pageIndex") @Min(0) int pageIndex,
                                 @RequestParam("pageSize") @Min(1) int pageSize) {
 
@@ -83,7 +83,7 @@ public class PostController {
         List<PostInformationVO> postInformationVOList = getPostInformationVOS(post);
         modelMap.put("postInformationList", postInformationVOList);
 
-        return new JSONResponse(post.getSuccess(), post.getMessage(), modelMap);
+        return new JsonResponse(post.getSuccess(), post.getMessage(), modelMap);
     }
 
     @ApiOperation(value = "根据条件获取帖子列表")
@@ -93,7 +93,7 @@ public class PostController {
             @ApiImplicitParam(name = "pageSize", value = "每页大小", required = true, dataType = "int")
     })
     @GetMapping
-    public JSONResponse listPost(@RequestParam(value = "postConditionStr", required = false) String postConditionStr,
+    public JsonResponse listPost(@RequestParam(value = "postConditionStr", required = false) String postConditionStr,
                                  @RequestParam(value = "pageIndex") @Min(0) int pageIndex,
                                  @RequestParam("pageSize") @Min(1) int pageSize) {
         PostDTO postDTO;
@@ -110,7 +110,7 @@ public class PostController {
                 log.debug("解析的Post json对象为 {}", post);
             } catch (Exception e) {
                 log.error("解析json错误: " + e.getMessage());
-                return new JSONResponse(false, "系统内部错误: " + e.getMessage());
+                return new JsonResponse(false, "系统内部错误: " + e.getMessage());
             }
 
             postDTO = postService.listPost(post, pageIndex, pageSize);
@@ -121,7 +121,7 @@ public class PostController {
         modelMap.put("count", postDTO.getCount());
         modelMap.put("postList", vos);
 
-        return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage(), modelMap);
+        return new JsonResponse(postDTO.getSuccess(), postDTO.getMessage(), modelMap);
     }
 
     private List<PostVO> getPostVOS(List<Post> postList) {
@@ -154,7 +154,7 @@ public class PostController {
             @ApiImplicitParam(name = "infoId", value = "信息位置,获取的是这个id之前的消息"),
     })
     @GetMapping("/{postId}/beforeInformation")
-    public JSONResponse listBeforeInformation(@PathVariable @Min(0) int postId,
+    public JsonResponse listBeforeInformation(@PathVariable @Min(0) int postId,
                                               @RequestParam Integer pageIndex,
                                               @RequestParam @Min(0) int pageSize,
                                               @RequestParam(required = false) Integer infoId) {
@@ -175,12 +175,12 @@ public class PostController {
             messageList.add(message);
 
         }
-        return new JSONResponse(postDTO.getSuccess(), postDTO.getMessage(), messageList);
+        return new JsonResponse(postDTO.getSuccess(), postDTO.getMessage(), messageList);
     }
 
     @ApiOperation(value = "添加帖子")
     @PostMapping
-    public JSONResponse addPost(@RequestBody @ApiParam AddPostVO postInfo) {
+    public JsonResponse addPost(@RequestBody @ApiParam AddPostVO postInfo) {
         Long currentUserId = UserUtils.getUserId();
 
         Post post = new Post();
@@ -189,10 +189,10 @@ public class PostController {
 
         try {
             PostDTO dto = postService.createPost(post);
-            return new JSONResponse(dto.getSuccess(), dto.getMessage(), dto.getPostId());
+            return new JsonResponse(dto.getSuccess(), dto.getMessage(), dto.getPostId());
         } catch (PostServiceException e) {
             e.printStackTrace();
-            return new JSONResponse(false, e.getMessage());
+            return new JsonResponse(false, e.getMessage());
         }
     }
 

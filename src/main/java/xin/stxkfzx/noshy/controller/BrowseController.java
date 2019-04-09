@@ -13,7 +13,7 @@ import xin.stxkfzx.noshy.dto.BrowseDTO;
 import xin.stxkfzx.noshy.exception.BrowseException;
 import xin.stxkfzx.noshy.service.BrowseService;
 import xin.stxkfzx.noshy.vo.AddRecordVO;
-import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.JsonResponse;
 
 /**
  * 浏览信息 路由
@@ -30,13 +30,13 @@ public class BrowseController {
 
     @ApiOperation(value = "添加浏览信息")
     @PostMapping("/addRecord")
-    public JSONResponse updateBrowseInfo(@RequestBody @ApiParam AddRecordVO recordVO) {
+    public JsonResponse updateBrowseInfo(@RequestBody @ApiParam AddRecordVO recordVO) {
         try {
             BrowseDTO dto = browseService.updateBrowseInfo(recordVO.getBrowseType(), recordVO.getBelongId(), recordVO.getTypeName());
-            return new JSONResponse(dto.getSuccess(), dto.getMessage(), dto.getBrowseInformation());
+            return new JsonResponse(dto.getSuccess(), dto.getMessage(), dto.getBrowseInformation());
         } catch (BrowseException e) {
             e.printStackTrace();
-            return new JSONResponse(false, e.getMessage());
+            return new JsonResponse(false, e.getMessage());
         }
     }
 

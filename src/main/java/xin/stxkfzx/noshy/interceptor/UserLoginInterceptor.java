@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import xin.stxkfzx.noshy.util.UserUtils;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
 
@@ -25,17 +25,35 @@ public class UserLoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         log.info("{} 进入拦截器", request.getRequestURI());
-        Optional.of(request).map(req -> req.getSession(false)).ifPresent(this::fillUserInfo);
+        fillUserInfo(request);
 
         return true;
     }
 
-    private void fillUserInfo(HttpSession session) {
-        Optional.ofNullable(session)
-                .map(s -> s.getAttribute(UserUtils.KEY_USER)).ifPresent(o -> {
+    private void fillUserInfo(HttpServletRequest request) {
+        // 获取当前登录用户
+        Optional.of(request).map(req -> req.getSession(false))
+                .map(s -> s.getAttribute(UserUtils.KEY_USER))
+                .ifPresent(o -> {
                     UserUtils.setUserId((Long) o);
                     log.debug("userId={} 添加到UserUtils", o);
                 });
+
+        // 获取lang
+        String lang = getLocalValue(request);
+        log.debug("当前用户语言：{}", lang);
+        UserUtils.setLocaleThreadLocal(lang);
+    }
+
+    private String getLocalValue(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        for (Cookie c :
+                cookies) {
+            if (UserUtils.KEY_LANG.equalsIgnoreCase(c.getName())) {
+                return c.getValue();
+            }
+        }
+        return null;
     }
 
     @Override

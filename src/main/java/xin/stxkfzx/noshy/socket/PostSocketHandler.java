@@ -16,7 +16,7 @@ import xin.stxkfzx.noshy.dto.PostDTO;
 import xin.stxkfzx.noshy.exception.PostServiceException;
 import xin.stxkfzx.noshy.service.PostService;
 import xin.stxkfzx.noshy.service.UserService;
-import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.JsonResponse;
 import xin.stxkfzx.noshy.vo.RequestSocketMessage;
 import xin.stxkfzx.noshy.vo.ResponseSocketMessage;
 import xin.stxkfzx.noshy.vo.UserVO;
@@ -81,7 +81,7 @@ public class PostSocketHandler implements WebSocketHandler {
     private void userChat(WebSocketSession webSocketSession, String message) throws IOException {
         Integer userId = getUserId(webSocketSession);
         String postId = getPostId(webSocketSession);
-        JSONResponse jsonResponse = new JSONResponse();
+        JsonResponse jsonResponse = new JsonResponse();
 
         // 构建帖子消息,存到数据库中
         PostInformation information = new PostInformation();

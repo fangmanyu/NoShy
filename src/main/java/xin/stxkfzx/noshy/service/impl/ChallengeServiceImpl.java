@@ -303,7 +303,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 userChallengeVideoLikes.setStatus(UserChallengeVideoLikes.LIKED);
             } else {
                 log.error("status: {} 错误", status);
-                throw new ChallengeServiceException("status 异常");
+                throw new IllegalArgumentException("Invalid status " + status);
             }
             userChallengeVideoLikes.setLastEditTime(new Date());
             rank.setLastEditTime(new Date());

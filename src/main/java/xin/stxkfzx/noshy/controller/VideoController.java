@@ -22,7 +22,7 @@ import xin.stxkfzx.noshy.service.VideoService;
 import xin.stxkfzx.noshy.util.CheckUtils;
 import xin.stxkfzx.noshy.util.UserUtils;
 import xin.stxkfzx.noshy.vo.ImageHolder;
-import xin.stxkfzx.noshy.vo.JSONResponse;
+import xin.stxkfzx.noshy.vo.JsonResponse;
 import xin.stxkfzx.noshy.vo.UserVO;
 import xin.stxkfzx.noshy.vo.challenge.ChallengeVO;
 import xin.stxkfzx.noshy.vo.video.*;
@@ -59,11 +59,11 @@ public class VideoController {
 
     @ApiOperation(value = "获取自己发布的视频列表")
     @GetMapping("/myVideo")
-    public JSONResponse listMyVideo() {
+    public JsonResponse listMyVideo() {
         Long currentUserId = UserUtils.getUserId();
 
         VideoDTO videoDTO = videoService.listMyVideo(currentUserId.intValue());
-        return new JSONResponse(true, "查询成功", getVideoDetailList(videoDTO));
+        return new JsonResponse(true, "查询成功", getVideoDetailList(videoDTO));
     }
 
     private List<VideoDetailVO> getVideoDetailList(VideoDTO videoDTO) {
@@ -81,9 +81,9 @@ public class VideoController {
     @ApiOperation(value = "通过分类获取视频列表")
     @ApiImplicitParam(name = "categoryId", value = "分类Id")
     @GetMapping("/category/{categoryId}")
-    public JSONResponse listVideoByCategory(@Min(0) @PathVariable Long categoryId) {
+    public JsonResponse listVideoByCategory(@Min(0) @PathVariable Long categoryId) {
         VideoDTO videoDTO = videoService.listVideoByCategory(categoryId);
-        return new JSONResponse(videoDTO.getSuccess(), videoDTO.getMessage(), videoDTO.getVideoList());
+        return new JsonResponse(videoDTO.getSuccess(), videoDTO.getMessage(), videoDTO.getVideoList());
     }
 
     /**
@@ -96,9 +96,9 @@ public class VideoController {
      */
     @ApiOperation(value = "获取全部视频分类列表")
     @GetMapping("/listVideoCategory")
-    public JSONResponse listVideoCategory() {
+    public JsonResponse listVideoCategory() {
         VideoDTO videoDTO = videoService.listCategory();
-        return new JSONResponse(videoDTO.getSuccess(), videoDTO.getMessage(), videoDTO.getVideoCategoryList());
+        return new JsonResponse(videoDTO.getSuccess(), videoDTO.getMessage(), videoDTO.getVideoCategoryList());
     }
 
     /**
@@ -112,13 +112,13 @@ public class VideoController {
     @ApiOperation(value = "获取指定视频播放路径")
     @ApiImplicitParam(name = "videoId", value = "指定视频Id")
     @GetMapping("/{videoId}/play")
-    public JSONResponse getPlayUrl(@PathVariable String videoId) {
+    public JsonResponse getPlayUrl(@PathVariable String videoId) {
         if (StringUtils.isEmpty(videoId)) {
-            return new JSONResponse(false, "videoId 为空");
+            return new JsonResponse(false, "videoId 为空");
         }
 
         VideoDTO playUrl = videoService.getPlayUrl(videoId);
-        return new JSONResponse(playUrl.getSuccess(), playUrl.getMessage(), playUrl.getPlayUrl());
+        return new JsonResponse(playUrl.getSuccess(), playUrl.getMessage(), playUrl.getPlayUrl());
     }
 
     /**
@@ -132,9 +132,9 @@ public class VideoController {
     @ApiOperation(value = "删除视频")
     @ApiImplicitParam(name = "videoId", value = "更新视频Id")
     @DeleteMapping("/{videoId}")
-    public JSONResponse removeVideo(@PathVariable String videoId) {
+    public JsonResponse removeVideo(@PathVariable String videoId) {
         if (StringUtils.isEmpty(videoId)) {
-            return new JSONResponse(false, "videoId 为空");
+            return new JsonResponse(false, "videoId 为空");
         }
 
         VideoDTO videoDTO = null;
@@ -144,7 +144,7 @@ public class VideoController {
             e.printStackTrace();
         }
 
-        return new JSONResponse(BooleanUtils.isTrue(videoDTO.getSuccess()), videoDTO.getMessage());
+        return new JsonResponse(BooleanUtils.isTrue(videoDTO.getSuccess()), videoDTO.getMessage());
     }
 
 
@@ -160,21 +160,21 @@ public class VideoController {
     @ApiOperation(value = "更新视频信息")
     @ApiImplicitParam(name = "videoId", value = "更新视频Id")
     @PostMapping("/{videoId}")
-    public JSONResponse modifyVideoInfo(@PathVariable("videoId") String videoId,
+    public JsonResponse modifyVideoInfo(@PathVariable("videoId") String videoId,
                                         @ApiParam(value = "更新视频信息") @RequestBody Video video) {
         if (StringUtils.isEmpty(videoId)) {
-            return new JSONResponse(false, "videoId 为空");
+            return new JsonResponse(false, "videoId 为空");
         }
 
         if (video == null) {
-            return new JSONResponse(false, "video 为空");
+            return new JsonResponse(false, "video 为空");
         }
 
 
         video.setVideoId(videoId);
         VideoDTO videoDTO = videoService.updateVideoByVideoId(video);
 
-        return new JSONResponse(videoDTO.getSuccess(), videoDTO.getMessage());
+        return new JsonResponse(videoDTO.getSuccess(), videoDTO.getMessage());
     }
 
     /**
@@ -188,13 +188,13 @@ public class VideoController {
     @ApiOperation(value = "查询指定视频信息")
     @ApiImplicitParam(name = "videoId", value = "视频Id")
     @GetMapping("/{videoId}")
-    public JSONResponse getVideo(@PathVariable("videoId") String videoId) {
+    public JsonResponse getVideo(@PathVariable("videoId") String videoId) {
         if (StringUtils.isEmpty(videoId)) {
-            return new JSONResponse(false, "videoId 为空");
+            return new JsonResponse(false, "videoId 为空");
         }
 
         VideoDTO dto = videoService.getVideoByVideoId(videoId);
-        return new JSONResponse(dto.getSuccess(), dto.getMessage(), getVideoDetail(dto.getVideo(), dto.getBrowseInformation()));
+        return new JsonResponse(dto.getSuccess(), dto.getMessage(), getVideoDetail(dto.getVideo(), dto.getBrowseInformation()));
     }
 
     private VideoDetailVO getVideoDetail(Video video, BrowseInformation browseInformation) {
@@ -227,7 +227,7 @@ public class VideoController {
             @ApiImplicitParam(name = "pageSize", value = "每页大小")
     })
     @GetMapping
-    public JSONResponse listVideos(@RequestParam(value = "videoCondition", required = false) String videoCondition,
+    public JsonResponse listVideos(@RequestParam(value = "videoCondition", required = false) String videoCondition,
                                    @RequestParam("pageIndex") @Min(0) int pageIndex,
                                    @RequestParam("pageSize") @Min(0) int pageSize,
                                    @RequestParam(value = "isOurSchool", required = false) Boolean isOurSchool) {
@@ -243,7 +243,7 @@ public class VideoController {
                 vo = new ObjectMapper().readValue(videoCondition, ListVideosVO.class);
             } catch (IOException e) {
                 log.error(e.getMessage());
-                return new JSONResponse(false, "videoCondition 解析错误");
+                return new JsonResponse(false, "videoCondition 解析错误");
             }
             video = new Video();
             video.setTitle(vo.getSearch());
@@ -265,10 +265,10 @@ public class VideoController {
             Map<String, Object> modelMap = new HashMap<>(3);
             modelMap.put("videoList", videoVOS);
             modelMap.put("count", videoDTO.getCount());
-            return new JSONResponse(true, "查询成功", modelMap);
+            return new JsonResponse(true, "查询成功", modelMap);
         }
 
-        return new JSONResponse(false, "查询失败：" + videoDTO.getMessage());
+        return new JsonResponse(false, "查询失败：" + videoDTO.getMessage());
     }
 
     private VideoVO getVideoVO(Video video) {
@@ -328,7 +328,7 @@ public class VideoController {
             @ApiImplicitParam(name = "tags", value = "视频标签。最多16个标签，每个标签不能超过5个字，标签之间以英文状态下的逗号(,)隔开")
     })
     @Deprecated
-    public JSONResponse uploadVideo(@RequestParam("title") String title,
+    public JsonResponse uploadVideo(@RequestParam("title") String title,
                                     @RequestParam("videoCategory") Long videoCategory,
                                     @ApiParam(value = "视频文件流对象", required = true) @RequestParam("videoFile") MultipartFile videoFile,
                                     @RequestParam(value = "description", required = false) String description,
@@ -340,16 +340,16 @@ public class VideoController {
         Long currentUserId = UserUtils.getUserId();
         boolean flag = StringUtils.isEmpty(title) || videoCategory == null || videoCategory < 0;
         if (flag) {
-            return new JSONResponse(false, "video 对象错误");
+            return new JsonResponse(false, "video 对象错误");
         }
 
         if (videoFile == null) {
-            return new JSONResponse(false, "文件流为空");
+            return new JsonResponse(false, "文件流为空");
         }
 
 
         if (videoFile.getSize() >= MAX_VIDEO_FILE_SIZE) {
-            return new JSONResponse(false, "文件超过800M");
+            return new JsonResponse(false, "文件超过800M");
         }
 
         // 构建上传视频信息
@@ -364,28 +364,28 @@ public class VideoController {
             imageHolder = new ImageHolder(videoFile.getOriginalFilename(), videoImage.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
-            return new JSONResponse(false, "系统错误，获取图片流失败: " + e.getMessage());
+            return new JsonResponse(false, "系统错误，获取图片流失败: " + e.getMessage());
         }
 
         try {
             video.setName(videoFile.getOriginalFilename());
             video.setVideoInputStream(videoFile.getInputStream());
         } catch (IOException e) {
-            return new JSONResponse(false, "系统错误，获取文件流失败: " + e.getMessage());
+            return new JsonResponse(false, "系统错误，获取文件流失败: " + e.getMessage());
         }
 
         try {
             VideoDTO videoDTO = videoService.uploadVideo(video, imageHolder);
 
-            JSONResponse jsonResponse;
+            JsonResponse jsonResponse;
             if (videoDTO.getSuccess()) {
-                jsonResponse = new JSONResponse((true), "上传成功");
+                jsonResponse = new JsonResponse((true), "上传成功");
             } else {
-                jsonResponse = new JSONResponse(false, videoDTO.getMessage());
+                jsonResponse = new JsonResponse(false, videoDTO.getMessage());
             }
             return jsonResponse;
         } catch (VideoServiceException e) {
-            return new JSONResponse(false, e.getMessage());
+            return new JsonResponse(false, e.getMessage());
         }
     }
 
@@ -415,7 +415,7 @@ public class VideoController {
 
     @ApiOperation(value = "获取上传视频凭证")
     @PostMapping("/uploadAuth")
-    public JSONResponse createUploadVideo(@RequestParam String videoInfo,
+    public JsonResponse createUploadVideo(@RequestParam String videoInfo,
                                           @RequestParam MultipartFile videoImage) {
         Long currentUserId = UserUtils.getUserId();
 
@@ -424,12 +424,12 @@ public class VideoController {
             uploadAuthVO = new ObjectMapper().readValue(videoInfo, UploadAuthVO.class);
             String errMsg = CheckUtils.checkBean(uploadAuthVO);
             if (StringUtils.isNotEmpty(errMsg)) {
-                return new JSONResponse(false, errMsg);
+                return new JsonResponse(false, errMsg);
             }
 
         } catch (IOException e) {
             log.error(e.getMessage());
-            return new JSONResponse(false, "参数解析错误");
+            return new JsonResponse(false, "参数解析错误");
         }
         Video video = new Video();
         BeanUtils.copyProperties(uploadAuthVO, video);
@@ -439,22 +439,22 @@ public class VideoController {
         try {
             imageHolder = new ImageHolder(videoImage.getOriginalFilename(), videoImage.getInputStream());
         } catch (IOException e) {
-            return new JSONResponse(false, "系统内部错误");
+            return new JsonResponse(false, "系统内部错误");
         }
         VideoDTO dto = videoService.createUploadVideo(video, imageHolder);
 
         AuthVo vo = new AuthVo();
         BeanUtils.copyProperties(dto, vo);
-        return new JSONResponse(dto.getSuccess(), dto.getMessage(), vo);
+        return new JsonResponse(dto.getSuccess(), dto.getMessage(), vo);
     }
 
     @ApiOperation(value = "刷新视频凭证")
     @PostMapping("/refreshAuth/{videoId}")
-    public JSONResponse refreshUploadVideo(@NotEmpty @PathVariable String videoId) {
+    public JsonResponse refreshUploadVideo(@NotEmpty @PathVariable String videoId) {
         VideoDTO videoDTO = videoService.refreshUploadVideo(videoId);
         AuthVo vo = new AuthVo();
         BeanUtils.copyProperties(videoDTO, vo);
-        return new JSONResponse(videoDTO.getSuccess(), videoDTO.getMessage(), vo);
+        return new JsonResponse(videoDTO.getSuccess(), videoDTO.getMessage(), vo);
     }
 
 

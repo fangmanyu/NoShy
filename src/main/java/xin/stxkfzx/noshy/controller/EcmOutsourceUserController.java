@@ -80,8 +80,6 @@ public class EcmOutsourceUserController {
 
     @GetMapping("/version")
     public String getVersion() {
-        Long user = UserUtils.getUserId();
-        System.out.println(user);
 
         return "1235";
     }
